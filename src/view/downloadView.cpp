@@ -59,6 +59,7 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     this->deleteIcon= new PNG((deleteIconPath+"delete.png").c_str());
     this->deleteIconSelected= new PNG((deleteIconPath+"deleteSelected.png").c_str());
 
+    this->isUpdating = false;
 }
 
 void downloadView::fillPage() {
@@ -102,6 +103,7 @@ void downloadView::setFinished(download * newDownload) {
     downloadsFile.close();
 }
 void downloadView::updateView() {
+    this->isUpdating = true;
     std::string printStr;
     std::stringstream printStringStream;
     printStringStream.precision(2);
@@ -200,22 +202,24 @@ void downloadView::updateView() {
             else
                 deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
     }
+    this->isUpdating = false;
 }
 
 void downloadView::pressX(){
     download * currDownload = currDownloads[selected];
-    if(deletedSelected)
+    if(deletedSelected) {
+        while(isUpdating)
+            continue;
         deleteDownload(currDownload->getID());
-    else if(!currDownload->stored()){
+    } else if(!currDownload->stored())
         std::thread(&download::initDownload,std::ref(*currDownload)).detach();
-    } else if (currDownload->stored() && currDownload->getRequest()->hasFinished())
+    else if (currDownload->stored() && currDownload->getRequest()->hasFinished())
             currDownload->install();
 }
 
 int downloadView::deleteDownload(const char * id){
     downloadList.erase(std::remove_if(downloadList.begin(), downloadList.end(), [&id](download* download){bool found = strcasecmp(download->getID(), id) == 0; if(found) download->deleteDownload(); return found;}), downloadList.end());
     downloadsYAML.remove(id);
-
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
     downloadsFile << downloadsYAML;
     downloadsFile.flush();
