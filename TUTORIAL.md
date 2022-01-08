@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/victorrjimenezz/PS4-4PT">
     <img src="sce_sys/icon0.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -12,12 +12,12 @@
   <p align="center">
     A package manager for the PS4. 
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template/issues"><strong>Request Feature / Report Bug</strong></a>
+    <a href="https://github.com/victorrjimenezz/PS4-4PT/issues"><strong>Request Feature / Report Bug</strong></a>
     <br />
     <br />
     <a href="https://github.com/victorrjimenezz/4PT-Repository">4PT Template Repository</a>
     ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">App tutorial</a>
+    <a href="https://github.com/victorrjimenezz/PS4-4PT/blob/master/README.md">README</a>
   </p>
 </div>
 
@@ -72,7 +72,7 @@ The list of tabs is:
 
 ## Adding a repository
 
-<img src="screenshots/screenshot5.png" width="450"  alt=""/>
+<img src="screenshots/screenshot5.png" width="100%"  alt=""/>
 
 To add a repository, go to the repository tab (2nd one) and </br>
 open the keyboard, type the URL and press Add Repo.
@@ -83,7 +83,7 @@ open the keyboard, type the URL and press Add Repo.
 
 ## Downloads list
 
-<img src="screenshots/screenshot6.png" width="450"  alt=""/>
+<img src="screenshots/screenshot6.png" width="100%"  alt=""/>
 
 <div id="id"></div>
 
@@ -119,7 +119,7 @@ and press X.
 
 ### General Search
 
-<img src="screenshots/screenshot4.png" width="450"  alt=""/>
+<img src="screenshots/screenshot4.png" width="100%"  alt=""/>
 
 To search a package by its name, from all loaded repositories,
 go to the search tab (rightmost one) and type the package name on the keyboard.
@@ -128,7 +128,7 @@ go to the search tab (rightmost one) and type the package name on the keyboard.
 
 ### Filter-by-repository Search
 
-<img src="screenshots/screenshot7.png" width="450"  alt=""/>
+<img src="screenshots/screenshot7.png" width="100%"  alt=""/>
 
 To search a package by its name from a specific repository,
 go to the repository tab (2nd one) select the repository from which to filter
@@ -137,7 +137,7 @@ and, once in the repository package list, open the keyboard and search the packa
 <div id="pkgdd"></div>
 
 ## PKG Direct Download
-<img src="screenshots/screenshot0.png" width="450"  alt=""/>
+<img src="screenshots/screenshot0.png" width="100%"  alt=""/>
 
 To download a PKG directly from a URL, go to the home tab
 (leftmost one), enter the package URL on the keyboard and press download.

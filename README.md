@@ -3,7 +3,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/victorrjimenezz/4PT-Repository">
     <img src="sce_sys/icon0.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -12,7 +12,7 @@
   <p align="center">
     A package manager for the PS4. 
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template/issues"><strong>Request Feature / Report Bug</strong></a>
+    <a href="https://github.com/victorrjimenezz/4PT-Repository/issues"><strong>Request Feature / Report Bug</strong></a>
     <br />
     <br />
     <a href="https://github.com/victorrjimenezz/4PT-Repository">4PT Template Repository</a>
@@ -63,18 +63,26 @@ Furthermore, 4PT allows anyone to host their own repository and provide any apps
 
 <div id="ss"></div>
 
+
 ### Screenshots
+
+<details>
+  <summary>Screenshots</summary>
+
+
+
 <p float="left">
-  <img src="screenshots/screenshot0.png" width="225"  alt=""/>
-  <img src="screenshots/screenshot1.png" width="225"  alt=""/>
+  <img src="screenshots/screenshot0.png" width="49%"  alt=""/>
+  <img src="screenshots/screenshot1.png" width="49%"  alt=""/>
 </p>
 <p float="left">
-  <img src="screenshots/screenshot2.png" width="225"  alt=""/>
-  <img src="screenshots/screenshot3.png" width="225"  alt=""/>
+  <img src="screenshots/screenshot2.png" width="49%"  alt=""/>
+  <img src="screenshots/screenshot3.png" width="49%"  alt=""/>
 </p>
 <p float="left">
-  <img src="screenshots/screenshot4.png" width="450"  alt=""/>
+  <img src="screenshots/screenshot4.png" width="100%"  alt=""/>
 </p>
+</details>
 
 ***
 
@@ -148,7 +156,7 @@ This project is built using the Open Orbis PS4 Toolchain and the Yaml-CPP librar
 
 ## Developers
 
-Víctor Jiménez - [@vjimenez1308](https://twitter.com/vjimenez1308)
+Víctor Jiménez - [@vjimenez1308](https://twitter.com/vjimenez1308) - [victorjimenez@4pt-project.com](mailto:victorjimenez@4pt-project.com)
 
 <div id="Acknowledgments"></div>
 
