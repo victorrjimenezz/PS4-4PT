@@ -12,9 +12,13 @@ class PNG {
     int height;
     int channels;
     unsigned char *img;
+    std::string path;
 public:
     PNG(const char *imagePath);
     PNG(const char *imagePath, int width, int height);
+    int getWidth() const;
+    int getHeight() const;
+    std::string getPath();
     ~PNG();
     int getChannels() const;
     void Draw(Scene2D *scene, int startX, int startY);
