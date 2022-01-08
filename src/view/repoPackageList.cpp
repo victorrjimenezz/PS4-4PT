@@ -136,8 +136,12 @@ void repoPackageList::updateView() {
 void repoPackageList::pressX(){
     if(isOnKeyboard)
         keyboardInput->pressKey();
-    else
-        downloadView::downloadManager->addDownload( new download(currPackages[selected]));
+    else {
+        std::shared_ptr<package> currpkg = currPackages[selected];
+        if(currPackages[selected] == nullptr)
+            return;
+        downloadView::downloadManager->addDownload(new download(currpkg));
+    }
 }
 void repoPackageList::deleteChild(){
     delete child;

@@ -207,6 +207,9 @@ void downloadView::updateView() {
 
 void downloadView::pressX(){
     download * currDownload = currDownloads[selected];
+    if(currDownload == nullptr)
+        return;
+
     if(deletedSelected) {
         while(isUpdating)
             continue;

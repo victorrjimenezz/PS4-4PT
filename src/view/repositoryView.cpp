@@ -180,7 +180,8 @@ void repositoryView::pressX(){
         keyboardInput->pressKey();
     else {
         repository *currRepo = currRepos[selected];
-
+        if(currRepo == nullptr)
+            return;
         switch (selectedOption) {
             case OPEN:
                 child = new repoPackageList(mainScene, fontLarge, fontMedium, fontSmall, frameWidth, frameHeight,
