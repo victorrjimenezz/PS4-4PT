@@ -18,7 +18,19 @@ PNG::PNG(const char *imagePath)
         LOG << "Failed to load image '" << imagePath << "': " << stbi_failure_reason();
         return;
     }
+    this->path = imagePath;
 }
+std::string PNG::getPath() {
+    return path;
+}
+int PNG::getWidth() const{
+    return width;
+}
+
+int PNG::getHeight() const {
+    return height;
+}
+
 int PNG::getChannels() const {
     return channels;
 }
@@ -41,6 +53,7 @@ PNG::PNG(const char *imagePath, int width, int height)
     }
     this->width = width;
     this->height = height;
+    this->path = imagePath;
 }
 
 PNG::~PNG()

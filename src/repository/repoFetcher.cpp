@@ -95,13 +95,29 @@ int loadSavedRepos(const std::shared_ptr<std::vector<repository*>>& repositoryLi
                     iconDefaultPath+="assets/images/repository/repoDefaultIcon.png";
                     const char * iconDefaultPathChar = iconDefaultPath.c_str();
 
-                    std::string localDownloadPath = loadingRepoFolder+"icon.png";
+                    std::string repoIconPath;
+                    if(repoYAML["iconPath"]) {
+                        repoIconPath = repoYAML["iconPath"].as<std::string>();
+                        LOG << "iconPath: " << repoIconPath.c_str();
+                    }
+                    std::string localDownloadPath;
                     std::string downloadURL = repoURL;
-                    downloadURL+=DEFAULT_REPO_ICON_PATH;
-                    removeFile(localDownloadPath.c_str());
-                    fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
-                    if(iconDownloadRequest.initDownload() <0){
+                    int ret = -1;
+                    if(!repoIconPath.empty()){
+                        localDownloadPath = loadingRepoFolder+"icon"+repoIconPath.substr(repoIconPath.find_last_of('.'));
+                        if(fileExists(localDownloadPath.c_str()))
+                            removeFile(localDownloadPath.c_str());
+                        downloadURL += repoIconPath;
+                        fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
+                        ret = iconDownloadRequest.initDownload();
+                    }
+
+                    if(ret < 0) {
+
                         LOG << "Error when downloading icon from " << downloadURL<< " to "<< localDownloadPath;
+                        localDownloadPath = loadingRepoFolder + "icon.png";
+                        if(fileExists(localDownloadPath.c_str()))
+                            removeFile(localDownloadPath.c_str());
                         copyFile(iconDefaultPathChar, localDownloadPath.c_str());
                     }
 
@@ -130,12 +146,12 @@ std::string getDefaultIconPath(package::PKGTypeENUM type){
     std::string iconDefaultPath = DATA_PATH;
     iconDefaultPath+="assets/images/repository/";
     std::string defaultGameIcon = iconDefaultPath+"gameDefaultIcon.png";
-    std::string defaultAppIcon = iconDefaultPath+"gameDefaultIcon.png";
-    std::string defaultUpdateIcon = iconDefaultPath+"gameDefaultIcon.png";
-    std::string defaultThemeIcon = iconDefaultPath+"gameDefaultIcon.png";
-    std::string defaultToolIcon = iconDefaultPath+"gameDefaultIcon.png";
-    std::string defaultCheatIcon = iconDefaultPath+"gameDefaultIcon.png";
-    std::string defaultMiscIcon = iconDefaultPath+"gameDefaultIcon.png";
+    std::string defaultAppIcon = iconDefaultPath+"appDefaultIcon.png";
+    std::string defaultUpdateIcon = iconDefaultPath+"updateDefaultIcon.png";
+    std::string defaultThemeIcon = iconDefaultPath+"themeDefaultIcon.png";
+    std::string defaultToolIcon = iconDefaultPath+"toolDefaultIcon.png";
+    std::string defaultCheatIcon = iconDefaultPath+"cheatDefaultIcon.png";
+    std::string defaultMiscIcon = iconDefaultPath+"miscDefaultIcon.png";
 
     std::string localIconPath;
     switch (type) {
@@ -184,7 +200,7 @@ int loadPackagesFromRepo(repository* repository){
     for(YAML::const_iterator it=repoYAML.begin(); it!=repoYAML.end(); ++it){
         if(it->second){
         const std::string &key=it->first.as<std::string>();
-        if(strcasecmp(key.c_str(),"name") == 0 || strcasecmp(key.c_str(),"repoURL") == 0)
+        if(strcasecmp(key.c_str(),"name") == 0 || strcasecmp(key.c_str(),"repoURL") == 0 || strcasecmp(key.c_str(),"iconPath") == 0)
             continue;
         std::string packageName = key;
 
@@ -199,6 +215,9 @@ int loadPackagesFromRepo(repository* repository){
             iconPath = attributes["iconPath"].as<std::string>();
             foundIcon = true;
         }
+        if(iconPath.find('.') == std::string::npos || pkgPath.find('.') == std::string::npos)
+            continue;
+
         std::string type = attributes["type"].as<std::string>();
         std::string version = attributes["version"].as<std::string>();
 
@@ -264,23 +283,32 @@ repository* fetchRepo(const char *repoURL) {
     std::string repoName = "Default Repo Name";
     if(repoYAML["name"]) {
         repoName = repoYAML["name"].as<std::string>();
-        LOG << "Name: " << repoName.c_str();
     }
+
+    std::string repoIconPath;
+    if(repoYAML["iconPath"]) {
+        repoIconPath = repoYAML["iconPath"].as<std::string>();
+    }
+
     std::string iconDefaultPath = DATA_PATH;
     iconDefaultPath+="assets/images/repository/repoDefaultIcon.png";
     const char * iconDefaultPathChar = iconDefaultPath.c_str();
 
-    localDownloadPath = localRepositoryFolder+"/icon.png";
-    downloadURL = repoURLStr;
-    downloadURL+=DEFAULT_REPO_ICON_PATH;
+    int ret = -1;
+    if(!repoIconPath.empty()){
+        localDownloadPath = localRepositoryFolder+"/icon"+repoIconPath.substr(repoIconPath.find_last_of('.'));
+        downloadURL = repoURLStr;
+        downloadURL += repoIconPath;
+        fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
+        ret = iconDownloadRequest.initDownload();
+    }
 
-    fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
-    if(iconDownloadRequest.initDownload() <0){
+    if(ret < 0) {
         LOG << "Error when downloading icon from " << downloadURL<< " to "<< localDownloadPath;
+        localDownloadPath = localRepositoryFolder + "/icon.png";
         copyFile(iconDefaultPathChar, localDownloadPath.c_str());
     }
 
-    LOG << "Local Icon Path: " << localDownloadPath;
     localRepositoryFolder+="/";
     repo = new repository(repoID.c_str(), repoName.c_str(), repoURLStr.c_str(), localRepositoryFolder.c_str(), localDownloadPath.c_str());
 

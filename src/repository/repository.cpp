@@ -15,6 +15,7 @@ repository::repository(const char * id, const char *name, const char *repoURL, c
     this->icon = new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
     this->updating = false;
     packageList = new std::vector<std::shared_ptr<package>>;
+
     loadPackages();
 }
 const char * repository::getID() {
@@ -68,18 +69,33 @@ int repository::updateYML() {
 }
 
 int repository::updateIcon() {
-    std::string OldLocalIconPath = repoLocalPath+"icon.png";
-    std::string localDownloadPath = repoLocalPath+"TEMPIcon.png";
+    std::string YMLPath = repoLocalPath+"repo.yml";
+    YAML::Node repoYAML = YAML::LoadFile(YMLPath);
+    if(!repoYAML)
+        return -1;
+
+    std::string OldLocalIconPath = icon->getPath();
+
+    if(!repoYAML["iconPath"])
+        return 0;
+
+    std::string repoIconPath = repoYAML["iconPath"].as<std::string>();
+    std::string repoExt = repoIconPath.substr(repoIconPath.find_last_of('.'));
+
+    std::string localDownloadPath = repoLocalPath+"tempicon"+repoExt;
     std::string downloadURL = repoURL;
-    downloadURL+=DEFAULT_REPO_ICON_PATH;
+    downloadURL += repoIconPath;
 
     fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
-    if(iconDownloadRequest.initDownload() <0){
-        LOG << "Error when downloading icon from " << downloadURL<< " to "<< localDownloadPath;
+    if(iconDownloadRequest.initDownload() < 0)
         return -1;
-    }
+
     removeFile(OldLocalIconPath.c_str());
+    OldLocalIconPath = OldLocalIconPath.substr(0,OldLocalIconPath.find_last_of('.')) +repoExt;
     moveFile(localDownloadPath.c_str(),OldLocalIconPath.c_str());
+    int width = icon->getWidth(), height = icon->getHeight();
+    delete icon;
+    icon = new PNG(OldLocalIconPath.c_str(),width,height);
     return 0;
 }
 

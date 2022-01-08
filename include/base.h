@@ -16,9 +16,6 @@
 //PACKAGES
 #define PKG_TYPE_AMOUNT 7
 
-//Repository Pathes
-#define DEFAULT_REPO_ICON_PATH "icon.png"
-
 //Networking
 #define ONE_MB 10e5
 #define USER_AGENT "PS4-4PT/1.00"

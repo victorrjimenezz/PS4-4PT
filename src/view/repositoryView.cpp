@@ -39,10 +39,7 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     selected = 0;
     repositoryList = std::shared_ptr<std::vector<repository*>>(new std::vector<repository*>);
     if(isFirstRun){
-        repository * repo = fetchRepo("http://test-4pt.asuscomm.com/golfo/");
-        if(repo != nullptr)
-            repositoryList->emplace_back(repo);
-        repo = fetchRepo("http://test-4pt.asuscomm.com/victorRepo/");
+        repository * repo = fetchRepo("http://4pt-project.com/");
         if(repo != nullptr)
             repositoryList->emplace_back(repo);
     } else {
@@ -298,6 +295,7 @@ repositoryView::~repositoryView() {
     for(auto repository : *repositoryList)
         delete repository;
     repositoryList.reset();
+    delete child;
     delete keyboardInput;
     delete deleteIcon;
     delete deleteIconSelected;

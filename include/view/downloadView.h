@@ -50,6 +50,7 @@ private:
     FT_Face fontMedium{};
     FT_Face fontSmall{};
 
+    bool isUpdating;
     const int frameWidth = 0;
     const int frameHeight = 0;
     const int viewWidth = 0;
