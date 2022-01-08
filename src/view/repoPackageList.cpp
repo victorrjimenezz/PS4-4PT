@@ -59,6 +59,10 @@ void repoPackageList::fillPage() {
         else
             currPackages[i] = displayPackageList.at(j);
     }
+    if(repoListSize <= selected)
+        selected = repoListSize-1;
+    if(selected < 0)
+        selected =0;
 }
 
 void repoPackageList::filterPackages(const char * name) {
@@ -98,26 +102,32 @@ void repoPackageList::updateView() {
             }
         }
     }
-    bool empty = packageList.empty();
+    bool empty = displayPackageList.empty();
     if(!isOnKeyboard) {
         packageRectangle packageRectangle = packageRectangles[selected];
-        mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
-                                 rectangleDivisorHeight, selectedColor);
-        mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
-                                 packageRectangle.width, rectangleDivisorHeight, selectedColor);
         if(!empty) {
+            mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
+                                     rectangleDivisorHeight, selectedColor);
+            mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
+                                     packageRectangle.width, rectangleDivisorHeight, selectedColor);
             std::shared_ptr<package> currPackage = currPackages[selected];
-            mainScene->DrawText((char *) std::string(currPackage->getName()).substr(0,PKGLIST_CHARACTER_LIMIT).c_str(), fontMedium, packageRectangle.x, packageRectangle.y,
+            mainScene->DrawText((char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
+                                fontMedium, packageRectangle.x, packageRectangle.y,
                                 selectedColor, selectedColor);
             printStr = "Type: ";
-            printStr+=TypeStr[currPackage->getPackageType()];
-            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y- 1 * packageRectangle.height / 8,
+            printStr += TypeStr[currPackage->getPackageType()];
+            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                packageRectangle.y - 1 * packageRectangle.height / 8,
                                 selectedColor, selectedColor);
             printStr = "Version: ";
             printStr += currPackage->getVersion();
-            mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
+            mainScene->DrawText((char *) printStr.substr(0, DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall,
+                                packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                 selectedColor, textColor);
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
+        } else {
+            mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
+            mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
         }
     }
     keyboardInput->updateView();

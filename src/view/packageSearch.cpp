@@ -54,6 +54,10 @@ void packageSearch::fillPage() {
         else
             currPackages[i] = displayPackageList.at(j);
     }
+    if(repoListSize <= selected)
+        selected = repoListSize-1;
+    if(selected < 0)
+        selected =0;
 }
 
 void packageSearch::updatePackages() {
@@ -101,14 +105,14 @@ void packageSearch::updateView() {
             }
         }
     }
-    bool empty = packageList.empty();
+    bool empty = displayPackageList.empty();
     if(!isOnKeyboard) {
         packageRectangle packageRectangle = packageRectangles[selected];
+        if(!empty) {
         mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
                                  rectangleDivisorHeight, selectedColor);
         mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
                                  packageRectangle.width, rectangleDivisorHeight, selectedColor);
-        if(!empty) {
             std::shared_ptr<package> currPackage = currPackages[selected];
             mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                 selectedColor, selectedColor);
@@ -119,6 +123,9 @@ void packageSearch::updateView() {
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                 selectedColor, textColor);
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
+        } else {
+            mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
+            mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
         }
     }
     keyboardInput->updateView();
