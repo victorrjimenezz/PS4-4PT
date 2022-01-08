@@ -128,7 +128,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 <div id="lt"></div>
 
 ### Long Term (~1/2 Year)
-- [ ] Add Animated GIF STBI Reading
+- [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Improve Keyboard/Change by UI IME
 - [ ] Add PS4 Version Compatibility Information
 - [ ] Download Icon from PKG itself
