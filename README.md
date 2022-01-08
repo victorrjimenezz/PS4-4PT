@@ -96,7 +96,7 @@ The current working app features are:
 
 ## Usage
 
-_For information on how to use the app, refer to [Tutorial](https://github.com/victorrjimenezz/PS4-4PT/Tutorial.md)_
+_For information on how to use the app, refer to [Tutorial](https://github.com/victorrjimenezz/PS4-4PT/blob/master/TUTORIAL.md)_
 
 _For information on creating a repo, please refer to  [4PT-Repository](https://github.com/victorrjimenezz/4PT-Repository)_
 
