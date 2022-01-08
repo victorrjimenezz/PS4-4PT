@@ -90,7 +90,7 @@ download::download(const char *url){
     this->repoName = "Direct Download";
     std::string iconDefaultPath = DATA_PATH;
     iconDefaultPath+="assets/images/repository/";
-    iconDefaultPath+="gameDefaultIcon.png";
+    iconDefaultPath+="miscDefaultIcon.png";
     this->iconPath = iconDefaultPath;
     this->finished = false;
     this->failed = false;
