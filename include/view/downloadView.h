@@ -27,7 +27,7 @@ private:
     PNG * deleteIconSelected;
     bool deletedSelected;
     int deleteIconX;
-    int deleteDownload(const char * download);
+    int deleteDownload(download * dld);
 
     int repoIconX;
     const static int downloadsPerPage = 5;

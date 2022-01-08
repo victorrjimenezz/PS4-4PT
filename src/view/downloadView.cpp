@@ -209,20 +209,22 @@ void downloadView::pressX(){
     download * currDownload = currDownloads[selected];
     if(currDownload == nullptr)
         return;
-
     if(deletedSelected) {
         while(isUpdating)
             continue;
-        deleteDownload(currDownload->getID());
+        deleteDownload(currDownload);
     } else if(!currDownload->stored())
         std::thread(&download::initDownload,std::ref(*currDownload)).detach();
-    else if (currDownload->stored() && currDownload->getRequest()->hasFinished())
+    else if (currDownload->stored() && currDownload->hasFinished())
             currDownload->install();
 }
 
-int downloadView::deleteDownload(const char * id){
-    downloadList.erase(std::remove_if(downloadList.begin(), downloadList.end(), [&id](download* download){bool found = strcasecmp(download->getID(), id) == 0; if(found) download->deleteDownload(); return found;}), downloadList.end());
+int downloadView::deleteDownload(download * dld){
+    std::string id = dld->getID();
+    downloadList.erase(std::remove_if(downloadList.begin(), downloadList.end(), [&id](download* download){bool found = strcasecmp(download->getID(), id.c_str()) == 0; if(found) download->deleteDownload(); return found;}), downloadList.end());
+    
     downloadsYAML.remove(id);
+
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
     downloadsFile << downloadsYAML;
     downloadsFile.flush();
