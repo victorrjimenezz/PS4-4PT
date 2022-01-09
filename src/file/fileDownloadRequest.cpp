@@ -67,6 +67,13 @@ int fileDownloadRequest::downloadError(const char *message) {
     failed = true;
     downloading = false;
     finished = false;
+
+    if(requestID!=-1)
+        sceHttpDeleteRequest(requestID);
+    if(connectionID!=-1)
+        sceHttpDeleteConnection(connectionID);
+    if(templateID!=-1)
+        sceHttpDeleteTemplate(templateID);
     return -1;
 }
 
@@ -143,8 +150,8 @@ int fileDownloadRequest::parseFileSize() {
         return downloadError("Error on sceHttpCreateTemplate()", statusCode);
 
 
-    int tempID = statusCode;
-    statusCode = sceHttpCreateConnectionWithURL(tempID, src, KEEPALIVE);
+    templateID = statusCode;
+    statusCode = sceHttpCreateConnectionWithURL(templateID, src, KEEPALIVE);
     if (statusCode < 0)
         return downloadError("Error on sceHttpCreateConnectionWithURL()", statusCode);
 
@@ -215,6 +222,12 @@ int fileDownloadRequest::downloadLoop() {
         downloading = false;
         finished = true;
     }
+    if(requestID!=-1)
+        sceHttpDeleteRequest(requestID);
+    if(connectionID!=-1)
+        sceHttpDeleteConnection(connectionID);
+    if(templateID!=-1)
+        sceHttpDeleteTemplate(templateID);
     return 0;
 }
 

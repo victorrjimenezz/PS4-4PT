@@ -16,8 +16,9 @@ private:
     std::string sourceURL;
     std::string destinationPath;
 
-    int requestID;
-    int connectionID;
+    int requestID = -1;
+    int connectionID = -1;
+    int templateID = -1;
 
     uint64_t    downloadedBytes;
     uint64_t    fileSizeBytes;
