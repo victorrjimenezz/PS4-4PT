@@ -55,7 +55,7 @@
 
 ## About The App
 
-There are many great Homebrew Apps/Games available, but there is no easy-unified way to install them.
+There are many great Homebrew Apps/Games available.
 
 This tool was developed in order for PS4 Homebrew users to easily download PKGs without the need of using a computer.
 
