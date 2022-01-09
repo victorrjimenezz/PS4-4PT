@@ -133,7 +133,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Add PS4 Version Compatibility Information
 - [ ] Download Icon from PKG itself
 - [ ] Compared to installed app versions
-- [ ] Add Package Page with photos/videos.
+- [ ] Add Package Page with photos/videos
 - [ ] Clean .pkg From /user/app folder
 - [ ] Multi-language Support
 
@@ -170,13 +170,13 @@ I would like to thank the following developers for the developing following proj
 &ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP </br>
  &ensp;  &ensp;  &ensp; Learned how to install PKGs
 * [PS4 Skeleton](https://github.com/Al-Azif/ps4-skeleton) by [Al Azif](https://twitter.com/_AlAzif) </br>
-&ensp;  &ensp;  &ensp; Used his jailbreaking tools to gain root privileges. </br>
-  &ensp;  &ensp;  &ensp; Used his notifi class to send notifications.
+&ensp;  &ensp;  &ensp; Used his jailbreaking tools to gain root privileges </br>
+  &ensp;  &ensp;  &ensp; Used his notifi class to send notifications
 * [PS4 Homebrew Store](https://github.com/LightningMods/PS4-Store) by [LightningMods_](https://twitter.com/lightningmods_) </br>
-&ensp;  &ensp;  &ensp; Used his dialog method to pop dialogs. </br>
-&ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP. </br>
+&ensp;  &ensp;  &ensp; Used his dialog method to pop dialogs </br>
+&ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP </br>
 &ensp;  &ensp;  &ensp; Learned how to install PKGs </br>
 * [tiny-ps4-shell](https://github.com/john-tornblom/tiny-ps4-shell) by [John Törnblom](https://github.com/john-tornblom) </br>
-&ensp;  &ensp;  &ensp; Used his method to copy files. </br>
+&ensp;  &ensp;  &ensp; Used his method to copy files </br>
 
 And I would like to thank the whole OpenOrbis team for developing the awesome [PS4 Developer toolchain](https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain)!!
