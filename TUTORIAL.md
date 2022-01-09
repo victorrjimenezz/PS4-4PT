@@ -24,7 +24,7 @@
 
 
 <!-- TABLE OF CONTENTS -->
-<details>
+<details open>
   <summary>Table of Contents</summary>
   <ol>
    <li><a href="#sbt">Switching Between Tabs</a></li>

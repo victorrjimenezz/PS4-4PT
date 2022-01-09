@@ -25,7 +25,7 @@
 
 
 <!-- TABLE OF CONTENTS -->
-<details>
+<details open>
   <summary>Table of Contents</summary>
   <ol>
     <li>
@@ -66,7 +66,7 @@ Furthermore, 4PT allows anyone to host their own repository and provide any apps
 
 ### Screenshots
 
-<details>
+<details open>
   <summary>Screenshots</summary>
 
 
