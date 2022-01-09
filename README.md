@@ -156,7 +156,7 @@ This project is built using the Open Orbis PS4 Toolchain and the Yaml-CPP librar
 
 ## Developers
 
-Víctor Jiménez - [@vjimenez1308](https://twitter.com/vjimenez1308) - [victorjimenez@4pt-project.com](mailto:victorjimenez@4pt-project.com)
+Víctor Jiménez - [@victorrjimenezz](https://twitter.com/victorrjimenezz) - [victorjimenez@4pt-project.com](mailto:victorjimenez@4pt-project.com)
 
 <div id="Acknowledgments"></div>
 
