@@ -68,11 +68,11 @@ int fileDownloadRequest::downloadError(const char *message) {
     downloading = false;
     finished = false;
 
-    if(requestID!=-1)
+    if(requestID!=-69)
         sceHttpDeleteRequest(requestID);
-    if(connectionID!=-1)
+    if(connectionID!=-69)
         sceHttpDeleteConnection(connectionID);
-    if(templateID!=-1)
+    if(templateID!=-69)
         sceHttpDeleteTemplate(templateID);
     return -1;
 }
@@ -84,7 +84,7 @@ int fileDownloadRequest::downloadError(const char *message, int statusCode) {
 }
 
 int fileDownloadRequest::initDownload(download * download) {
-    int ret;
+    int ret = 0;
     if(downloading) {
         downloadError("ALREADY DOWNLOADING");
         goto err;
@@ -118,7 +118,7 @@ void fileDownloadRequest::cancelDownload() {
     canceled = true;
 }
 int fileDownloadRequest::initDownload() {
-    int ret;
+    int ret = 0;
     if(downloading) {
         downloadError("ALREADY DOWNLOADING");
         goto err;
@@ -222,11 +222,11 @@ int fileDownloadRequest::downloadLoop() {
         downloading = false;
         finished = true;
     }
-    if(requestID!=-1)
+    if(requestID!=-69)
         sceHttpDeleteRequest(requestID);
-    if(connectionID!=-1)
+    if(connectionID!=-69)
         sceHttpDeleteConnection(connectionID);
-    if(templateID!=-1)
+    if(templateID!=-69)
         sceHttpDeleteTemplate(templateID);
     return 0;
 }
