@@ -167,15 +167,15 @@ Víctor Jiménez - [@victorrjimenezz](https://twitter.com/victorrjimenezz) - [vi
 I would like to thank the following developers for the developing following projects, which I used to learn how to perform certain actions:
 
 * [Remote Package Installer](https://github.com/flatz/ps4_remote_pkg_installer) by [Flat_z](https://twitter.com/flat_z) </br>
-&ensp;  &ensp;  &ensp; Learned how access PS4's native HTTP </br>
- &ensp;  &ensp;  &ensp; Learned how to install PKGs from its source code
+&ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP </br>
+ &ensp;  &ensp;  &ensp; Learned how to install PKGs
 * [PS4 Skeleton](https://github.com/Al-Azif/ps4-skeleton) by [Al Azif](https://twitter.com/_AlAzif) </br>
 &ensp;  &ensp;  &ensp; Used his jailbreaking tools to gain root privileges. </br>
   &ensp;  &ensp;  &ensp; Used his notifi class to send notifications.
 * [PS4 Homebrew Store](https://github.com/LightningMods/PS4-Store) by [LightningMods_](https://twitter.com/lightningmods_) </br>
 &ensp;  &ensp;  &ensp; Used his dialog method to pop dialogs. </br>
-&ensp;  &ensp;  &ensp; Learned how access PS4's native HTTP. </br>
-&ensp;  &ensp;  &ensp; Learned how to install PKGs from its source code. </br>
+&ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP. </br>
+&ensp;  &ensp;  &ensp; Learned how to install PKGs </br>
 * [tiny-ps4-shell](https://github.com/john-tornblom/tiny-ps4-shell) by [John Törnblom](https://github.com/john-tornblom) </br>
 &ensp;  &ensp;  &ensp; Used his method to copy files. </br>
 
