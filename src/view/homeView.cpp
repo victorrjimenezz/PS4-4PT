@@ -37,7 +37,11 @@ homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, F
     char usernameChar[20];
     sceUserServiceGetUserName(UID, usernameChar, 20);
     std::string username = std::string(usernameChar);
-    welcomeText = "Welcome " + username + " to 4PT\n Version: " + std::string(APP_VERSION);
+    std::ostringstream out;
+    out.precision(2);
+    out << std::fixed << APP_VERSION;
+
+    welcomeText = "Welcome " + username + " to 4PT\n Version: " + out.str();
     welcomeSubText = "Developed by @victorrjimenezz";
     pkgLink = "PKG Direct Download:";
 }
