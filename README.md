@@ -132,7 +132,6 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Improve Keyboard/Change by UI IME
 - [ ] Add PS4 Version Compatibility Information
 - [ ] Download Icon from PKG itself
-- [ ] Compared to installed app versions
 - [ ] Add Package Page with photos/videos
 - [ ] Clean .pkg From /user/app folder
 - [ ] Multi-language Support
