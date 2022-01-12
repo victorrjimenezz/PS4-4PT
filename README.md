@@ -121,7 +121,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Add SSL Support
 - [ ] Improve Keyboard Keys
 - [ ] Add option to download binaries
-- [ ] Add Installed apps Update/Version management
+- [ ] Add Update/Version management
 - [ ] Add Short Description
 - [ ] Add Sound Effects
 
