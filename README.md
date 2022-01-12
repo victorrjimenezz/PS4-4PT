@@ -93,7 +93,7 @@ Furthermore, 4PT allows anyone to host their own repository and provide any apps
 The current working app features are:
 
 - Downloading PKGs from repositories
-- Downloading PKGs directly from a URL.
+- Downloading PKGs directly from a URL
 - Uninstall APPs
 - Adding Repositories
 - Searching apps, filtering by name and repository.
@@ -120,7 +120,6 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 ### Short Term (~1.5 Months)
 - [ ] Add SSL Support
 - [ ] Improve Keyboard Keys
-- [ ] Make a list of repoPackageList instead of initializing each time to improve efficiency
 - [ ] Add option to download binaries
 - [ ] Add Installed apps Update/Version management
 - [ ] Add Short Description

@@ -4,11 +4,8 @@
 #include "../../_common/notifi.h"
 
 #include "../../include/view/repositoryView.h"
-#include "../../include/base.h"
 #include "../../include/repository/repoFetcher.h"
 #include "../../include/utils/dialog.h"
-#include "../../include/view/repoPackageList.h"
-#include "../../include/utils/logger.h"
 
 #include <string>
 #include <vector>
