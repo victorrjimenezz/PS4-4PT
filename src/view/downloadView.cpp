@@ -46,18 +46,33 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
     this->repoIconX = static_cast<int>(REPO_ICON_POS*repoX);
     for(int i =0; i < downloadsPerPage; i++)
-        downloadRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight};
+        downloadRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight,viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2 -1 * rectangleBaseHeight / 16} ;
     downloadView::fillPage();
 
     this->downloadDateX=repoX+ (downloadRectangles[0].width - repoX) * DOWNLOAD_DATE_POS;
     this->packageTypeX=repoX+ (downloadRectangles[0].width - repoX) * PACKAGE_TYPE_POS;
 
-    this->deletedSelected = false;
-    this->deleteIconX=repoX+ (downloadRectangles[0].width - repoX) * DELETE_ICON_POS;
+    option = SelectedOption::REMOVE;
+    std::string iconPath;
+
+    this->installIconX=repoX+ (downloadRectangles[0].width - repoX) * INSTALL_ICON_POS;
+    iconPath = DATA_PATH;
+    iconPath+="assets/images/download/";
+    this->installIcon= new PNG((iconPath+"install.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+    this->installIconSelected= new PNG((iconPath+"installSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+    this->downloadIcon= new PNG((iconPath+"download.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+    this->downloadIconSelected= new PNG((iconPath+"downloadSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+
+    this->uninstallIconX=repoX+ (downloadRectangles[0].width - repoX) * UNINSTALL_ICON_POS;
+    this->uninstallIcon= new PNG((iconPath+"uninstall.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+    this->uninstallIconSelected= new PNG((iconPath+"uninstallSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+
+
+    this->deleteIconX=repoX+ (downloadRectangles[0].width - repoX) * DOWNLOAD_DELETE_ICON_POS;
     std::string deleteIconPath = DATA_PATH;
     deleteIconPath+="assets/images/";
-    this->deleteIcon= new PNG((deleteIconPath+"delete.png").c_str());
-    this->deleteIconSelected= new PNG((deleteIconPath+"deleteSelected.png").c_str());
+    this->deleteIcon= new PNG((deleteIconPath+"delete.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+    this->deleteIconSelected= new PNG((deleteIconPath+"deleteSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
 
     this->isUpdating = false;
 }
@@ -72,6 +87,12 @@ void downloadView::fillPage() {
         else
             currDownloads[i] = downloadList.at(j);
     }
+    if(currDownloads[selected] == nullptr)
+        return;
+    int installed = currDownloads[selected]->isInstalled();
+    int finished = currDownloads[selected]->getRequest()->hasFinished();
+    if((!installed && option == UNINSTALL )|| (!finished && option == INSTALL))
+        option = REMOVE;
 }
 void downloadView::addDownload(download * newDownload) {
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
@@ -181,15 +202,19 @@ void downloadView::updateView() {
                             selectedColor, selectedColor);
 
         std::shared_ptr<fileDownloadRequest> downloadRequest = currDownload->getRequest();
+        bool installed = currDownload->isInstalled();
+        bool stored = currDownload->stored();
+        bool finished = currDownload->hasFinished();
+        bool downloading = downloadRequest->isDownloading();
         if(currDownload->hasFailed())
             printStringStream << "Has Failed";
-        else if(!currDownload->stored())
+        else if(!stored)
             printStringStream <<  "Pending Download... (X to retry)";
-        else if(currDownload->hasFinished() && !currDownload->isInstalled())
+        else if(finished && !installed)
             printStringStream << "Has finished. (X to install)";
-        else if(currDownload->hasFinished() && currDownload->isInstalled())
+        else if(finished && installed)
             printStringStream << "Is installed";
-        else if(downloadRequest->isDownloading()){
+        else if(downloading){
             printStringStream << "Downloaded " << downloadRequest->getDownloadedInMb();
             printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
         }
@@ -197,10 +222,38 @@ void downloadView::updateView() {
                             repoRectangle.y + 3 * repoRectangle.height / 8,
                             selectedColor, textColor);
         currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-            if (deletedSelected)
-                deleteIconSelected->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-            else
-                deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+
+
+        switch(option){
+            case INSTALL:
+                if(finished)
+                    installIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                else if(!downloading)
+                    downloadIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                if(installed)
+                    uninstallIcon->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
+                deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
+                break;
+            case UNINSTALL:
+                if(finished)
+                    installIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                else if(!downloading)
+                    downloadIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                uninstallIconSelected->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
+                deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
+                break;
+            case REMOVE:
+            default:
+                if(finished)
+                    installIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                else if(!downloading)
+                    downloadIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                if(installed)
+                    uninstallIcon->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
+                deleteIconSelected->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
+                break;
+        }
+
     }
     this->isUpdating = false;
 }
@@ -209,14 +262,30 @@ void downloadView::pressX(){
     download * currDownload = currDownloads[selected];
     if(currDownload == nullptr)
         return;
-    if(deletedSelected) {
-        while(isUpdating)
-            continue;
-        deleteDownload(currDownload);
+
+    switch(option) {
+        case INSTALL:
+            if(currDownload->stored())
+                currDownload->install();
+            else
+                std::thread(&download::initDownload,std::ref(*currDownload)).detach();
+            break;
+        case UNINSTALL:
+            option = INSTALL;
+            currDownload->unInstall();
+            break;
+        case REMOVE:
+        default:
+            while(isUpdating)
+                continue;
+            deleteDownload(currDownload);
+            break;
+    }
+    /*if(deletedSelected) {
     } else if(!currDownload->stored())
         std::thread(&download::initDownload,std::ref(*currDownload)).detach();
     else if (currDownload->stored() && currDownload->hasFinished())
-            currDownload->install();
+            currDownload->install();*/
 }
 
 int downloadView::deleteDownload(download * dld){
@@ -246,7 +315,7 @@ void downloadView::pressTriangle(){
 
 }
 void downloadView::pressSquare(){
-    deletedSelected = !deletedSelected;
+    option = REMOVE;
 }
 void downloadView::arrowUp(){
         selected--;
@@ -272,13 +341,43 @@ void downloadView::arrowDown(){
         }
 }
 void downloadView::arrowRight() {
-        if (!deletedSelected)
-            deletedSelected = true;
+    if(currDownloads[selected] == nullptr)
+        return;
+    int installed = currDownloads[selected]->isInstalled();
+    switch(option) {
+        case INSTALL:
+            if(installed)
+                option = UNINSTALL;
+            else
+                option = REMOVE;
+            break;
+        case UNINSTALL:
+            option = REMOVE;
+            break;
+        case REMOVE:
+            break;
+    }
 
 }
 void downloadView::arrowLeft() {
-        if (deletedSelected)
-            deletedSelected = false;
+    if(currDownloads[selected] == nullptr)
+        return;
+    int installed = currDownloads[selected]->isInstalled();
+    int finished = currDownloads[selected]->getRequest()->hasFinished();
+
+    switch(option) {
+        case REMOVE:
+            if(installed)
+                option = UNINSTALL;
+            else if(finished)
+                option = INSTALL;
+            break;
+        case UNINSTALL:
+            option = INSTALL;
+            break;
+        case INSTALL:
+            break;
+    }
 
 }
 bool downloadView::isActive() {
@@ -287,6 +386,12 @@ bool downloadView::isActive() {
 downloadView::~downloadView() {
     for(auto repository : downloadList)
         delete repository;
+    delete installIcon;
+    delete installIconSelected;
+    delete uninstallIcon;
+    delete uninstallIconSelected;
+    delete downloadIcon;
+    delete downloadIconSelected;
     delete deleteIcon;
     delete deleteIconSelected;
 }

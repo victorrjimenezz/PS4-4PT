@@ -19,7 +19,6 @@
 
 //Include Headers
 #include "../include/utils/utils.h"
-#include "../include/file/pkgManager.h"
 #include "../include/file/fileManager.h"
 #include "../include/file/fileDownloadRequest.h"
 #include "../include/view/mainView.h"
@@ -66,7 +65,6 @@ int main() {
         sceSystemServiceLoadExec("exit",NULL);
     } else if(ret == 1)
         isFirstRun = true;
-
 
     mainView mainView(isFirstRun);
     LOG << "Initialized Main view" << "\n";
@@ -139,8 +137,8 @@ int loadModules() {
         return -1;
     if(sceSysmoduleLoadModule(ORBIS_SYSMODULE_MESSAGE_DIALOG) < 0)
         return -1;
-    //if(sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL) < 0)
-    //    return -1;
+    if(sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL))
+        return -1;
     return 0;
 }
 int startProcesses() {
@@ -197,14 +195,14 @@ int networkInit() {
     }
     LOG << "Created Network Pool";
 
-    /*int libSslId = sceSslInit(SSL_HEAP_SIZE);
+    int libSslId = sceSslInit(SSL_HEAP_SIZE);
     if(libSslId < 0) {
         LOG << "Ssl Initialization Failed;";
         return libSslId;
     }
-    LOG << "Initialized Ssl at " << libSslId;*/
+    LOG << "Initialized Ssl at " << libSslId;
 
-    int libhttpCtxId = sceHttpInit(libNetMemId, 0, HTTP_HEAP_SIZE);
+    int libhttpCtxId = sceHttpInit(libNetMemId, libSslId, HTTP_HEAP_SIZE);
     if(libhttpCtxId<0){
         LOG << "Http Initialization Failed";
         return libhttpCtxId;
@@ -267,7 +265,7 @@ void unloadModules() {
     sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_HTTP);
     sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_NET);
     sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_NETCTL);
-    //sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL);
+    sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL);
 }
 void closeLogger() {
     logger::closeLogger();

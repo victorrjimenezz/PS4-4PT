@@ -16,16 +16,30 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 class downloadView : public subView {
+    enum SelectedOption {
+        INSTALL, UNINSTALL, REMOVE
+    };
     struct downloadRectangle {
         int x;
         int y;
         int width;
         int height;
+        int iconPosY;
     };
 private:
+
+    PNG * installIcon;
+    PNG * installIconSelected;
+    PNG * downloadIcon;
+    PNG * downloadIconSelected;
+    int installIconX;
+
+    PNG * uninstallIcon;
+    PNG * uninstallIconSelected;
+    int uninstallIconX;
+
     PNG * deleteIcon;
     PNG * deleteIconSelected;
-    bool deletedSelected;
     int deleteIconX;
     int deleteDownload(download * dld);
 
@@ -49,6 +63,7 @@ private:
     FT_Face fontLarge{};
     FT_Face fontMedium{};
     FT_Face fontSmall{};
+    SelectedOption option;
 
     bool isUpdating;
     const int frameWidth = 0;

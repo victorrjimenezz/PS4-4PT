@@ -3,11 +3,9 @@
 //
 #include "../../include/view/mainView.h"
 #include "../../_common/graphics.h"
-#include "../../include/view/tabSelected.h"
 #include "../../include/view/repositoryView.h"
 #include "../../include/view/homeView.h"
 #include "../../include/view/downloadView.h"
-#include "../../include/base.h"
 #include "../../include/utils/logger.h"
 #include "../../include/view/packageSearch.h"
 #include <proto-include.h>
@@ -35,6 +33,7 @@ int mainView::updateView() {
 }
 
 mainView::mainView(bool isFirstRun) : subViews()  {
+
     updatingView = false;
     bgColor = {255,255,255};
     // No buffering
@@ -99,7 +98,6 @@ mainView::mainView(bool isFirstRun) : subViews()  {
 
     LOG << "Settings subViews" << "\n";
     subViews[0] = new homeView(mainScene,fontMediumLarge,fontMedium,fontSmall,frameWidth,frameHeight);
-    LOG << "FINISHED";
     subViews[1] = new repositoryView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight,isFirstRun);
     subViews[2] = new downloadView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
     subViews[3] = new packageSearch(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
@@ -108,6 +106,7 @@ mainView::mainView(bool isFirstRun) : subViews()  {
     controllerManager = new ControllerManager(tabView,subViews);
     LOG << "Initializing Thread" << "\n";
     std::thread(&ControllerManager::initController, std::ref(*controllerManager)).detach();
+
 }
 
 mainView::~mainView() {

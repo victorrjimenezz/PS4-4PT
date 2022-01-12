@@ -23,12 +23,15 @@ private:
     std::string repoName;
     std::string path;
     std::mutex mutex;
+    std::string titleID;
     std::shared_ptr<fileDownloadRequest> downloadRequest;
     std::string genDate();
     PNG * icon;
     bool installed;
     bool finished;
     bool failed;
+    int checkInstalled();
+    int setTitleID();
 public:
     download(const char *url);
     download(const char *id, const char *date, const char *localPath, const char *url, const char *name,
@@ -40,16 +43,15 @@ public:
     const char * getName();
     const char * getURL();
     const char * getIconPath();
+    int install();
+    int unInstall();
     package::PKGTypeENUM getPackageType();
     const char * getRepoName();
     const char * getVersion();
-    //std::shared_ptr<package> getPKG();
     void initDownload();
     void deleteDownload();
-    void install();
     bool stored();
     std::shared_ptr<fileDownloadRequest> getRequest();
-    //bool isDownloading();
     bool hasFinished();
     bool hasFailed();
     void setFinished();

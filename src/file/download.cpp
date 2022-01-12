@@ -3,12 +3,14 @@
 //
 #include <sstream>
 #include <orbis/AppInstUtil.h>
+#include <orbis/Bgft.h>
+
 #include "../../include/file/download.h"
 #include "../../include/file/fileManager.h"
-#include "../../include/file/pkgManager.h"
 #include "../../include/repository/repoFetcher.h"
 #include "../../include/view/downloadView.h"
 #include "../../_common/notifi.h"
+#include "../../include/utils/logger.h"
 
 std::string download::genDate(){
     auto now = std::chrono::system_clock::now();
@@ -40,12 +42,13 @@ download::download(const std::shared_ptr<package>& pkg){
     this->iconPath = pkg->getIconPath();
     this->finished = false;
     this->failed = false;
+    this->installed = false;
     this->icon = new PNG(pkg->getIconPath(),ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
 
     this->downloadRequest = std::shared_ptr<fileDownloadRequest>(new fileDownloadRequest(sourceURL.c_str(),path.c_str()));
 }
 
-download::download(const char * id, const char * date, const char * localPath, const char * url, const char * name, const char * version, const char * repoName, package::PKGTypeENUM type, const char * iconPath, bool finished){
+download::download(const char * id, const char * date, const char * localPath, const char * url, const char * name, const char * version, const char * repoName, package::PKGTypeENUM type, const char * iconPath, bool finished) {
     this->id = id;
     this->date = date;
     this->path=localPath;
@@ -56,10 +59,13 @@ download::download(const char * id, const char * date, const char * localPath, c
     this->repoName = repoName;
     this->finished = false;
     this->installed = false;
+    this->titleID = "";
     if (fileExists(localPath)) {
-        if (finished)
+        if (finished){
             this->finished = true;
-        else
+            setTitleID();
+            this->installed = checkInstalled();
+        }else
             removeFile(localPath);
     }
     this->failed = false;
@@ -74,7 +80,7 @@ download::download(const char * id, const char * date, const char * localPath, c
     this->downloadRequest = std::shared_ptr<fileDownloadRequest>(new fileDownloadRequest(url,path.c_str()));
 }
 
-download::download(const char *url){
+download::download(const char *url) {
     this->id = genRandom(10);
     std::string pkgURL = url;
     pkgURL = pkgURL.substr(pkgURL.find_last_of('/')+1);
@@ -88,6 +94,7 @@ download::download(const char *url){
     this->packageType = package::MISC;
     this->url = url;
     this->repoName = "Direct Download";
+    this->titleID = "";
     std::string iconDefaultPath = DATA_PATH;
     iconDefaultPath+="assets/images/repository/";
     iconDefaultPath+="miscDefaultIcon.png";
@@ -148,24 +155,83 @@ const char * download::getPath() {
 bool download::stored() {
     return fileExists(path.c_str());
 }
+int download::unInstall() {
+    if(sceAppInstUtilAppUnInstall(&titleID[0]) != 0)
+        return -1;
+    installed = false;
+    return 0;
+}
+int download::setTitleID(){
+    int ret = 0, isApp = 0;
+    char tempTitleID[16];
+    if(titleID.empty()) {
+        ret = sceAppInstUtilGetTitleIdFromPkg(path.c_str(), &tempTitleID[0], &isApp);
+        titleID = tempTitleID;
+        if (ret)
+            LOG << "Error on sceAppInstUtilGetTitleIdFromPkg";
+    }
+    return ret;
+}
 
-void download::install() {
-    pkginstall(this);
+int download::install() {
+    int  ret;
+    int  task_id = -1;
+    char buffer[255];
+
+    ret = setTitleID();
+
+    if(ret)
+        goto err;
+
+
+    snprintf(buffer, 254, "%s via 4PT", titleID.c_str());
+    OrbisBgftDownloadParamEx download_params;
+    memset(&download_params, 0, sizeof(download_params));
+    download_params.params.entitlementType = 5;
+    download_params.params.id = titleID.c_str();
+    download_params.params.contentUrl = path.c_str();
+    download_params.params.contentName = buffer;
+    download_params.params.iconPath = iconPath.c_str();
+    download_params.params.playgoScenarioId = "0";
+    download_params.params.option = ORBIS_BGFT_TASK_OPT_DELETE_AFTER_UPLOAD;
+    download_params.slot = 0;
+
+
+    retry:
+    ret = sceBgftServiceIntDownloadRegisterTaskByStorageEx(&download_params, &task_id);
+
+    if(ret == ORBIS_APPINSTUTIL_APP_ALREADY_INSTALLED) {
+        ret = unInstall();
+        if(ret != 0){
+            LOG << "Error on sceAppInstUtilAppUnInstall";
+            goto err;
+        }
+
+        goto retry;
+    }
+    else
+    if(ret){
+        LOG << "Error on sceBgftServiceIntDownloadRegisterTaskByStorageEx";
+        goto err;
+    }
+
+    ret = sceBgftServiceDownloadStartTask(task_id);
+    if(ret){
+        LOG << "Error on sceBgftDownloadStartTask";
+        goto err;
+    }
     installed = true;
+    return 0;
+
+    err:
+    std::string message = "Error when installing app";
+    message+=name;
+    notifi(NULL,message.c_str());
+    return -1;
+
 }
 
 bool download::isInstalled() {
-    /*int isApp,exists;
-    char title_id[16];
-    if(stored()){
-        int ret = sceAppInstUtilGetTitleIdFromPkg(path.c_str(), title_id, &isApp);
-        if(ret)
-            return installed;
-        else {
-            sceAppInstUtilAppExists(title_id,&exists);
-            return exists;
-        }
-    }*/
     return installed;
 }
 
@@ -197,11 +263,22 @@ download::~download() {
     delete icon;
 }
 
+int download::checkInstalled() {
+    int isInstalled = 0;
+    if(!titleID.empty())
+        sceAppInstUtilAppExists(titleID.c_str(), &isInstalled);
+    return isInstalled;
+
+}
+
 void download::setFinished() {
     std::string downloadMessage = "Finished downloading:\n";
     downloadMessage += name;
     notifi(NULL, downloadMessage.c_str());
     finished = true;
+    if(setTitleID() == 0)
+        installed = checkInstalled();
+
 }
 
 void download::setFailed(bool failed) {

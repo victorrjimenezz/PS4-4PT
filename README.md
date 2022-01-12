@@ -94,6 +94,7 @@ The current working app features are:
 
 - Downloading PKGs from repositories
 - Downloading PKGs directly from a URL.
+- Uninstall APPs
 - Adding Repositories
 - Searching apps, filtering by name and repository.
 - Install downloaded PKGs.
