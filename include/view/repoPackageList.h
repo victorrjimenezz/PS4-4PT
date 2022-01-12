@@ -65,6 +65,7 @@ public:
     void arrowRight();
     void arrowLeft();
     bool isActive();
+    void setActive();
     void deleteChild();
     subView * getParent();
     subView * getChild();

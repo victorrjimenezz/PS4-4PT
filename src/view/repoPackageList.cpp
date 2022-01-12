@@ -33,10 +33,8 @@ repoPackageList::repoPackageList(Scene2D * mainScene, FT_Face fontLarge, FT_Face
     currPage = 0;
     selected = 0;
 
-    for(const std::shared_ptr<package>& package : *repository->getPackageList()) {
-        displayPackageList.emplace_back(package);
-        packageList.emplace_back(package);
-    }
+    this->packageList = *repository->getPackageList();
+    filterPackages("");
 
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
     this->repoIconX = static_cast<int>(REPO_ICON_POS*repoX);
@@ -157,6 +155,9 @@ subView* repoPackageList::getChild(){
 }
 void repoPackageList::pressCircle(){
     active=false;
+}
+void repoPackageList::setActive() {
+    active = true;
 }
 void repoPackageList::pressTriangle(){
     isOnKeyboard = !isOnKeyboard;

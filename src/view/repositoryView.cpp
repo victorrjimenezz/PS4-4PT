@@ -41,9 +41,13 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     if(isFirstRun){
         repository * repo = fetchRepo("http://4pt-project.com/");
         if(repo != nullptr)
-            repositoryList->emplace_back(repo);
+            addRepository(repo);
+
+        repo = fetchRepo("https://4pt-project.com/");
+        if(repo != nullptr)
+            addRepository(repo);
     } else {
-        loadSavedRepos(repositoryList);
+        loadSavedRepos(this);
     }
 
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
@@ -166,7 +170,7 @@ void repositoryView::hasEntered(){
     }
     repository *repo = fetchRepo(repoURL);
     if(repo != nullptr) {
-        repositoryList->emplace_back(repo);
+        addRepository(repo);
         fillPage();
     } else {
         std::string errmessage = "Repo not found at: ";
@@ -182,10 +186,11 @@ void repositoryView::pressX(){
         repository *currRepo = currRepos[selected];
         if(currRepo == nullptr)
             return;
+        repoPackageList * repoPackageListView = repoPackageViewList.at(selected+currPage*reposPerPage);
         switch (selectedOption) {
             case OPEN:
-                child = new repoPackageList(mainScene, fontLarge, fontMedium, fontSmall, frameWidth, frameHeight,
-                                            currRepo, this);
+                repoPackageListView->setActive();
+                child = repoPackageListView;
                 break;
             case UPDATE:
                 std::thread([&capture0 = *currRepo, updateIcon = std::ref(updateIcon)] { capture0.updateRepository(updateIcon); }).detach();
@@ -198,7 +203,9 @@ void repositoryView::pressX(){
 }
 
 int repositoryView::deleteRepo(const char * id){
+    repoPackageViewList.erase(repoPackageViewList.begin() + selected+currPage*reposPerPage);
     repositoryList->erase(std::remove_if(repositoryList->begin(), repositoryList->end(), [&id](repository* repo){bool found = strcasecmp(repo->getID(), id) == 0; if(found) repo->deleteRepository(); return found;}), repositoryList->end());
+
     if(!(selected==0 && currPage==0)) {
         selected--;
         if(selected < 0) {
@@ -295,6 +302,9 @@ bool repositoryView::isActive() {
 repositoryView::~repositoryView() {
     for(auto repository : *repositoryList)
         delete repository;
+    for(auto repoPackageView : repoPackageViewList)
+        delete repoPackageView;
+
     repositoryList.reset();
     delete child;
     delete keyboardInput;
@@ -302,7 +312,6 @@ repositoryView::~repositoryView() {
     delete deleteIconSelected;
 }
 void repositoryView::deleteChild() {
-    delete child;
     child = nullptr;
 }
 subView *repositoryView::getParent() {
@@ -315,4 +324,10 @@ subView *repositoryView::getChild() {
 
 std::shared_ptr<std::vector<repository *>> repositoryView::getRepositoryList() {
     return repositoryList;
+}
+
+void repositoryView::addRepository(repository * repository) {
+    repositoryList->emplace_back(repository);
+    repoPackageViewList.emplace_back(new repoPackageList(mainScene, fontLarge, fontMedium, fontSmall, frameWidth, frameHeight,
+                                                         repository, this));
 }

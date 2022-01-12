@@ -45,7 +45,7 @@ int loadDownloadList(std::vector<download*> * downloadList, YAML::Node downloads
     return 0;
 }
 
-int loadSavedRepos(const std::shared_ptr<std::vector<repository*>>& repositoryList){
+int loadSavedRepos(repositoryView * repositoryView){
     std::string originalRepoIcon = DATA_PATH;
     originalRepoIcon+="assets/images/repository/repoDefaultIcon.png";
     std::string repoPath = STORED_PATH;
@@ -81,8 +81,7 @@ int loadSavedRepos(const std::shared_ptr<std::vector<repository*>>& repositoryLi
                     std::string localIconDir = loadingRepoFolder+"icon.png";
                     if(!fileExists(localIconDir.c_str()))
                         copyFile(originalRepoIcon.c_str(),localIconDir.c_str());
-                    repository * newRepo = new repository(file.c_str(), repoName.c_str(), repoURL.c_str(), loadingRepoFolder.c_str(), localIconDir.c_str());
-                    repositoryList->emplace_back(newRepo);
+                    repositoryView->addRepository(new repository(file.c_str(), repoName.c_str(), repoURL.c_str(), loadingRepoFolder.c_str(), localIconDir.c_str()));
                 } else {
                     repoYAML = YAML::LoadFile(loadingRepoPath);
 
@@ -122,8 +121,7 @@ int loadSavedRepos(const std::shared_ptr<std::vector<repository*>>& repositoryLi
                     }
 
                     std::string repoName = repoYAML["name"].as<std::string>();
-                    repository * newRepo = new repository(file.c_str(), repoName.c_str(), repoURL.c_str(), loadingRepoFolder.c_str(), localDownloadPath.c_str());
-                    repositoryList->emplace_back(newRepo);
+                    repositoryView->addRepository(new repository(file.c_str(), repoName.c_str(), repoURL.c_str(), loadingRepoFolder.c_str(), localDownloadPath.c_str()));
                 }
             } else {
                 loadingRepoPath = repoPath+file;

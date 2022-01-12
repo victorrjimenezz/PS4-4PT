@@ -12,6 +12,7 @@
 #include "../../_common/graphics.h"
 #include "../../include/view/keyboardInput.h"
 #include "../utils/AnimatedPNG.h"
+#include "repoPackageList.h"
 
 #include <vector>
 class repositoryView : public subView {
@@ -47,6 +48,8 @@ private:
     Scene2D * mainScene;
     repository * currRepos[reposPerPage];
     void updateRepositories();
+
+    std::vector<repoPackageList*> repoPackageViewList;
     std::shared_ptr<std::vector<repository*>> repositoryList;
     repoRectangle repoRectangles[reposPerPage];
     subView * child;
@@ -84,10 +87,9 @@ public:
     void deleteChild();
     subView * getParent();
     subView * getChild();
-
     std::shared_ptr<std::vector<repository*>> getRepositoryList();
-
     bool isActive();
     ~repositoryView();
+    void addRepository(repository * repository);
 };
 #endif //CYDI4_REPOSITORYVIEW_H

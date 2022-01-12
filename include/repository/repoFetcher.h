@@ -7,13 +7,14 @@
 #include "repository.h"
 #include "../file/download.h"
 #include "../../include/repository/package.h"
+#include "../../include/view/repositoryView.h"
 #include <vector>
 #include <yaml-cpp/yaml.h>
 
 package::PKGTypeENUM getPKGType(const char * type);
 
 int loadDownloadList(std::vector<download*> * downloadList, YAML::Node downloadsFile);
-int loadSavedRepos(const std::shared_ptr<std::vector<repository*>>& repositoryList);
+int loadSavedRepos(repositoryView * repositoryView);
 std::string getDefaultIconPath(package::PKGTypeENUM type);
 int loadPackagesFromRepo(repository* repository);
 repository* fetchRepo(const char *repoURLStr);
