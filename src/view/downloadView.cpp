@@ -363,13 +363,13 @@ void downloadView::arrowLeft() {
     if(currDownloads[selected] == nullptr)
         return;
     int installed = currDownloads[selected]->isInstalled();
-    int finished = currDownloads[selected]->getRequest()->hasFinished();
+    int downloading = currDownloads[selected]->getRequest()->isDownloading();
 
     switch(option) {
         case REMOVE:
             if(installed)
                 option = UNINSTALL;
-            else if(finished)
+            else if(!downloading)
                 option = INSTALL;
             break;
         case UNINSTALL:
