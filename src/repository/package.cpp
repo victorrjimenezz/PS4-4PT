@@ -3,6 +3,7 @@
 //
 #include "../../include/repository/package.h"
 #include "../../include/utils/logger.h"
+#include "../../include/file/fileManager.h"
 
 package::package(const char*name, const char*path, const char* packageType, const char*version, const char * iconPath, repository * repository){
     this->name = name;
@@ -27,6 +28,7 @@ package::PKGTypeENUM package::getPackageType(){
     return packageType;
 }
 package::~package(){
+    removeFile(icon->getPath().c_str());
     delete icon;
 }
 
