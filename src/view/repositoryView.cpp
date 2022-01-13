@@ -40,9 +40,6 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
         if(repo != nullptr)
             addRepository(repo);
 
-        repo = fetchRepo("https://4pt-project.com/");
-        if(repo != nullptr)
-            addRepository(repo);
     } else {
         loadSavedRepos(this);
     }
