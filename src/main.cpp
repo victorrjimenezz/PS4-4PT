@@ -195,14 +195,14 @@ int networkInit() {
     }
     LOG << "Created Network Pool";
 
-    int libSslId = sceSslInit(SSL_HEAP_SIZE);
+    /*int libSslId = sceSslInit(SSL_HEAP_SIZE);
     if(libSslId < 0) {
         LOG << "Ssl Initialization Failed;";
         return libSslId;
     }
-    LOG << "Initialized Ssl at " << libSslId;
+    LOG << "Initialized Ssl at " << libSslId;*/
 
-    int libhttpCtxId = sceHttpInit(libNetMemId, libSslId, HTTP_HEAP_SIZE);
+    int libhttpCtxId = sceHttpInit(libNetMemId, 0, HTTP_HEAP_SIZE);
     if(libhttpCtxId<0){
         LOG << "Http Initialization Failed";
         return libhttpCtxId;
