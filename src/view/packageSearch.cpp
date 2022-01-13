@@ -39,6 +39,7 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
     this->repoIconX = static_cast<int>(REPO_ICON_POS*repoX);
     for(int i =0; i < packagesPerPage; i++)
         packageRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight};
+    this->packageTypeX=repoX+ (packageRectangles[0].width - repoX) * PKGLIST_TYPE_POS;
     packageSearch::fillPage();
 
 }
@@ -106,6 +107,11 @@ void packageSearch::updateView() {
                 printStr += currPackage->getRepo()->getName();
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                     selectedColor, textColor);
+                printStr = "Type: ";
+                printStr += TypeStr[currPackage->getPackageType()];
+                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                    packageRectangle.y - 1 * packageRectangle.height / 8,
+                                    selectedColor, selectedColor);
                 currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
             }
         }
@@ -127,6 +133,11 @@ void packageSearch::updateView() {
             printStr += currPackage->getRepo()->getName();
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                 selectedColor, textColor);
+            printStr = "Type: ";
+            printStr += TypeStr[currPackage->getPackageType()];
+            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                packageRectangle.y - 1 * packageRectangle.height / 8,
+                                selectedColor, selectedColor);
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
         } else {
             mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);

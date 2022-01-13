@@ -27,6 +27,7 @@ private:
     const static int packagesPerPage = 5;
     int currPage;
     int selected;
+    int packageTypeX;
     int rectangleBaseHeight;
     int rectangleDivisorHeight;
     Scene2D * mainScene;
