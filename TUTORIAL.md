@@ -33,6 +33,7 @@
         <a href="#dl">Downloads List</a>
       <ul>
         <li><a href="#id">Install Download</a></li>
+        <li><a href="#ud">Uninstall Download</a></li>
         <li><a href="#rd">Remove Download</a></li>
         <li><a href="#rf">Retry Failed Download</a></li>
       </ul>
@@ -89,15 +90,24 @@ open the keyboard, type the URL and press Add Repo.
 
 ### Install Download
 
-To install a download, select it from the downloads list using the up/down arrows 
+To install a download, select it from the downloads list using the up/down arrows, select the install option by using the right/left arrows,
 and press X.
+
+<div id="ud"></div>
+
+### Uninstall Download
+
+To uninstall a download from the PS4, select it from the downloads list using the up/down arrows,
+select the uninstall option by using the right/left arrows, and press X.
+
+***(NOTE: THIS WILL UNINSTALL THE APP FROM THE PS4)***
 
 <div id="rd"></div>
 
 ### Remove Download
 
-To remove a download (from the app and the disk), select it form the downloads list using the up/down arrows,
- select the delete option by pressing the right arrow, and press X.
+To remove a download (from the app and the disk), select it from the downloads list using the up/down arrows,
+ select the delete option by using the right/left arrows, and press X.
 
 ***(NOTE: THIS WILL NOT UNINSTALL THE APP FROM THE PS4)***
 
@@ -106,8 +116,8 @@ To remove a download (from the app and the disk), select it form the downloads l
 
 ### Retry Failed Download
 
-To retry a failed download, select it from the downloads list using the up/down arrows
-and press X.
+To retry a failed download, select it from the downloads list using the up/down arrows, select the download option by 
+using the right/left arrows, and press X.
 
 ***
 
