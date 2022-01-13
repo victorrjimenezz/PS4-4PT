@@ -14,6 +14,7 @@ repository::repository(const char * id, const char *name, const char *repoURL, c
     this->name = std::string(name);
     this->icon = new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
     this->updating = false;
+    this->updated = true;
     packageList = new std::vector<std::shared_ptr<package>>;
 
     loadPackages();
@@ -112,11 +113,17 @@ int repository::updateRepository(AnimatedPNG * updateIconPNG) {
         updateIconPNG->stop();
     updating = false;
     packageSearch::mainPackageSearch->updatePackages();
+    updated = true;
     return packages;
 }
 
 std::vector<std::shared_ptr<package>> * repository::getPackageList() {
     return packageList;
+}
+bool repository::hasUpdated(){
+    bool oldUpdated = updated;
+    updated = false;
+    return oldUpdated;
 }
 void repository::clearPackageList() {
     for(auto & package : *packageList)

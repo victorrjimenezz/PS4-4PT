@@ -61,6 +61,11 @@ void packageSearch::fillPage() {
 }
 
 void packageSearch::updatePackages() {
+    for(auto & package : displayPackageList)
+        package.reset();
+    displayPackageList.clear();
+    for(auto & package : packageList)
+        package.reset();
     packageList.clear();
     for(auto repository : *repositoryList){
         for(const auto& package : *(repository->getPackageList())){

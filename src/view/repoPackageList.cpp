@@ -33,7 +33,8 @@ repoPackageList::repoPackageList(Scene2D * mainScene, FT_Face fontLarge, FT_Face
     currPage = 0;
     selected = 0;
 
-    this->packageList = *repository->getPackageList();
+    repo = repository;
+    this->packageList = repository->getPackageList();
     filterPackages("");
 
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
@@ -42,8 +43,6 @@ repoPackageList::repoPackageList(Scene2D * mainScene, FT_Face fontLarge, FT_Face
         packageRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight};
 
     this->packageTypeX=repoX+ (packageRectangles[0].width - repoX) * PKGLIST_TYPE_POS;
-
-    repoPackageList::fillPage();
 
 }
 
@@ -64,8 +63,11 @@ void repoPackageList::fillPage() {
 }
 
 void repoPackageList::filterPackages(const char * name) {
+    //TODO IF NAME IS SMALLER DO RESET EVERYTHING, IF NAME IS LONGER ONLY FILTER THOSE ALREADY FILTERED
+    for(auto pkg : displayPackageList)
+        pkg.reset();
     displayPackageList.clear();
-    for(auto & package : packageList){
+    for(auto & package : *packageList){
         std::string hayStack =  package->getName();
         std::string needle = name;
         if (findStringIC(hayStack,needle)) {
@@ -157,6 +159,8 @@ void repoPackageList::pressCircle(){
     active=false;
 }
 void repoPackageList::setActive() {
+    if(repo->hasUpdated())
+        filterPackages("");
     active = true;
 }
 void repoPackageList::pressTriangle(){
@@ -186,7 +190,7 @@ void repoPackageList::arrowUp(){
 void repoPackageList::arrowDown(){
     if(!isOnKeyboard) {
         selected++;
-        int repoSize = (int) packageList.size();
+        int repoSize = (int) packageList->size();
         if (selected + packagesPerPage * currPage < repoSize) {
             if (selected >= packagesPerPage) {
                 selected = 0;
@@ -210,8 +214,9 @@ void repoPackageList::arrowLeft() {
 
 }
 repoPackageList::~repoPackageList() {
-    for(auto repository : packageList)
-        repository.reset();
+    for(auto pkg : displayPackageList)
+        pkg.reset();
+    displayPackageList.clear();
     delete keyboardInput;
 }
 

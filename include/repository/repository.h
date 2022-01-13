@@ -19,6 +19,7 @@ private:
     PNG * icon;
     std::vector<std::shared_ptr<package>> *packageList;
     bool updating;
+    bool updated;
     int updateYML();
     int updateIcon();
 public:
@@ -30,6 +31,7 @@ public:
     const char * getName();
     const char * getRepoURL();
     const char * getLocalPath();
+    bool hasUpdated();
     void clearPackageList();
     void addPkg(const std::shared_ptr<package>& package);
     void setName(const char * newName);

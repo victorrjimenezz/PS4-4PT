@@ -31,7 +31,7 @@ private:
     int rectangleDivisorHeight;
     Scene2D * mainScene;
     std::shared_ptr<package> currPackages[packagesPerPage];
-    std::vector<std::shared_ptr<package>> packageList;
+    std::vector<std::shared_ptr<package>> * packageList;
     std::vector<std::shared_ptr<package>> displayPackageList;
     packageRectangle packageRectangles[packagesPerPage];
     Color bgColor{};
@@ -41,7 +41,7 @@ private:
     FT_Face fontLarge{};
     FT_Face fontMedium{};
     FT_Face fontSmall{};
-
+    repository * repo;
     keyboardInput * keyboardInput;
 
     subView * parent;
