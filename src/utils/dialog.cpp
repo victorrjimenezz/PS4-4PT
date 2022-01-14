@@ -10,29 +10,19 @@
 #include <string>
 #include <cstdlib>
 
-static inline void sceCommonDialogSetMagicNumber( uint32_t* magic, const OrbisCommonDialogBaseParam* param ) {
-    *magic = (uint32_t)( ORBIS_COMMON_DIALOG_MAGIC_NUMBER + (uint64_t)param );
-}
-
-static inline void sceCommonDialogBaseParamInit(OrbisCommonDialogBaseParam *param) {
-    memset(param, 0x0, sizeof(OrbisCommonDialogBaseParam));
-    param->size = (uint32_t)sizeof(OrbisCommonDialogBaseParam);
-    sceCommonDialogSetMagicNumber( &(param->magic), param );
-}
-
-
-static inline void OrbisMsgDialogParamInitialize(OrbisMsgDialogParam *param){
-    memset( param, 0x0, sizeof(OrbisMsgDialogParam) );
-    sceCommonDialogBaseParamInit( &param->baseParam );
-    param->size = sizeof(OrbisMsgDialogParam);
-}
-
 int popDialog(const char* message) {
     int ret = 0;
 
     sceMsgDialogInitialize();
     OrbisMsgDialogParam param;
-    OrbisMsgDialogParamInitialize(&param);
+
+    memset(&param, 0x0, sizeof(OrbisMsgDialogParam) );
+    memset(&param.baseParam, 0x0, sizeof(OrbisCommonDialogBaseParam));
+
+    param.baseParam.size = (uint32_t)sizeof(OrbisCommonDialogBaseParam);
+    param.baseParam.magic = (uint32_t)( ORBIS_COMMON_DIALOG_MAGIC_NUMBER + (uint64_t)&param.baseParam );
+
+    param.size = sizeof(OrbisMsgDialogParam);
     param.mode = ORBIS_MSG_DIALOG_MODE_USER_MSG;
 
     OrbisMsgDialogUserMessageParam userMsgParam;
