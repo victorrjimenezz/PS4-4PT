@@ -51,6 +51,14 @@
 
 ***
 
+#Important Disclaimers
+- SSL (https) has not been implemented yet, so make sure the repository
+allows for http:// connections.
+- This app has only been tested on System Version 9.00, I'd love to get feedback from users
+on older versions!
+
+***
+
 <div id="ata"></div>
 
 ## About The App
