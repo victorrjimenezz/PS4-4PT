@@ -1,16 +1,25 @@
 //
 // Created by Víctor Jiménez Rugama on 12/24/21.
 //
-#include "../../_common/notifi.h"
 
 #include "../../include/view/repositoryView.h"
-#include "../../include/repository/repoFetcher.h"
+#include "../../include/view/keyboardInput.h"
+#include "../../include/view/repoPackageList.h"
+#include "../../include/repository/repository.h"
 #include "../../include/utils/dialog.h"
+#include "../../include/utils/PNG.h"
+#include "../../include/utils/AnimatedPNG.h"
+#include "../../include/utils/notifi.h"
+#include "../../include/file/fileDownloadRequest.h"
+#include "../../include/utils/AudioManager.h"
+#include "../../include/utils/logger.h"
+#include "../../include/file/fileManager.h"
 
 #include <string>
 #include <vector>
 #include <iterator>
 #include <thread>
+#include <yaml-cpp/yaml.h>
 
 repositoryView * repositoryView::mainRepositoryView;
 repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight, bool isFirstRun) : currRepos(),frameWidth(frameWidth),frameHeight(frameHeight), viewWidth(frameWidth), viewHeight(frameHeight*TOPVIEWSIZE) {
@@ -22,26 +31,26 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
 
     bgColor = {255,255,255};
     selectedColor = {0,0,0};
-    textColor = {180, 180, 180};
+    textColor = {90, 90, 90};
 
     this->isOnKeyboard = false;
     this->fontLarge = fontLarge;
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, "ADD REPO","http://",isOnKeyboard);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, "ADD REPO","https://",isOnKeyboard);
     child = nullptr;
 
     currPage = 0;
     selected = 0;
     repositoryList = std::shared_ptr<std::vector<repository*>>(new std::vector<repository*>);
     if(isFirstRun){
-        repository * repo = fetchRepo("http://4pt-project.com/");
+        repository * repo = repository::fetchRepo(MAIN_URL);
         if(repo != nullptr)
             addRepository(repo);
 
     } else {
-        loadSavedRepos(this);
+        loadSavedRepos();
     }
 
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
@@ -67,7 +76,10 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     this->deleteIcon= new PNG((iconPath+"delete.png").c_str());
     this->deleteIconSelected= new PNG((iconPath+"deleteSelected.png").c_str());
 
-
+    //LOAD deleteWav
+    std::string audioPath = DATA_PATH;
+    audioPath+="assets/audio/delete.wav";
+    deleteWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &deleteWavCount);
 
 
 }
@@ -115,7 +127,7 @@ void repositoryView::updateView() {
         mainScene->DrawText((char *) currRepo->getName(), fontMedium, repoRectangle.x, repoRectangle.y,
                             selectedColor, selectedColor);
         mainScene->DrawText((char *) currRepo->getRepoURL(), fontSmall, repoRectangle.x, repoRectangle.y+3*repoRectangle.height/8,
-                            selectedColor, textColor);
+                            selectedColor, selectedColor);
         currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
             switch (selectedOption) {
                 case OPEN:
@@ -149,20 +161,18 @@ void repositoryView::hasEntered(){
     if(repoURLTEMP.back() != '/')
         repoURLTEMP+='/';
     const char * repoURL = repoURLTEMP.c_str();
-    if(strcasecmp(repoURLTEMP.substr(0,8).c_str(),"https://") == 0) {
-        popDialog("SSL (HTTPS) NOT SUPPORTED YET");
-        return;
-    } else if(strcasecmp(repoURLTEMP.substr(0,7).c_str(),"http://") != 0) {
+    if(!fileDownloadRequest::verifyURL(repoURL)) {
         popDialog("INVALID URL");
         return;
     }
+
     for(repository *repository : *repositoryList){
         if(strcasecmp(repository->getRepoURL(),repoURL) == 0) {
             popDialog("Repository already loaded!");
             return;
         }
     }
-    repository *repo = fetchRepo(repoURL);
+    repository *repo = repository::fetchRepo(repoURL);
     if(repo != nullptr) {
         addRepository(repo);
         fillPage();
@@ -208,6 +218,7 @@ int repositoryView::deleteRepo(const char * id){
         }
     }
     fillPage();
+    AudioManager::mainAudioManager->playAudio(deleteWav,deleteWavCount);
     return 0;
 }
 void repositoryView::pressCircle(){
@@ -324,4 +335,108 @@ void repositoryView::addRepository(repository * repository) {
     repositoryList->emplace_back(repository);
     repoPackageViewList.emplace_back(new repoPackageList(mainScene, fontLarge, fontMedium, fontSmall, frameWidth, frameHeight,
                                                          repository, this));
+}
+
+int repositoryView::loadSavedRepos() {
+        std::string originalRepoIcon = DATA_PATH;
+        originalRepoIcon+="assets/images/repository/repoDefaultIcon.png";
+        std::string repoPath = STORED_PATH;
+        repoPath+=REPO_PATH;
+
+        YAML::Node repoYAML;
+
+        std::string loadingRepoFolder;
+        std::string loadingRepoPath;
+        std::string loadingRepoPathTEMP;
+        std::string repoURL;
+        for(const std::string& file : lsDir(repoPath.c_str())) {
+            loadingRepoFolder=repoPath+file+'/';
+            loadingRepoPath = loadingRepoFolder;
+            loadingRepoPath+="repo.yml";
+            loadingRepoPathTEMP = loadingRepoFolder;
+            loadingRepoPathTEMP+="repoTEMP.yml";
+            if(fileExists(loadingRepoPath.c_str())){
+                removeFile(loadingRepoPathTEMP.c_str());
+                moveFile(loadingRepoPath.c_str(),loadingRepoPathTEMP.c_str());
+                try {
+                    repoYAML = YAML::LoadFile(loadingRepoPathTEMP);
+                } catch(const YAML::ParserException& ex) {
+                    LOG << ex.what();
+                    if(folderExists(loadingRepoFolder.c_str()))
+                        removeFile(loadingRepoFolder.c_str());
+                    continue;
+                }
+                if(repoYAML["repoURL"]) {
+                    repoURL = repoYAML["repoURL"].as<std::string>();
+                    std::string repoYML = repoURL+"repo.yml";
+                    fileDownloadRequest repoUpdateRequest(repoYML.c_str(),loadingRepoPath.c_str());
+                    if(repoUpdateRequest.initDownload() < 0){
+                        LOG << "Could not download " << repoYML << " to "<<loadingRepoPath;
+                        LOG << "ERROR WHEN UPDATING REPO " << repoURL;
+                        removeFile(loadingRepoPath.c_str());
+                        moveFile(loadingRepoPathTEMP.c_str(),loadingRepoPath.c_str());
+
+                        std::string repoName = repoYAML["name"].as<std::string>();
+                        std::string localIconDir = loadingRepoFolder+"icon.png";
+                        if(!fileExists(localIconDir.c_str()))
+                            copyFile(originalRepoIcon.c_str(),localIconDir.c_str());
+                        addRepository(new repository(file.c_str(), repoName.c_str(), repoURL.c_str(), loadingRepoFolder.c_str(), localIconDir.c_str()));
+                    } else {
+                        try {
+                            repoYAML = YAML::LoadFile(loadingRepoPath);
+                        } catch(const YAML::ParserException& ex) {
+                            LOG << ex.what();
+                            if(folderExists(loadingRepoFolder.c_str()))
+                                removeFile(loadingRepoFolder.c_str());
+                            continue;
+                        }
+
+                        repoYAML["repoURL"] = repoURL;
+                        std::ofstream fout(loadingRepoPath);
+                        fout << repoYAML;
+                        fout.close();
+                        removeFile(loadingRepoPathTEMP.c_str());
+                        std::string iconDefaultPath = DATA_PATH;
+                        iconDefaultPath+="assets/images/repository/repoDefaultIcon.png";
+                        const char * iconDefaultPathChar = iconDefaultPath.c_str();
+
+                        std::string repoIconPath;
+                        if(repoYAML["iconPath"]) {
+                            repoIconPath = repoYAML["iconPath"].as<std::string>();
+                            LOG << "iconPath: " << repoIconPath.c_str();
+                        }
+                        std::string localDownloadPath;
+                        std::string downloadURL = repoURL;
+                        int ret = -1;
+                        if(!repoIconPath.empty()){
+                            localDownloadPath = loadingRepoFolder+"icon"+repoIconPath.substr(repoIconPath.find_last_of('.'));
+                            if(fileExists(localDownloadPath.c_str()))
+                                removeFile(localDownloadPath.c_str());
+                            downloadURL += repoIconPath;
+                            fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
+                            ret = iconDownloadRequest.initDownload();
+                        }
+
+                        if(ret < 0) {
+
+                            LOG << "Error when downloading icon from " << downloadURL<< " to "<< localDownloadPath;
+                            localDownloadPath = loadingRepoFolder + "icon.png";
+                            if(fileExists(localDownloadPath.c_str()))
+                                removeFile(localDownloadPath.c_str());
+                            copyFile(iconDefaultPathChar, localDownloadPath.c_str());
+                        }
+
+                        std::string repoName = repoYAML["name"].as<std::string>();
+                        addRepository(new repository(file.c_str(), repoName.c_str(), repoURL.c_str(), loadingRepoFolder.c_str(), localDownloadPath.c_str()));
+                    }
+                } else {
+                    LOG << "RepoURL NOT found. Removing Directory" << loadingRepoFolder;
+                    removeDir(loadingRepoFolder.c_str());
+                }
+            } else {
+                LOG << "repo.yml NOT found. Removing Directory" << loadingRepoFolder;
+                removeDir(loadingRepoFolder.c_str());
+            }
+        }
+        return 0;
 }

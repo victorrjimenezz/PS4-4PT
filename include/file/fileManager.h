@@ -5,6 +5,12 @@
 #include <unistd.h>
 #include <vector>
 
+/*
+ * 0 -> Does not Exist
+ * >0 fileSize
+ */
+uint64_t getFileSize(const char * file);
+
 std::vector<std::string> lsDir(const char * path);
 /*
  * 1-> Exists

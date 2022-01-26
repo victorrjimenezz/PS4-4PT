@@ -5,10 +5,8 @@
 #include "../../include/utils/logger.h"
 #include <orbis/CommonDialog.h>
 #include <orbis/MsgDialog.h>
-#include <orbis/Sysmodule.h>
 
 #include <string>
-#include <cstdlib>
 
 int popDialog(const char* message) {
     int ret = 0;

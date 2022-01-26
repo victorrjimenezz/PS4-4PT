@@ -7,6 +7,7 @@
 #include <stb/stb_image.h>
 #include <stb/stb_image_resize.h>
 #include "../../include/utils/PNG.h"
+#include "../../include/utils/AppGraphics.h"
 #include "../../include/utils/logger.h"
 
 PNG::PNG(const char *imagePath)
@@ -15,10 +16,24 @@ PNG::PNG(const char *imagePath)
 
     if (this->img == NULL)
     {
+        this->img = nullptr;
         LOG << "Failed to load image '" << imagePath << "': " << stbi_failure_reason();
         return;
     }
     this->path = imagePath;
+}
+PNG::PNG(const uint8_t *imageData, uint32_t dataLen)
+{
+
+    this->img = (unsigned char *)stbi_load_from_memory(imageData, dataLen,&this->width, &this->height, &this->channels, STBI_rgb_alpha);
+
+    if (this->img == NULL)
+    {
+        this->img = nullptr;
+        LOG << "Failed to load image " << stbi_failure_reason();
+        return;
+    }
+    this->path = "";
 }
 std::string PNG::getPath() {
     return path;
@@ -40,6 +55,7 @@ PNG::PNG(const char *imagePath, int width, int height)
 
     if (tempIMG == NULL)
     {
+        this->img = nullptr;
         LOG << "Failed to load image '" << imagePath << "': " << stbi_failure_reason();
         return;
     }
@@ -48,6 +64,7 @@ PNG::PNG(const char *imagePath, int width, int height)
     stbi_image_free((uint32_t *)tempIMG);
     if (this->img == NULL)
     {
+        this->img = nullptr;
         LOG << "Failed to load image '" << imagePath << "': " << stbi_failure_reason();
         return;
     }
@@ -55,6 +72,32 @@ PNG::PNG(const char *imagePath, int width, int height)
     this->height = height;
     this->path = imagePath;
 }
+
+
+
+PNG::PNG(const uint8_t *imageData, uint32_t dataLen, int width, int height) {
+    const unsigned char * tempIMG = ( unsigned char *)stbi_load_from_memory(imageData, dataLen, &this->width, &this->height, &this->channels, STBI_default);
+
+    if (tempIMG == NULL)
+    {
+        this->img = nullptr;
+        LOG << "Failed to load image" << stbi_failure_reason();
+        return;
+    }
+    this->img = (unsigned char *) malloc(width*height*channels);
+    stbir_resize_uint8(tempIMG, this->width, this->height, 0, img, width, height, 0, channels);
+    stbi_image_free((uint32_t *)tempIMG);
+    if (this->img == NULL)
+    {
+        this->img = nullptr;
+        LOG << "Failed to load image" << stbi_failure_reason();
+        return;
+    }
+    this->width = width;
+    this->height = height;
+    this->path = "";
+}
+
 
 PNG::~PNG()
 {
@@ -65,7 +108,7 @@ PNG::~PNG()
 void PNG::Draw(Scene2D *scene, int startX, int startY)
 {
     // Don't draw non-existant images
-    if(this->img == NULL)
+    if(this->img == nullptr)
         return;
 
     // Iterate the bitmap and draw the pixels
@@ -82,16 +125,24 @@ void PNG::Draw(Scene2D *scene, int startX, int startY)
             uint8_t b = pixelOffset[2];
             uint8_t a = channels >= 4 ? pixelOffset[3] : 0xff;
 
-            Color color = { r, g, b };
+            Color color = { r, g, b, a};
 
             // Do some bounds checking to make sure the pixel is actually inside the frame buffer
             if (xPos < 0 || yPos < 0 || xPos >= this->width || yPos >= this->height)
                 continue;
 
-            if(a > 100)
-                scene->DrawPixel(x, y, color);
+            scene->DrawPixel(x, y, color);
         }
     }
 }
 
+PNG::PNG(PNG *png) {
+    this->height = png->height;
+    this->width = png->width;
+    this->channels = png->channels;
+    uint64_t imgSize = (width * height) * channels;
+    this->img = (uint8_t *) malloc(imgSize);
+    memcpy(this->img,png->img,imgSize);
+
+}
 

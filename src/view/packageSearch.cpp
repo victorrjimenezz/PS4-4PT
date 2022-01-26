@@ -2,11 +2,16 @@
 // Created by Víctor Jiménez Rugama on 12/24/21.
 //
 #include "../../include/view/packageSearch.h"
-#include "../../_common/notifi.h"
-#include "../../include/utils/logger.h"
+#include "../../include/view/keyboardInput.h"
+#include "../../include/repository/package.h"
+#include "../../include/repository/repository.h"
 #include "../../include/utils/utils.h"
+#include "../../include/utils/notifi.h"
+#include "../../include/file/download.h"
+#include "../../include/utils/PNG.h"
 #include "../../include/view/downloadView.h"
 #include "../../include/view/repositoryView.h"
+
 #include <vector>
 #include <iterator>
 
@@ -21,7 +26,8 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
 
     bgColor = {255,255,255};
     selectedColor = {0,0,0};
-    textColor = {180, 180, 180};
+    textColor = {90, 90, 90};
+    updateTextColor = {255,0,0};
 
     this->isOnKeyboard = false;
     this->fontLarge = fontLarge;
@@ -102,17 +108,36 @@ void packageSearch::updateView() {
                 mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                     selectedColor, textColor);
                 printStr = "Version: ";
-                printStr += currPackage->getVersion();
-                printStr += " From Repository: ";
-                printStr += currPackage->getRepo()->getName();
+                printStr += currPackage->getVersionStr();
+                printStr += " | ";
+                printStr += currPackage->getTitleID();
+                printStr += " | ";
+                printStr += currPackage->getRepoName();
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                     selectedColor, textColor);
                 printStr = "Type: ";
                 printStr += TypeStr[currPackage->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y - 1 * packageRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    selectedColor, textColor);
                 currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
+                if(currPackage->isInstalled()) {
+                    if(currPackage->getVersion()>currPackage->getCurrVer()) {
+                        printStr = "Update Available ";
+                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
+                                            updateTextColor, updateTextColor);
+                    } else {
+                        printStr = "Installed";
+                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
+                                            selectedColor, textColor);
+                    }
+                }
+                printStr = "Size: ";
+                printStr+= currPackage->getPkgSizeMB();
+                printStr += "MB";
+                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                    packageRectangle.y + 3 * packageRectangle.height / 8,
+                                    selectedColor, textColor);
             }
         }
     }
@@ -128,17 +153,36 @@ void packageSearch::updateView() {
             mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                 selectedColor, selectedColor);
             printStr = "Version: ";
-            printStr += currPackage->getVersion();
-            printStr += " From Repository: ";
-            printStr += currPackage->getRepo()->getName();
+            printStr += currPackage->getVersionStr();
+            printStr += " | ";
+            printStr += currPackage->getTitleID();
+            printStr += " | ";
+            printStr += currPackage->getRepoName();
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
-                                selectedColor, textColor);
+                                selectedColor, selectedColor);
             printStr = "Type: ";
             printStr += TypeStr[currPackage->getPackageType()];
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                 packageRectangle.y - 1 * packageRectangle.height / 8,
                                 selectedColor, selectedColor);
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
+            if(currPackage->isInstalled()) {
+                if(currPackage->getVersion()>currPackage->getCurrVer()) {
+                    printStr = "Update Available ";
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
+                                        updateTextColor, updateTextColor);
+                } else {
+                    printStr = "Installed";
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
+                                        selectedColor, selectedColor);
+                }
+            }
+            printStr = "Size: ";
+            printStr+= currPackage->getPkgSizeMB();
+            printStr += "MB";
+            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                packageRectangle.y + 3 * packageRectangle.height / 8,
+                                selectedColor, selectedColor);
         } else {
             mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);

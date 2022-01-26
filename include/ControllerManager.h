@@ -5,11 +5,14 @@
 #ifndef CYDI4_CONTROLLERMANAGER_H
 #define CYDI4_CONTROLLERMANAGER_H
 
-#include "utils/controller.h"
-#include "view/subView.h"
 #include "view/tabView.h"
 #include "base.h"
 #include <mutex>
+
+class drwav_int16;
+class Controller;
+class subView;
+class tabView;
 
 class ControllerManager {
 private:
@@ -25,6 +28,20 @@ private:
     bool CircleWasPressed{};
     bool triangleWasPressed{};
     bool squareWasPressed{};
+
+    //Audio Files
+    drwav_int16  * tabChangeWav;
+    size_t tabChangeWavCount;
+
+    drwav_int16  * pressXWav;
+    size_t pressXWavCount;
+
+    drwav_int16  * escapeWav;
+    size_t escapeWavCount;
+
+    drwav_int16  * arrowWav;
+    size_t arrowWavCount;
+
 
     static bool controllerActive;
 

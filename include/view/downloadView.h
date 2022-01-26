@@ -8,13 +8,15 @@
 #endif
 
 #include "subView.h"
-#include "../repository/repository.h"
-#include "../../_common/graphics.h"
-#include "../../include/view/keyboardInput.h"
-#include "../../include/file/download.h"
+#include "../utils/AppGraphics.h"
 
 #include <vector>
 #include <yaml-cpp/yaml.h>
+
+class PNG;
+class download;
+class drwav_int16;
+
 class downloadView : public subView {
     enum SelectedOption {
         INSTALL, UNINSTALL, REMOVE
@@ -41,7 +43,14 @@ private:
     PNG * deleteIcon;
     PNG * deleteIconSelected;
     int deleteIconX;
+
+    PNG * pauseIcon;
+    PNG * pauseIconSelected;
+
     int deleteDownload(download * dld);
+
+    drwav_int16  * deleteWav;
+    size_t deleteWavCount;
 
     int repoIconX;
     const static int downloadsPerPage = 5;
@@ -71,6 +80,7 @@ private:
     const int viewWidth = 0;
     const int viewHeight = 0;
     void fillPage();
+    int loadDownloadList();
 public:
     static downloadView *downloadManager;
     downloadView(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight);
@@ -87,7 +97,6 @@ public:
     void deleteChild();
     subView * getParent();
     subView * getChild();
-    void setFinished(download * newDownload);
     bool isActive();
     ~downloadView();
 };

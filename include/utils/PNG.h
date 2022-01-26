@@ -4,8 +4,8 @@
 
 #ifndef CYDI4_PNG_H
 #define CYDI4_PNG_H
-#include "../../_common/graphics.h"
 #include <string>
+class Scene2D;
 class PNG {
 
     int width;
@@ -14,8 +14,11 @@ class PNG {
     unsigned char *img;
     std::string path;
 public:
+    PNG(PNG * png);
     PNG(const char *imagePath);
+    PNG(const uint8_t *imageData, uint32_t dataLen);
     PNG(const char *imagePath, int width, int height);
+    PNG(const uint8_t *imageData, uint32_t dataLen, int width, int height);
     int getWidth() const;
     int getHeight() const;
     std::string getPath();

@@ -12,17 +12,16 @@
 #define SSL_HEAP_SIZE (128 * 1024)
 #define NET_HEAP_SIZE   (1 * 1024 * 1024)
 
-//Common Headers
-#include "../_common/graphics.h"
-#include "../_common/log.h"
-#include "../_common/notifi.h"
-
 //Include Headers
 #include "../include/utils/utils.h"
 #include "../include/file/fileManager.h"
 #include "../include/file/fileDownloadRequest.h"
 #include "../include/view/mainView.h"
 #include "../include/utils/logger.h"
+#include "../include/utils/Updater.h"
+#include "../include/utils/dialog.h"
+#include "../include/utils/notifi.h"
+#include "../include/utils/AudioManager.h"
 
 //Load Orbis dependencies
 #include <orbis/Sysmodule.h>
@@ -37,6 +36,7 @@
 #include <orbis/CommonDialog.h>
 #include <orbis/MsgDialog.h>
 
+
 std::stringstream debugLogStream;
 
 int initializeApp();
@@ -47,7 +47,7 @@ int networkInit();
 int mkDirs();
 std::string unique_log_name();
 int openLogger();
-
+int checkForUpdate();
 
 void exitApp();
 void stopProcesses();
@@ -69,9 +69,18 @@ int main() {
     mainView mainView(isFirstRun);
     LOG << "Initialized Main view" << "\n";
 
-    // Draw loop
-    for (;;) {
-        mainView.updateView();
+    LOG << "Checking for Update";
+    checkForUpdate();
+    LOG << "Initialized APP!";
+    sceSystemServiceHideSplashScreen();
+
+    try {
+        // Draw loop
+        for (;;) {
+            mainView.updateView();
+        }
+    } catch(const std::exception& exception){
+        LOG << "FATAL ERROR:\n" << exception.what();
     }
 
     return 0;
@@ -97,29 +106,61 @@ int initializeApp() {
     int ret;
     jailbreak();
 
-    if(!is_jailbroken())
+    if(!is_jailbroken()) {
+        notifi(NULL,"ERROR: COULD NOT GAIN PERMISSIONS");
         return -1;
+    }
+
+    if(seteuid(0)) {
+        notifi(NULL,"ERROR: Unable to acquire root permissions");
+        return -1;
+    }
 
     ret = mkDirs();
-    if(ret<0)
+    if(ret<0) {
         return -1;
+    }
 
-    if(openLogger() < 0)
+    if(openLogger() < 0) {
+        notifi(NULL,"ERROR: COULD NOT START LOGGER");
         return -1;
+    }
 
-    if(loadModules()< 0)
+    LOG << "Started Logger";
+
+    if(loadModules()< 0) {
+        LOG << "ERROR: COULD NOT LOAD MODULES";
         return -1;
+    }
     LOG << "Loaded Modules" << "\n";
 
-    if(startProcesses()< 0)
+    if(startProcesses()< 0) {
+        LOG << "ERROR: COULD NOT START PROCESSES";
         return -1;
+    }
     LOG << "Started Processes" << "\n";
 
     srand (time(NULL));
     LOG << "Set srand" << "\n";
 
+    if(AudioManager::initAudioManager() <0)
+        LOG << "Could not initialize Audio Manager";
     return ret;
 }
+
+int checkForUpdate(){
+    int ret = Updater::checkForUpdate();
+    if(ret == -2)
+        popDialog("Failed to load Update file");
+    else if(ret == -3)
+        popDialog("Failed to install update");
+    else if(ret == -4) {
+        popDialog("Failed to uninstall old app version.\nPlease uninstall it manually");
+        sceSystemServiceLoadExec("exit",NULL);
+    }
+    return 0;
+}
+
 int loadModules() {
     if(sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SYSTEM_SERVICE)<0)
         return -1;
@@ -138,9 +179,10 @@ int loadModules() {
     if(sceSysmoduleLoadModule(ORBIS_SYSMODULE_MESSAGE_DIALOG) < 0)
         return -1;
     if(sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL))
-        return -1;
+       return -1;
     return 0;
 }
+
 int startProcesses() {
     if(sceAppInstUtilInitialize())
         return -1;
@@ -154,6 +196,7 @@ int startProcesses() {
     sceMsgDialogInitialize();
     return 0;
 }
+
 int bgftInit(){
     OrbisBgftInitParams bgftInitParams;
     memset(&bgftInitParams, 0, sizeof(bgftInitParams));
@@ -174,6 +217,7 @@ int bgftInit(){
     return 0;
 
 }
+
 int networkInit() {
     int ret = sceNetCtlInit();
     if (ret) {
@@ -195,21 +239,22 @@ int networkInit() {
     }
     LOG << "Created Network Pool";
 
-    /*int libSslId = sceSslInit(SSL_HEAP_SIZE);
+    int libSslId = sceSslInit(SSL_HEAP_SIZE);
     if(libSslId < 0) {
         LOG << "Ssl Initialization Failed;";
         return libSslId;
     }
-    LOG << "Initialized Ssl at " << libSslId;*/
+    LOG << "Initialized Ssl at " << libSslId;
 
-    int libhttpCtxId = sceHttpInit(libNetMemId, 0, HTTP_HEAP_SIZE);
+    int libhttpCtxId = sceHttpInit(libNetMemId, libSslId, HTTP_HEAP_SIZE);
     if(libhttpCtxId<0){
         LOG << "Http Initialization Failed";
         return libhttpCtxId;
     }
 
-    LOG << "Initialized HTTP";
     fileDownloadRequest::setLibhttpCtxId(libhttpCtxId);
+    LOG << "Initialized HTTP";
+
     return 0;
 }
 int openLogger() {
@@ -219,23 +264,36 @@ int openLogger() {
     return logger::init(logPath.c_str());
 }
 int mkDirs(){
-    int ret = 0;
+    int ret = 0, tempRet;
     std::string repoPath = STORED_PATH;
     repoPath+=REPO_PATH;
 
     std::string logsPath = STORED_PATH;
     logsPath+=LOGS_PATH;
+
+    std::stringstream errorCode;
+    errorCode << "Could Not Make Dirs\nErrorCode: ";
+
     if(!folderExists(repoPath.c_str())) {
         ret = 1;
-        if (mkDir(repoPath.c_str()) != 0)
-            return -1;
+        tempRet = mkDir(repoPath.c_str());
+        if (tempRet != 0) {
+            ret = -1;
+            errorCode << std::hex << ret;
+            notifi(NULL,errorCode.str().c_str());
+            goto err;
+        }
     }
     if(!folderExists(logsPath.c_str())) {
-        if (mkDir(logsPath.c_str()) != 0)
-            return -1;
-        if(ret == 1)
-            ret = 1;
+        tempRet = mkDir(logsPath.c_str());
+        if (tempRet != 0) {
+            ret = -1;
+            errorCode << std::hex << ret;
+            notifi(NULL,errorCode.str().c_str());
+            goto err;
+        }
     }
+    err:
     return ret;
 }
 
@@ -250,6 +308,7 @@ void stopProcesses() {
     sceBgftServiceIntTerm();
     sceUserServiceTerminate();
     networkShutDown();
+    AudioManager::mainAudioManager->termAudioManager();
 }
 void networkShutDown() {
     sceHttpTerm(fileDownloadRequest::getLibhttpCtxId());

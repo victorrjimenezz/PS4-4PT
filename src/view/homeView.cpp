@@ -1,31 +1,32 @@
 //
 // Created by Víctor Jiménez Rugama on 12/24/21.
 //
-#include "../../_common/notifi.h"
 
 #include "../../include/view/homeView.h"
 #include "../../include/view/downloadView.h"
-#include "../../include/base.h"
-#include "../../include/repository/repoFetcher.h"
+#include "../../include/view/keyboardInput.h"
 #include "../../include/utils/logger.h"
+#include "../../include/utils/notifi.h"
 #include "../../include/utils/dialog.h"
-#include "../../include/ControllerManager.h"
-#include "../../include/view/repoPackageList.h"
+#include "../../include/file/fileDownloadRequest.h"
+#include "../../include/file/download.h"
+#include "../../include/utils/PNG.h"
 
 #include <iterator>
+#include <orbis/UserService.h>
 
 homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : frameWidth(frameWidth),frameHeight(frameHeight){
     this->mainScene = mainScene;
 
     bgColor = {255,255,255};
-    textColor = {180, 180, 180};
+    textColor = {0, 0, 0};
 
     this->fontLarge = fontLarge;
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
     keyboardX = HOMEVIEW_KEYBOARD_X*frameWidth;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,"DOWNLOAD", "http://",true);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,"DOWNLOAD", "https://",true);
 
     logoWidth = HOMEVIEW_LOGO_WIDTH*frameWidth;
     logoX = HOMEVIEW_LOGO_X*frameWidth-logoWidth/2;
@@ -44,6 +45,7 @@ homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, F
     welcomeText = "Welcome " + username + " to 4PT\n Version: " + out.str();
     welcomeSubText = "Developed by @victorrjimenezz";
     pkgLink = "PKG Direct Download:";
+
 }
 
 void homeView::updateView() {
@@ -58,14 +60,19 @@ void homeView::updateView() {
 void homeView::hasEntered() {
     std::string inputText = keyboardInput->readText();
 
-    if(strcasecmp(inputText.substr(0,8).c_str(),"https://") == 0) {
-        popDialog("SSL (HTTPS) NOT SUPPORTED YET");
-        return;
-    } else if(strcasecmp(inputText.substr(0,7).c_str(),"http://") != 0) {
+    if(!fileDownloadRequest::verifyURL(inputText.c_str())) {
         popDialog("INVALID URL");
         return;
     }
-    download * download = new class download(inputText.c_str());
+
+    bool initFailed;
+
+
+    auto * download = new class download(inputText.c_str(),&initFailed);
+    if(initFailed) {
+        notifi(NULL,std::string("COULD NOT DOWNLOAD PKG FROM\n"+inputText).c_str());
+        return;
+    }
     downloadView::downloadManager->addDownload( download);
 }
 void homeView::pressX(){

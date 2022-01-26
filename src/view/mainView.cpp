@@ -2,11 +2,12 @@
 // Created by Víctor Jiménez Rugama on 12/24/21.
 //
 #include "../../include/view/mainView.h"
-#include "../../_common/graphics.h"
+#include "../../include/utils/AppGraphics.h"
 #include "../../include/view/repositoryView.h"
 #include "../../include/view/homeView.h"
 #include "../../include/view/downloadView.h"
 #include "../../include/utils/logger.h"
+#include "../../include/ControllerManager.h"
 #include "../../include/view/packageSearch.h"
 #include <proto-include.h>
 #include <thread>
@@ -98,9 +99,13 @@ mainView::mainView(bool isFirstRun) : subViews()  {
 
     LOG << "Settings subViews" << "\n";
     subViews[0] = new homeView(mainScene,fontMediumLarge,fontMedium,fontSmall,frameWidth,frameHeight);
+    LOG << "Initialized homeView" << "\n";
     subViews[1] = new repositoryView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight,isFirstRun);
+    LOG << "Initialized repositoryView" << "\n";
     subViews[2] = new downloadView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
+    LOG << "Initialized downloadView" << "\n";
     subViews[3] = new packageSearch(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
+    LOG << "Initialized packageSearch" << "\n";
 
     LOG << "Initializing ControllerManager" << "\n";
     controllerManager = new ControllerManager(tabView,subViews);

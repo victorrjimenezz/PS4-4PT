@@ -2,56 +2,190 @@
 // Created by Víctor Jiménez Rugama on 12/29/21.
 //
 #include "../../include/repository/package.h"
-#include "../../include/utils/logger.h"
 #include "../../include/file/fileManager.h"
+#include "../../include/file/fileDownloadRequest.h"
+#include "../../include/repository/PKGInfo.h"
+#include "../../include/utils/logger.h"
+#include "../../include/utils/PNG.h"
+#include "../../include/utils/notifi.h"
 
-package::package(const char*name, const char*path, const char* packageType, const char*version, const char * iconPath, repository * repository){
-    this->name = name;
-    this->path = path;
-    this->iconPath = iconPath;
-    this->icon = new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
-    this->packageType = getPackageType(packageType);
-    this->version = version;
-    this->repo = repository;
+#include <sstream>
+#include <orbis/AppInstUtil.h>
+#include <orbis/bgft.h>
+
+package::package(const char*url, bool local, bool * failed, const char * type, const char * repositoryName){
+    std::ostringstream stringStream;
+    stringStream.precision(2);
+    PKGInfo pkgInfo(url,local);
+    this->icon = pkgInfo.getIconCopy();
+    this->url = url;
+    const char * fileExt;
+    if(this->url.find_last_of('.') == std::string::npos) {
+        LOG << "Invalid PKG at " << url;
+        goto err;
+    }
+    fileExt = this->url.substr(this->url.find_last_of('.')).c_str();
+    if(this->url.size()<4 || strcasecmp(fileExt, ".pkg") != 0 || strcasecmp(pkgInfo.getTitle(),"") == 0 || strcasecmp(pkgInfo.getTitleID(),"") == 0 || pkgInfo.getVersion()==-1 || this->icon == nullptr) {
+        LOG << "Invalid PKG at " << url;
+        goto err;
+    }
+    this->TITLE_ID = pkgInfo.getTitleID();
+    this->name = pkgInfo.getTitle();
+    this->packageType = getPackageType(type);
+    this->version = pkgInfo.getVersion();
+    this->repoName = repositoryName;
+    this->packageSizeBytes = pkgInfo.getPkgSize();
+
+    stringStream << std::fixed << packageSizeBytes/ONE_MB;
+    this->packageSizeMB = stringStream.str();
+    stringStream.str(std::string());
+    this->currentInstalledVersion = -1;
+
+    if(isInstalled()){
+        PKGInfo pkgInfoInstalled((INSTALL_PATH+std::string(TITLE_ID)+"/app.pkg").c_str(),true);
+        this->currentInstalledVersion = pkgInfoInstalled.getVersion();
+    }
+
+    stringStream << std::fixed << version;
+    this->versionString = stringStream.str();
+
+    pkgSFOType = "";
+    if(strcasecmp(pkgInfo.getType(),"gc") == 0)
+        pkgSFOType = "Game Content";
+    else if(strcasecmp(pkgInfo.getType(),"gpc") == 0 || strcasecmp(pkgInfo.getType(),"gpd") == 0)
+        pkgSFOType = "Patch";
+
+    *failed = false;
+    return;
+    err:
+    delete icon;
+    *failed = true;
 }
 
+double package::getCurrentInstalledVersion() const{
+    if(!isInstalled())
+        return version;
+    return currentInstalledVersion;
+}
 
 package::PKGTypeENUM package::getPackageType(const char *packageType) {
     PKGTypeENUM pkgType = MISC;
-    for (int i = GAME; i != MISC; i++ )
+    for(int i = 0; i < PKG_TYPE_AMOUNT;i++)
         if(strcasecmp(TypeStr[i],packageType) == 0)
             pkgType = static_cast<PKGTypeENUM>(i);
     return pkgType;
+}
+
+bool package::isInstalled() const{
+    return fileExists((INSTALL_PATH+std::string(TITLE_ID)).c_str());
+}
+
+int package::unInstall() {
+    if(sceAppInstUtilAppUnInstall(TITLE_ID.c_str()) != 0)
+        return -1;
+    return 0;
+}
+
+int package::install(const char * path) {
+    int  ret;
+    int  task_id = -1;
+    char buffer[255];
+    const char * titleID = TITLE_ID.c_str();
+    const char * installPath;
+    if(strcasecmp(path,"") == 0)
+        installPath = url.c_str();
+    else
+        installPath = path;
+
+    snprintf(buffer, 254, "%s via 4PT", titleID);
+    OrbisBgftDownloadParamEx download_params;
+    memset(&download_params, 0, sizeof(download_params));
+    download_params.params.entitlementType = 5;
+    download_params.params.id = titleID;
+    download_params.params.contentUrl = installPath;
+    download_params.params.contentName = buffer;
+    download_params.params.playgoScenarioId = "0";
+    download_params.params.option = ORBIS_BGFT_TASK_OPT_DELETE_AFTER_UPLOAD;
+    download_params.slot = 0;
+
+
+    retry:
+    ret = sceBgftServiceIntDownloadRegisterTaskByStorageEx(&download_params, &task_id);
+
+    if(ret == ORBIS_APPINSTUTIL_APP_ALREADY_INSTALLED) {
+        ret = unInstall();
+        if(ret != 0){
+            LOG << "Error on sceAppInstUtilAppUnInstall";
+            goto err;
+        }
+
+        goto retry;
+    } else if(ret){
+        LOG << "Error on sceBgftServiceIntDownloadRegisterTaskByStorageEx";
+        goto err;
+    }
+
+    ret = sceBgftServiceDownloadStartTask(task_id);
+    if(ret){
+        LOG << "Error on sceBgftDownloadStartTask";
+        goto err;
+    }
+
+    return 0;
+
+    err:
+    std::string message = "Error when installing app";
+    message+=name;
+    notifi(NULL,message.c_str());
+    return -1;
+
 }
 
 package::PKGTypeENUM package::getPackageType(){
     return packageType;
 }
 package::~package(){
-    removeFile(icon->getPath().c_str());
     delete icon;
-}
-
-repository *package::getRepo() {
-    return this->repo;
 }
 
 const char *package::getName() {
     return this->name.c_str();
 }
 
-const char * package::getVersion() {
-    return this->version.c_str();
+const char *package::getURL() {
+    return this->url.c_str();
 }
 
-const char * package::getIconPath() {
-    return this->iconPath.c_str();
-}
-
-const char *package::getPath() {
-    return this->path.c_str();
+double package::getVersion() const {
+    return this->version;
 }
 
 PNG *package::getIcon() {
     return icon;
+}
+
+const char *package::getTitleID() {
+    return TITLE_ID.c_str();
+}
+const char * package::getVersionStr(){
+    return versionString.c_str();
+}
+
+double package::getCurrVer() {
+    return currentInstalledVersion;
+}
+uint64_t package::getPkgSize() {
+    return packageSizeBytes;
+}
+
+const char * package::getPkgSizeMB() {
+    return packageSizeMB.c_str();
+}
+
+const char *package::getRepoName() {
+    return repoName.c_str();
+}
+
+const char *package::getSFOType() {
+    return pkgSFOType.c_str();
 }

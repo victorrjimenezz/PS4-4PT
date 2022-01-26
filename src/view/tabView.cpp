@@ -3,7 +3,8 @@
 //
 #include "../../include/view/tabView.h"
 #include "../../include/base.h"
-#include "../../include/utils/logger.h"
+#include "../../include/utils/PNG.h"
+
 #include <string>
 
 tabView::tabView(Scene2D *scene, int frameWidth, int frameHeight) : tabRectange(), tabColor(), tabSelected(), searchPos() {

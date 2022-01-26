@@ -3,9 +3,9 @@
 //
 #ifndef CYDI4_ANIMATEDPNG_H
 #define CYDI4_ANIMATEDPNG_H
-#include "../../_common/graphics.h"
-#include "../utils/PNG.h"
+#include "AppGraphics.h"
 #include <vector>
+class PNG;
 class AnimatedPNG {
 private:
     std::vector<PNG*> frames;

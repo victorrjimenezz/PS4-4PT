@@ -9,12 +9,13 @@
 #endif
 
 #include "subView.h"
-#include "../repository/repository.h"
-#include "../../_common/graphics.h"
-#include "../../include/view/keyboardInput.h"
+#include "../utils/AppGraphics.h"
 
 #include <vector>
 #include <unordered_map>
+class package;
+class repository;
+class keyboardInput;
 class packageSearch : public subView {
     struct packageRectangle {
         int x;
@@ -38,6 +39,7 @@ private:
     packageRectangle packageRectangles[packagesPerPage];
     Color bgColor{};
     Color textColor{};
+    Color updateTextColor{};
     Color selectedColor{};
     FT_Face fontLarge{};
     FT_Face fontMedium{};

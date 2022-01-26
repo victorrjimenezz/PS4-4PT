@@ -6,12 +6,14 @@
 #define CYDI4_FILEDOWNLOADREQUEST_H
 #include <atomic>
 #include <string>
+#include <regex>
 
 class download;
 class fileDownloadRequest {
 private:
     static int libhttpCtxId;
-    const char *eoh = "\r\n\r\n";
+    static const char *eoh;
+    static std::regex getUrlRegex();
 
     std::string sourceURL;
     std::string destinationPath;
@@ -26,25 +28,30 @@ private:
     bool failed;
     bool downloading;
     bool finished;
-    bool canceled;
+    bool paused;
 
 
     int parseFileSize();
     int downloadLoop();
     int downloadError(const char * message);
     int downloadError(const char * message, int statusCode);
+    static int skipSslCallback(int libsslId, unsigned int verifyErr, void * const sslCert[], int certNum, void *userArg);
+    int initRequest();
+    int termRequest();
 
 public:
-    fileDownloadRequest(const char * sourceURL, const char * destinationPath);
+    fileDownloadRequest(const char * sourceURL, const char * destinationPath, uint64_t startByte = 0, uint64_t fileSize = 0);
+    int static downloadBytes(const char * url, uint8_t * data, uint64_t startByte, uint64_t endByte);
+    bool static verifyURL(const char * url);
+
     static void setLibhttpCtxId(int libhttpCtxId);
     static int getLibhttpCtxId();
     double getDownloadedPercent();
     double getDownloadedInMb() const;
     double getTotalSizeInMb() const;
-    int initDownload();
-    int initDownload(download * download);
+    int initDownload(download * download = nullptr);
     bool hasFailed() const;
-    void cancelDownload();
+    void pauseDownload();
     bool isDownloading() const;
     bool hasFinished() const;
 

@@ -7,7 +7,7 @@
 #endif
 
 #include <string>
-#include "../../_common/graphics.h"
+#include "../../include/utils/AppGraphics.h"
 #include "../../include/view/keyboardInput.h"
 #include "../../include/base.h"
 
@@ -26,7 +26,7 @@ keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, in
     this->borderColor = {180,180,180};
     this->bgColor = {255,255,255};
     this->textColor = {0,0,0};
-    this->selectedTextColor = {90,90,90};
+    this->selectedTextColor = {120,120,120};
 
 
     this->containerX = x;

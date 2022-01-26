@@ -9,8 +9,10 @@
 #define GRAPHICS_USES_FONT 1
 #endif
 
-#include "../../_common/graphics.h"
+#include "../utils/AppGraphics.h"
 #include "../base.h"
+
+#include <string>
 
 class keyboardInput {
 private:

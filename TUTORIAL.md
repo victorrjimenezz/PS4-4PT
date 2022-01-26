@@ -32,6 +32,8 @@
     <li>
         <a href="#dl">Downloads List</a>
       <ul>
+        <li><a href="#rd">Pause Download</a></li>
+        <li><a href="#pd">Resume Download</a></li>
         <li><a href="#id">Install Download</a></li>
         <li><a href="#ud">Uninstall Download</a></li>
         <li><a href="#rd">Remove Download</a></li>
@@ -75,8 +77,8 @@ The list of tabs is:
 
 <img src="screenshots/screenshot5.png" width="100%"  alt=""/>
 
-To add a repository, go to the repository tab (2nd one) and </br>
-open the keyboard, type the URL and press Add Repo.
+To add a repository:
+</br>go to the repository tab (2nd one), open the keyboard, type the URL and press Add Repo.
 
 ***
 
@@ -84,7 +86,22 @@ open the keyboard, type the URL and press Add Repo.
 
 ## Downloads list
 
-<img src="screenshots/screenshot6.png" width="100%"  alt=""/>
+<img src="screenshots/screenshot3.png" width="100%"  alt=""/>
+
+<div id="pd"></div>
+
+### Pause Download
+
+To pause a download, select it from the downloads list using the up/down arrows, select the pause option by using the right/left arrows,
+and press X.
+
+<div id="rd"></div>
+
+### Resume Download
+
+To resume a download, select it from the downloads list using the up/down arrows, select the resume option by using the right/left arrows,
+and press X.
+
 
 <div id="id"></div>
 
@@ -119,6 +136,8 @@ To remove a download (from the app and the disk), select it from the downloads l
 To retry a failed download, select it from the downloads list using the up/down arrows, select the download option by 
 using the right/left arrows, and press X.
 
+***(NOTE: IF THE APP HAD BEEN PARTIALLY DOWNLOADED, THIS WILL RESUME WHERE IT WAS LEFT OFF)***
+
 ***
 
 <div id="srch"></div>
@@ -129,7 +148,7 @@ using the right/left arrows, and press X.
 
 ### General Search
 
-<img src="screenshots/screenshot4.png" width="100%"  alt=""/>
+<img src="screenshots/screenshot41.png" width="100%"  alt=""/>
 
 To search a package by its name, from all loaded repositories,
 go to the search tab (rightmost one) and type the package name on the keyboard.
@@ -138,8 +157,8 @@ go to the search tab (rightmost one) and type the package name on the keyboard.
 
 ### Filter-by-repository Search
 
-<img src="screenshots/screenshot7.png" width="100%"  alt=""/>
-
+<!-- <img src="screenshots/screenshot7.png" width="100%"  alt=""/>
+-->
 To search a package by its name from a specific repository,
 go to the repository tab (2nd one) select the repository from which to filter
 and, once in the repository package list, open the keyboard and search the package.

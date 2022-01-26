@@ -1,18 +1,19 @@
 //
 // Created by Víctor Jiménez Rugama on 12/24/21.
 //
-#include "../../_common/notifi.h"
 
 #include "../../include/view/downloadView.h"
 #include "../../include/base.h"
 #include "../../include/ControllerManager.h"
 #include "../../include/utils/logger.h"
-#include "../../include/utils/dialog.h"
+#include "../../include/utils/notifi.h"
+#include "../../include/utils/PNG.h"
+#include "../../include/utils/utils.h"
 #include "../../include/file/fileManager.h"
-#include "../../include/repository/package.h"
-#include "../../include/repository/repoFetcher.h"
+#include "../../include/file/download.h"
+#include "../../include/file/fileDownloadRequest.h"
+#include "../../include/utils/AudioManager.h"
 
-#include <sstream>
 #include <string>
 #include <thread>
 #include <ostream>
@@ -22,17 +23,13 @@ downloadView* downloadView::downloadManager;
 downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : downloadList(),currDownloads(), frameWidth(frameWidth), frameHeight(frameHeight), viewWidth(frameWidth), viewHeight(frameHeight * TOPVIEWSIZE) {
     this->mainScene = mainScene;
     downloadManager = this;
-    if(fileExists(DOWNLOADS_PATH))  {
-        downloadsYAML = YAML::LoadFile(DOWNLOADS_PATH);
-        loadDownloadList(&downloadList,downloadsYAML);
-    }
 
     rectangleBaseHeight = ((frameHeight-frameHeight*TABVIEWSIZE-viewHeight) / downloadsPerPage);
     rectangleDivisorHeight = (rectangleBaseHeight*RECTANGLEDIVISORHEIGHT);
 
     bgColor = {255,255,255};
     selectedColor = {0,0,0};
-    textColor = {180, 180, 180};
+    textColor = {90, 90, 90};
 
     this->fontLarge = fontLarge;
     this->fontMedium = fontMedium;
@@ -43,11 +40,12 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     currPage = 0;
     selected = 0;
 
+    loadDownloadList();
+
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
     this->repoIconX = static_cast<int>(REPO_ICON_POS*repoX);
     for(int i =0; i < downloadsPerPage; i++)
         downloadRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight,viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2 -1 * rectangleBaseHeight / 16} ;
-    downloadView::fillPage();
 
     this->downloadDateX=repoX+ (downloadRectangles[0].width - repoX) * DOWNLOAD_DATE_POS;
     this->packageTypeX=repoX+ (downloadRectangles[0].width - repoX) * PACKAGE_TYPE_POS;
@@ -67,6 +65,9 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     this->uninstallIcon= new PNG((iconPath+"uninstall.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
     this->uninstallIconSelected= new PNG((iconPath+"uninstallSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
 
+    this->pauseIcon= new PNG((iconPath+"pause.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+    this->pauseIconSelected= new PNG((iconPath+"pauseSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
+
 
     this->deleteIconX=repoX+ (downloadRectangles[0].width - repoX) * DOWNLOAD_DELETE_ICON_POS;
     std::string deleteIconPath = DATA_PATH;
@@ -74,7 +75,13 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     this->deleteIcon= new PNG((deleteIconPath+"delete.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
     this->deleteIconSelected= new PNG((deleteIconPath+"deleteSelected.png").c_str(),DOWNLOAD_OPTION_ICON_WIDTH,DOWNLOAD_OPTION_ICON_HEIGHT);
 
+    //LOAD deleteWav
+    std::string audioPath = DATA_PATH;
+    audioPath+="assets/audio/delete.wav";
+    deleteWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &deleteWavCount);
+
     this->isUpdating = false;
+    this->fillPage();
 }
 
 void downloadView::fillPage() {
@@ -92,37 +99,100 @@ void downloadView::fillPage() {
     int installed = currDownloads[selected]->isInstalled();
     int finished = currDownloads[selected]->getRequest()->hasFinished();
     if((!installed && option == UNINSTALL )|| (!finished && option == INSTALL))
-        option = REMOVE;
+        option = INSTALL;
 }
+int downloadView::loadDownloadList(){
+    std::vector<std::string> downloadsLocations;
+    bool failedInit;
+    if(fileExists(DOWNLOADS_PATH))  {
+        try {
+            downloadsYAML = YAML::LoadFile(DOWNLOADS_PATH);
+            for(YAML::const_iterator it=downloadsYAML.begin(); it!=downloadsYAML.end(); ++it){
+                if(it->second){
+                    if((it->second).IsMap()) {
+                        const std::string &key = it->first.as<std::string>();
+                        if (strcasecmp(key.c_str(), "name") == 0 || strcasecmp(key.c_str(), "repoURL") == 0)
+                            continue;
+                        std::string id = key;
+
+                        YAML::Node attributes = it->second;
+                        if (!attributes["date"] || !attributes["path"] || !attributes["url"] || !attributes["repoName"] || !attributes["type"])
+                            continue;
+
+                        std::string date = attributes["date"].as<std::string>("");
+                        std::string path = attributes["path"].as<std::string>("");
+                        std::string url = attributes["url"].as<std::string>("");
+                        std::string repoName = attributes["repoName"].as<std::string>("");
+                        std::string type = attributes["type"].as<std::string>("");
+
+                        auto *dld = new download(id.c_str(), date.c_str(), path.c_str(),&failedInit, url.c_str(),type.c_str(),repoName.c_str());
+                        if (failedInit) {
+                            delete dld;
+                            continue;
+                        }
+                        if(!path.empty())
+                            downloadsLocations.emplace_back(path);
+                        downloadList.emplace_back(dld);
+                    }
+                }
+            }
+        } catch(const YAML::ParserException& ex) {
+            LOG << ex.what();
+            removeFile(DOWNLOADS_PATH);
+        }
+    }
+
+    for(const std::string& file : lsDir(INSTALL_PATH)) {
+        std::string filename = file.substr(0,file.find_last_of('.'));
+        std::string extension = file.substr(file.size() - 4);
+        if(file.find_last_of('.') == std::string::npos || strcasecmp(extension.c_str(),PKG_EXTENSION) != 0)
+            continue;
+        std::string path = INSTALL_PATH;
+        path+= file;
+        if (std::find(downloadsLocations.begin(), downloadsLocations.end(), path) != downloadsLocations.end())
+            continue;
+        auto *dld = new download(filename.c_str(), genDate().c_str(), path.c_str(), &failedInit);
+        if (failedInit || !dld->hasFinished()) {
+            delete dld;
+            removeFile(path.c_str());
+            continue;
+        }
+
+        downloadsYAML[dld->getID()];
+        downloadsYAML[dld->getID()]["date"] = dld->getDate();
+        downloadsYAML[dld->getID()]["path"] = dld->getPath();
+        downloadsYAML[dld->getID()]["url"] = dld->getURL();
+        downloadsYAML[dld->getID()]["repoName"] = dld->getRepoName();
+        downloadsYAML[dld->getID()]["type"] = TypeStr[dld->getPackageType()];
+        downloadList.emplace_back(dld);
+    }
+
+    std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
+    downloadsFile << downloadsYAML;
+    downloadsFile.flush();
+    downloadsFile.close();
+    return 0;
+}
+
 void downloadView::addDownload(download * newDownload) {
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
     std::thread(&download::initDownload,std::ref(*newDownload)).detach();
     std::string notification = newDownload->getName();
     notification += "\nAdded to downloads";
-    notifi(newDownload->getIconPath(),notification.c_str());
+    notifi(NULL,notification.c_str());
     downloadList.emplace_back(newDownload);
     downloadsYAML[newDownload->getID()];
     downloadsYAML[newDownload->getID()]["date"] = newDownload->getDate();
     downloadsYAML[newDownload->getID()]["path"] = newDownload->getPath();
     downloadsYAML[newDownload->getID()]["url"] = newDownload->getURL();
-    downloadsYAML[newDownload->getID()]["name"] = newDownload->getName();
-    downloadsYAML[newDownload->getID()]["version"] = newDownload->getVersion();
     downloadsYAML[newDownload->getID()]["repoName"] = newDownload->getRepoName();
     downloadsYAML[newDownload->getID()]["type"] = TypeStr[newDownload->getPackageType()];
-    downloadsYAML[newDownload->getID()]["iconPath"] = newDownload->getIconPath();
-    downloadsYAML[newDownload->getID()]["finished"] = newDownload->hasFinished();
     downloadsFile << downloadsYAML;
     downloadsFile.flush();
     downloadsFile.close();
     fillPage();
 }
-void downloadView::setFinished(download * newDownload) {
-    downloadsYAML[newDownload->getID()]["finished"] = true;
-    std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
-    downloadsFile << downloadsYAML;
-    downloadsFile.flush();
-    downloadsFile.close();
-}
+
 void downloadView::updateView() {
     this->isUpdating = true;
     std::string printStr;
@@ -138,20 +208,24 @@ void downloadView::updateView() {
             if(currDownload != nullptr){
                 printStringStream.str(std::string());
                 std::shared_ptr<fileDownloadRequest> downloadRequest = currDownload->getRequest();
-                if(currDownload->hasFailed())
+                if(currDownload->hasFailed()) {
                     printStringStream << "Has Failed";
-                else if(!currDownload->stored())
+                    printStringStream << "Downloaded " << downloadRequest->getDownloadedInMb();
+                    printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
+                } else if(!currDownload->stored())
                     printStringStream <<  "Pending Download...";
                 else if(currDownload->hasFinished() && !currDownload->isInstalled())
                     printStringStream << "Has finished";
                 else if(currDownload->hasFinished() && currDownload->isInstalled())
                     printStringStream << "Is installed";
-                else if(downloadRequest->isDownloading()){
+                else {
                     printStringStream << "Downloaded " << downloadRequest->getDownloadedInMb();
                     printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
                 }
                 currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y,
+                mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
+                                    selectedColor, textColor);
+                mainScene->DrawText((char *) currDownload->getTitleID(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
                                     selectedColor, textColor);
                 mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 3 * repoRectangle.height / 8,
                                     selectedColor, textColor);
@@ -168,7 +242,7 @@ void downloadView::updateView() {
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
                                     selectedColor, selectedColor);
                 printStr = "Version: ";
-                printStr+=currDownload->getVersion();
+                printStr+=currDownload->getVersionStr();
                 mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
                                     selectedColor, selectedColor);
             }
@@ -182,7 +256,9 @@ void downloadView::updateView() {
                                  rectangleDivisorHeight, selectedColor);
         mainScene->DrawRectangle(0, repoRectangle.y + repoRectangle.height / 2 - rectangleDivisorHeight / 2,
                                  repoRectangle.width, rectangleDivisorHeight, selectedColor);
-        mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y,
+        mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
+                            selectedColor, selectedColor);
+        mainScene->DrawText((char *) currDownload->getTitleID(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
                             selectedColor, selectedColor);
         printStr = "Type: ";
         printStr+=TypeStr[currDownload->getPackageType()];
@@ -197,7 +273,7 @@ void downloadView::updateView() {
         mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
                             selectedColor, selectedColor);
         printStr = "Version: ";
-        printStr+=currDownload->getVersion();
+        printStr+=currDownload->getVersionStr();
         mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
                             selectedColor, selectedColor);
 
@@ -206,21 +282,23 @@ void downloadView::updateView() {
         bool stored = currDownload->stored();
         bool finished = currDownload->hasFinished();
         bool downloading = downloadRequest->isDownloading();
-        if(currDownload->hasFailed())
+        if(currDownload->hasFailed()) {
             printStringStream << "Has Failed";
-        else if(!stored)
+            printStringStream << "Downloaded " << downloadRequest->getDownloadedInMb();
+            printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
+        }else if(!stored)
             printStringStream <<  "Pending Download... (X to retry)";
         else if(finished && !installed)
             printStringStream << "Has finished. (X to install)";
         else if(finished && installed)
             printStringStream << "Is installed";
-        else if(downloading){
+        else {
             printStringStream << "Downloaded " << downloadRequest->getDownloadedInMb();
             printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
         }
         mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x,
                             repoRectangle.y + 3 * repoRectangle.height / 8,
-                            selectedColor, textColor);
+                            selectedColor, selectedColor);
         currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
 
 
@@ -228,7 +306,9 @@ void downloadView::updateView() {
             case INSTALL:
                 if(finished)
                     installIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else if(!downloading)
+                else if(downloading)
+                    pauseIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                else
                     downloadIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
                 if(installed)
                     uninstallIcon->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
@@ -237,7 +317,9 @@ void downloadView::updateView() {
             case UNINSTALL:
                 if(finished)
                     installIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else if(!downloading)
+                else if(downloading)
+                    pauseIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                else
                     downloadIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
                 uninstallIconSelected->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
                 deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
@@ -246,7 +328,9 @@ void downloadView::updateView() {
             default:
                 if(finished)
                     installIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else if(!downloading)
+                else if(downloading)
+                    pauseIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
+                else
                     downloadIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
                 if(installed)
                     uninstallIcon->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
@@ -265,7 +349,9 @@ void downloadView::pressX(){
 
     switch(option) {
         case INSTALL:
-            if(currDownload->stored())
+            if(currDownload->getRequest()->isDownloading())
+                currDownload->getRequest()->pauseDownload();
+            else if(currDownload->hasFinished())
                 currDownload->install();
             else
                 std::thread(&download::initDownload,std::ref(*currDownload)).detach();
@@ -281,11 +367,6 @@ void downloadView::pressX(){
             deleteDownload(currDownload);
             break;
     }
-    /*if(deletedSelected) {
-    } else if(!currDownload->stored())
-        std::thread(&download::initDownload,std::ref(*currDownload)).detach();
-    else if (currDownload->stored() && currDownload->hasFinished())
-            currDownload->install();*/
 }
 
 int downloadView::deleteDownload(download * dld){
@@ -306,6 +387,7 @@ int downloadView::deleteDownload(download * dld){
         }
     }
     fillPage();
+    AudioManager::mainAudioManager->playAudio(deleteWav,deleteWavCount);
     return 0;
 }
 void downloadView::pressCircle(){
@@ -363,13 +445,13 @@ void downloadView::arrowLeft() {
     if(currDownloads[selected] == nullptr)
         return;
     int installed = currDownloads[selected]->isInstalled();
-    int downloading = currDownloads[selected]->getRequest()->isDownloading();
+    //int downloading = currDownloads[selected]->getRequest()->isDownloading();
 
     switch(option) {
         case REMOVE:
             if(installed)
                 option = UNINSTALL;
-            else if(!downloading)
+            else
                 option = INSTALL;
             break;
         case UNINSTALL:
@@ -394,6 +476,8 @@ downloadView::~downloadView() {
     delete downloadIconSelected;
     delete deleteIcon;
     delete deleteIconSelected;
+    delete pauseIcon;
+    delete pauseIconSelected;
 }
 void downloadView::deleteChild() {
     delete child;

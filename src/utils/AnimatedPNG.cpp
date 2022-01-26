@@ -2,6 +2,7 @@
 // Created by Víctor Jiménez Rugama on 1/5/22.
 //
 #include "../../include/utils/AnimatedPNG.h"
+#include "../../include/utils/PNG.h"
 #include "../../include/utils/logger.h"
 #include "../../include/file/fileManager.h"
 

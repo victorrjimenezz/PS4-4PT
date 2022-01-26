@@ -7,10 +7,12 @@
 
 #include <cstdlib>
 #include <string>
-#include "../utils/PNG.h"
+
+
 #include "../base.h"
 
 class repository;
+class PNG;
 
 static const char* TypeStr[PKG_TYPE_AMOUNT]={"GAME", "APP", "UPDATE", "THEME", "TOOL", "CHEAT", "MISC"};
 
@@ -21,23 +23,40 @@ public:
     };
 private:
     std::string name;
-    std::string path;
-    std::string iconPath;
-    repository * repo;
+    std::string repoName;
+    std::string url;
     PNG * icon;
     enum PKGTypeENUM packageType;
-    std::string version;
+    std::string TITLE_ID;
+    uint64_t packageSizeBytes;
+    std::string packageSizeMB;
+    double version;
+    std::string pkgSFOType;
+    std::string versionString;
+    double currInstalledVersion;
+    double currentInstalledVersion;
+    double getCurrentInstalledVersion() const;
+
 public:
     static PKGTypeENUM getPackageType(const char * packageType);
-    explicit package(const char*name, const char*path, const char* packageType, const char*version, const char * icon, repository * repository);
+
+    package(const char*url, bool local, bool * failed, const char * type = "", const char * repositoryName = "Direct Download");
     const char * getName();
+    const char * getVersionStr();
     PNG * getIcon();
-    repository * getRepo();
-    const char * getPath();
-    const char * getVersion();
-    const char * getIconPath();
+    const char * getTitleID();
+    const char * getRepoName();
+    const char * getURL();
+    const char * getSFOType();
+    double getVersion() const;
+    uint64_t getPkgSize();
+    const char * getPkgSizeMB();
     enum PKGTypeENUM getPackageType();
     ~package();
+    double getCurrVer();
+    int unInstall();
+    int install(const char * path = "");
+    bool isInstalled() const;
 };
 
 #endif //CYDI4_PACKAGE_H

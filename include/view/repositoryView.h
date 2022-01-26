@@ -8,13 +8,15 @@
 #endif
 
 #include "subView.h"
-#include "../repository/repository.h"
-#include "../../_common/graphics.h"
-#include "../../include/view/keyboardInput.h"
-#include "../utils/AnimatedPNG.h"
-#include "repoPackageList.h"
+#include "../utils/AppGraphics.h"
 
 #include <vector>
+class PNG;
+class AnimatedPNG;
+class repository;
+class drwav_int16;
+class repoPackageList;
+class keyboardInput;
 class repositoryView : public subView {
     enum SelectedOption {
         OPEN, UPDATE, DELETE
@@ -49,6 +51,10 @@ private:
     repository * currRepos[reposPerPage];
     void updateRepositories();
 
+    //Delete Sound
+    drwav_int16  * deleteWav;
+    size_t deleteWavCount;
+
     std::vector<repoPackageList*> repoPackageViewList;
     std::shared_ptr<std::vector<repository*>> repositoryList;
     repoRectangle repoRectangles[reposPerPage];
@@ -72,6 +78,7 @@ private:
     const int viewHeight = 0;
     void fillPage();
     void hasEntered();
+    int loadSavedRepos();
 public:
     static repositoryView * mainRepositoryView;
     repositoryView(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight, bool isFirstRun);

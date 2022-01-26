@@ -51,14 +51,6 @@
 
 ***
 
-#Important Disclaimers
-- SSL (https) has not been implemented yet, so make sure the repository
-allows for http:// connections.
-- This app has only been tested on System Version 9.00, I'd love to get feedback from users
-on older versions!
-
-***
-
 <div id="ata"></div>
 
 ## About The App
@@ -88,7 +80,8 @@ Furthermore, 4PT allows anyone to host their own repository and provide any apps
   <img src="screenshots/screenshot3.png" width="49%"  alt=""/>
 </p>
 <p float="left">
-  <img src="screenshots/screenshot4.png" width="100%"  alt=""/>
+  <img src="screenshots/screenshot4.png" width="49%"  alt=""/>
+  <img src="screenshots/screenshot41.png" width="49%"  alt=""/>
 </p>
 </details>
 
@@ -100,12 +93,12 @@ Furthermore, 4PT allows anyone to host their own repository and provide any apps
 
 The current working app features are:
 
-- Downloading PKGs from repositories
-- Downloading PKGs directly from a URL
-- Uninstall APPs
+- Downloading PKGs from repositories/directly from a URL
+- Ability to pause/resume a download
 - Adding Repositories
 - Searching apps, filtering by name and repository.
-- Install downloaded PKGs.
+- Install/Uninstall downloaded PKGs.
+- App updates itself automatically
 
 ***
 
@@ -125,23 +118,25 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
-### Short Term (~1.5 Months)
-- [ ] Add SSL Support
-- [ ] Improve Keyboard Keys
-- [ ] Add option to download binaries
-- [ ] Add Update/Version management
-- [ ] Add Short Description
-- [ ] Add Sound Effects
+### Most Urgent | Version 2.10 (few days)
+
+- [ ] Fix bug that causes the app not to be able to initialize for some users
+
+### Version 2.5 (~3 Months)
+
+- [ ] If the PKG has no icon, load one from the default icons
+- [ ] Add customization options, such as disabling notifications
+- [ ] Add a new PKG List view where only covers are displayed
+- [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
+- [ ] Add functionality to download binaries
+- [ ] Add title to Keyboard Input
+- [ ] Add PS4 Version Compatibility Information
 
 <div id="lt"></div>
 
-### Long Term (~1/2 Year)
-- [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
-- [ ] Improve Keyboard/Change by UI IME
-- [ ] Add PS4 Version Compatibility Information
-- [ ] Download Icon from PKG itself
-- [ ] Add Package Page with photos/videos
-- [ ] Clean .pkg From /user/app folder
+### Future versions (~1/2 Year)
+
+- [ ] Change Keyboard to UI IME
 - [ ] Multi-language Support
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
@@ -171,10 +166,13 @@ Víctor Jiménez - [@victorrjimenezz](https://twitter.com/victorrjimenezz) - [vi
 
 ## Acknowledgments
 
+I would like to thank [0x199](https://twitter.com/0x199) for helping me with the SSL issue.
+
 I would like to thank the following developers for the developing following projects, which I used to learn how to perform certain actions:
 
 * [Remote Package Installer](https://github.com/flatz/ps4_remote_pkg_installer) by [Flat_z](https://twitter.com/flat_z) </br>
 &ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP </br>
+&ensp;  &ensp;  &ensp; Learned how get icon and version from pkgs  </br>
  &ensp;  &ensp;  &ensp; Learned how to install PKGs
 * [PS4 Skeleton](https://github.com/Al-Azif/ps4-skeleton) by [Al Azif](https://twitter.com/_AlAzif) </br>
 &ensp;  &ensp;  &ensp; Used his jailbreaking tools to gain root privileges </br>
@@ -185,5 +183,7 @@ I would like to thank the following developers for the developing following proj
 &ensp;  &ensp;  &ensp; Learned how to install PKGs </br>
 * [tiny-ps4-shell](https://github.com/john-tornblom/tiny-ps4-shell) by [John Törnblom](https://github.com/john-tornblom) </br>
 &ensp;  &ensp;  &ensp; Used his method to copy files </br>
+* [OpenOrbis NET_HTTP Sample](https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/tree/master/samples/net_http) by [Damián Parrino](https://twitter.com/dparrino) </br>
+&ensp;  &ensp;  &ensp; Used his setSSLCallback method to enable SSL </br>
 
 And I would like to thank the whole OpenOrbis team for developing the awesome [PS4 Developer toolchain](https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain)!!

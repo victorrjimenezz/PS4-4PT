@@ -10,11 +10,10 @@
 #endif
 
 //Common Headers
-#include "../../_common/graphics.h"
-#include "../utils/PNG.h"
-#include "../../_common/notifi.h"
+#include "../utils/AppGraphics.h"
 #include "tabSelected.h"
 
+class PNG;
 class tabView {
     struct tabRectange{
         int x;

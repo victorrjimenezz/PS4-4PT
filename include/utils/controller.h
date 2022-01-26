@@ -1,7 +1,7 @@
-#include "orbis/Pad.h"
-#include "orbis/UserService.h"
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
+
+#include <orbis/Pad.h>
 
 class Controller
 {

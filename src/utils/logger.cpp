@@ -2,6 +2,7 @@
 // Created by Víctor Jiménez Rugama on 12/28/21.
 //
 #include "../../include/utils/logger.h"
+#include "../../include/utils/notifi.h"
 
 std::ofstream logger::logStream;
 logger::logger(const std::string &funcName) {
@@ -14,8 +15,10 @@ logger::logger(const std::string &funcName) {
 
 int logger::init(const char *PATH){
     logStream.open(PATH);
-    if(logStream.fail())
+    if(logStream.fail()) {
+        notifi(NULL,"LogStream Init failed!");
         return -1;
+    }
     LOG << "Initialized Logger.";
     return 0;
 }

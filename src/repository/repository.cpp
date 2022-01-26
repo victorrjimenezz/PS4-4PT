@@ -1,15 +1,21 @@
 //
 // Created by Víctor Jiménez Rugama on 12/24/21.
 //
-#include "../../_common/notifi.h"
 #include "../../include/utils/logger.h"
 #include "../../include/repository/repository.h"
-#include "../../include/repository/repoFetcher.h"
+#include "../../include/repository/package.h"
 #include "../../include/file/fileManager.h"
+#include "../../include/file/fileDownloadRequest.h"
+#include "../../include/utils/notifi.h"
+#include "../../include/utils/PNG.h"
+#include "../../include/utils/AnimatedPNG.h"
+#include "../../include/utils/utils.h"
 #include "../../include/view/packageSearch.h"
-#include "../../include/base.h"
+#include "../../include/repository/PKGInfo.h"
 
 #include <utility>
+#include <yaml-cpp/yaml.h>
+
 repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath) {
     this->name = std::string(name);
     this->icon = new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
@@ -17,11 +23,61 @@ repository::repository(const char * id, const char *name, const char *repoURL, c
     this->updated = true;
     packageList = new std::vector<std::shared_ptr<package>>;
 
-    loadPackages();
+    updatePKGS();
 }
+
 const char * repository::getID() {
     return this->id.c_str();
 }
+
+int repository::updatePKGS() {
+
+    std::string repoYMLPath = repoLocalPath + "repo.yml";
+
+    if(fileExists(repoYMLPath.c_str()) == 0){
+        LOG << "REPO DIRECTORY DOES NOT EXIST!" << repoYMLPath;
+        return -1;
+    }
+    this->clearPackageList();
+    std::string downloadURL;
+
+    bool failedInit;
+    YAML::Node repoYAML;
+    try {
+        repoYAML = YAML::LoadFile(repoYMLPath);
+    } catch(const YAML::ParserException& ex) {
+        LOG << ex.what();
+        return -1;
+    }
+    for(YAML::const_iterator it=repoYAML.begin(); it!=repoYAML.end(); ++it) {
+        if (it->second) {
+            if((it->second).IsMap()) {
+                const std::string &key = it->first.as<std::string>();
+                if (strcasecmp(key.c_str(), "name") == 0 || strcasecmp(key.c_str(), "repoURL") == 0)
+                    continue;
+
+                YAML::Node attributes = it->second;
+                if (!attributes["pkgPath"])
+                    continue;
+
+                if (attributes["pkgPath"].as<std::string>().find('.') == std::string::npos)
+                    continue;
+                std::string pkgPath = repoURL + attributes["pkgPath"].as<std::string>("");
+                std::string type = attributes["type"].as<std::string>("");
+                std::shared_ptr<package> pkg(
+                        new package(pkgPath.c_str(), false, &failedInit, type.c_str(), name.c_str()));
+                if (failedInit) {
+                    LOG << "FAILED TO FETCH " << pkgPath;
+                    pkg.reset();
+                    continue;
+                }
+                addPkg(pkg);
+            }
+        }
+    }
+    return 0;
+}
+
 PNG * repository::getIcon() {
     return this->icon;
 }
@@ -52,7 +108,13 @@ int repository::updateYML() {
         return -1;
     }
 
-    YAML::Node repoYAML  = YAML::LoadFile(localTEMPDownloadPath);
+    YAML::Node repoYAML;
+    try {
+        repoYAML  = YAML::LoadFile(localTEMPDownloadPath);
+    } catch(const YAML::ParserException& ex) {
+        LOG << ex.what();
+        return -1;
+    }
     if(!repoYAML || !repoYAML["name"]) {
         removeFile(localTEMPDownloadPath.c_str());
         return -1;
@@ -71,7 +133,13 @@ int repository::updateYML() {
 
 int repository::updateIcon() {
     std::string YMLPath = repoLocalPath+"repo.yml";
-    YAML::Node repoYAML = YAML::LoadFile(YMLPath);
+    YAML::Node repoYAML;
+    try {
+        repoYAML = YAML::LoadFile(YMLPath);
+    } catch(const YAML::ParserException& ex) {
+        LOG << ex.what();
+        return -1;
+    }
     if(!repoYAML)
         return -1;
 
@@ -108,7 +176,7 @@ int repository::updateRepository(AnimatedPNG * updateIconPNG) {
         updateIconPNG->play();
     updateYML();
     updateIcon();
-    int packages = loadPackagesFromRepo(this);
+    int packages = updatePKGS();
     if(updateIconPNG != nullptr)
         updateIconPNG->stop();
     updating = false;
@@ -131,10 +199,6 @@ void repository::clearPackageList() {
     packageList->clear();
 }
 
-int repository::loadPackages() {
-    return loadPackagesFromRepo(this);
-}
-
 void repository::deleteRepository() {
     while(updating)
         continue;
@@ -152,5 +216,87 @@ repository::~repository() {
 
 bool repository::isUpdating() const {
     return updating;
+}
+
+repository *repository::fetchRepo(const char *repoURL) {
+        repository * repo = nullptr;
+
+        std::string repoURLStr = repoURL;
+        if(repoURLStr.back() != '/')
+            repoURLStr+= '/';
+
+        std::string localRepositoryFolder(STORED_PATH);
+        localRepositoryFolder += REPO_PATH;
+
+        std::string repoID = genRandom(10);
+        localRepositoryFolder += repoID;
+        while(folderExists(localRepositoryFolder.c_str())) {
+            localRepositoryFolder = STORED_PATH;
+            localRepositoryFolder += REPO_PATH;
+            repoID = genRandom(10);
+            localRepositoryFolder += repoID;
+        }
+
+        if(mkDir(localRepositoryFolder.c_str()) <0){
+            LOG << "Error when creating folder " << localRepositoryFolder;
+            return repo;
+        }
+
+        std::string localDownloadPath = localRepositoryFolder+"/repo.yml";
+        std::string downloadURL = repoURLStr;
+        downloadURL+="repo.yml";
+        fileDownloadRequest YMLDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
+        if(YMLDownloadRequest.initDownload() <0){
+            LOG << "Error when downloading repo.yml from " << downloadURL<< " to "<< localRepositoryFolder;
+            removeDir(localRepositoryFolder.c_str());
+            return nullptr;
+        }
+        YAML::Node repoYAML;
+        try {
+            repoYAML = YAML::LoadFile(localDownloadPath);
+        } catch(const YAML::ParserException& ex) {
+            LOG << ex.what();
+            if(folderExists(localRepositoryFolder.c_str()))
+                removeFile(localRepositoryFolder.c_str());
+            return nullptr;
+        }
+        repoYAML["repoURL"] = repoURLStr;
+        std::ofstream fout(localDownloadPath);
+        fout << repoYAML;
+        fout.close();
+
+        std::string repoName = "Default Repo Name";
+        if(repoYAML["name"]) {
+            repoName = repoYAML["name"].as<std::string>();
+        }
+
+        std::string repoIconPath;
+        if(repoYAML["iconPath"]) {
+            repoIconPath = repoYAML["iconPath"].as<std::string>();
+        }
+
+        std::string iconDefaultPath = DATA_PATH;
+        iconDefaultPath+="assets/images/repository/repoDefaultIcon.png";
+        const char * iconDefaultPathChar = iconDefaultPath.c_str();
+
+        int ret = -1;
+        if(!repoIconPath.empty()){
+            localDownloadPath = localRepositoryFolder+"/icon"+repoIconPath.substr(repoIconPath.find_last_of('.'));
+            downloadURL = repoURLStr;
+            downloadURL += repoIconPath;
+            fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
+            ret = iconDownloadRequest.initDownload();
+        }
+
+        if(ret < 0) {
+            LOG << "Error when downloading icon from " << downloadURL<< " to "<< localDownloadPath;
+            localDownloadPath = localRepositoryFolder + "/icon.png";
+            copyFile(iconDefaultPathChar, localDownloadPath.c_str());
+        }
+
+        localRepositoryFolder+="/";
+        repo = new repository(repoID.c_str(), repoName.c_str(), repoURLStr.c_str(), localRepositoryFolder.c_str(), localDownloadPath.c_str());
+
+        return repo;
 }
 

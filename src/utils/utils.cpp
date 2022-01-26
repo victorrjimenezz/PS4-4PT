@@ -1,7 +1,7 @@
 #include "../../include/utils/utils.h"
 
-#include "../../_common/elf.h"
-#include "../../_common/libjbc.h"
+#include "../../include/jbUtils/elf.h"
+#include "../../include/jbUtils/libjbc.h"
 
 #include <orbis/SystemService.h>
 #include <orbis/libkernel.h>
@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <unistd.h>
+#include <sstream>
 
 // Store firmware so we only have to get it once
 uint16_t g_Firmware;
@@ -42,6 +43,21 @@ std::string genRandom(const int len) {
     }
 
     return tmp_s;
+}
+
+std::string genDate(){
+    auto now = std::chrono::system_clock::now();
+    time_t currentTime = std::chrono::system_clock::to_time_t(now);
+    tm currentLocalTime = *localtime(&currentTime);
+
+    std::ostringstream buffer;
+    buffer << currentLocalTime.tm_year+1900;
+    buffer << "/" <<currentLocalTime.tm_mon+1;
+    buffer << "/" << currentLocalTime.tm_mday;
+    buffer << " " << currentLocalTime.tm_hour;
+    buffer << ":" << currentLocalTime.tm_min;
+
+    return buffer.str();
 }
 
 // Verify jailbreak

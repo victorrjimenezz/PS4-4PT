@@ -4,12 +4,12 @@
 
 #ifndef CYDI4_REPOSITORY_H
 #define CYDI4_REPOSITORY_H
-#include "../utils/PNG.h"
 #include <string>
 #include <vector>
-#include "package.h"
-#include "../utils/AnimatedPNG.h"
 
+class PNG;
+class package;
+class AnimatedPNG;
 class repository {
 private:
     const std::string id;
@@ -22,9 +22,10 @@ private:
     bool updated;
     int updateYML();
     int updateIcon();
+    int updatePKGS();
 public:
     explicit repository(const char * id, const char *name, const char * repoURL, const char * repoLocalPath, const char * iconPath);
-    int loadPackages();
+    static repository* fetchRepo(const char *repoURLStr);
     int updateRepository(AnimatedPNG * updateIcon = nullptr);
     PNG * getIcon();
     const char * getID();

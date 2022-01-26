@@ -4,22 +4,38 @@
 
 #ifndef CYDI4_BASE_H
 #define CYDI4_BASE_H
+
+//APP VERSION
+#define APP_VERSION 2.00
+#define APP_TITLEID "PAPT00200"
+#define MAIN_URL "https://www.4pt-project.com/"
+
+
 //default data path
-#define DATA_PATH "/mnt/sandbox/PAPT00069_000/app0/"
-#define STORED_PATH "/user/app/PAPT00069/"
+#define DATA_PATH "/mnt/sandbox/" APP_TITLEID "_000/app0/"
+#define STORED_PATH "/user/app/" APP_TITLEID "/"
 #define INSTALL_PATH "/user/app/"
 #define DOWNLOAD_PATH INSTALL_PATH
 #define REPO_PATH "repositories/"
+
 #define LOGS_PATH "logs/"
-#define DOWNLOADS_PATH "/user/app/PAPT00069/downloads.yml"
+#define LOGO_PATH "/mnt/sandbox/" APP_TITLEID "_000/app0/assets/images/logo.png"
+
+#define UPDATES_FILE "updates.yml"
+#define UPDATES_FILE_URL MAIN_URL UPDATES_FILE
+
+#define DOWNLOADS_FILE "downloads.yml"
+#define DOWNLOADS_PATH "/user/app/" APP_TITLEID "/" DOWNLOADS_FILE
 
 //PACKAGES
+#define PKG_EXTENSION ".pkg"
 #define PKG_TYPE_AMOUNT 7
 
 //Networking
 #define ONE_MB 10e5
-#define USER_AGENT "PS4-4PT/1.00"
-#define KEEPALIVE 1
+#define USER_AGENT "PS4-4PT/1.00"//"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
+#define HTTP_SUCCESS 1
+#define NET_POOLSIZE (4 * 1024)
 
 // Font information
 #define FONT_SIZE_LARGE  128
@@ -63,8 +79,6 @@
 #define HOMEVIEW_KEYBOARD_WIDTH 0.7
 #define HOMEVIEW_KEYBOARD_HEIGHT 0.15
 
-#define LOGO_PATH "/mnt/sandbox/PAPT00069_000/app0/assets/images/logo.png"
-
 //DIVISORS
 #define RECTANGLEDIVISORHEIGHT 0.05
 #define OPEN_ICON_POS 0.7
@@ -91,8 +105,54 @@
 #define DOWNLOAD_OPTION_ICON_WIDTH 75
 #define DOWNLOAD_OPTION_ICON_HEIGHT 75
 
-//APP VERSION
-#define APP_VERSION 1.02
+//BINARY OPERATIONS
+#define LE16(x) (x)
+#define LE32(x) (x)
+
+#define SWAP32(x) \
+	((uint32_t)( \
+		(((uint32_t)(x) & UINT32_C(0x000000FF)) << 24) | \
+		(((uint32_t)(x) & UINT32_C(0x0000FF00)) <<  8) | \
+		(((uint32_t)(x) & UINT32_C(0x00FF0000)) >>  8) | \
+		(((uint32_t)(x) & UINT32_C(0xFF000000)) >> 24) \
+	))
+#define SWAP64(x) \
+	((uint64_t)( \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x00000000000000FF)) << 56) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x000000000000FF00)) << 40) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x0000000000FF0000)) << 24) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x00000000FF000000)) <<  8) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x000000FF00000000)) >>  8) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x0000FF0000000000)) >> 24) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0x00FF000000000000)) >> 40) | \
+		(uint64_t)(((uint64_t)(x) & UINT64_C(0xFF00000000000000)) >> 56) \
+	))
+
+#define BE32(x) SWAP32(x)
+#define BE64(x) SWAP64(x)
+
+//PACKAGE FILE INFO
+#define PKG_INITIAL_BUFFER_SIZE 16000
+#define PKG_SIZE_OFFSET 0x430
+#define PKG_CONTENT_ID_SIZE 0x24
+#define SIZEOF_PKG_TABLE_ENTRY 0x20
+#define PKG_ENTRY_COUNT 0x10
+#define PKG_ENTRY_TABLE_OFFSET 0x18
+#define PKG_ENTRY_OFFSET 0x10
+#define PKG_ENTRY_SIZE 0x14
+
+//SFO FILE
+#define SFO_ENTRY_COUNT 0x10
+#define SFO_KEY_TABLE_OFFSET 0x08
+#define SFO_VALUE_TABLE_OFFSET 0x0C
+
+#define SFO_ENTRY_FORMAT 0x02
+#define SFO_ENTRY_VALUE_SIZE 0x04
+#define SFO_ENTRY_MAX_SIZE 0x08
+#define SFO_ENTRY_VALUE_OFFSET 0x0C
+
+#define SIZEOF_SFO_TABLE_ENTRY 0x10
+#define SIZEOF_SFO_HEADER 0x14
 
 //ORBIS INFORMATION
 #define ORBIS_APPINSTUTIL_APP_ALREADY_INSTALLED 0x80990088

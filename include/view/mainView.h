@@ -9,16 +9,13 @@
 #endif
 
 //Common Headers
-#include "../../_common/graphics.h"
-#include "../utils/PNG.h"
-#include "../../_common/notifi.h"
-#include "../ControllerManager.h"
-#include "subView.h"
-#include "tabView.h"
+#include "../utils/AppGraphics.h"
 #include "../base.h"
 
 #include <thread>
-
+class tabView;
+class ControllerManager;
+class subView;
 class mainView {
 private:
     Scene2D * mainScene;

@@ -2,8 +2,12 @@
 // Created by Víctor Jiménez Rugama on 12/27/21.
 //
 #include "../include/ControllerManager.h"
-#include "../include/utils/logger.h"
+#include "../include/utils/controller.h"
 #include "../include/view/mainView.h"
+#include "../include/view/subView.h"
+#include "../include/utils/AudioManager.h"
+
+#include <thread>
 
 bool ControllerManager::controllerActive;
 ControllerManager::ControllerManager(class tabView *tabView, subView* subViews[VIEWS]) : subViews() {
@@ -50,6 +54,28 @@ subView * ControllerManager::getCurrentView(){
 
 void ControllerManager::initController() {
     mutex.lock();
+
+    //LOAD tabChangeWav
+    std::string audioPath = DATA_PATH;
+    audioPath+="assets/audio/tabChange.wav";
+    tabChangeWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &tabChangeWavCount);
+
+    //LOAD pressXWav
+    audioPath = DATA_PATH;
+    audioPath+="assets/audio/pressX.wav";
+    pressXWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &pressXWavCount);
+
+    //LOAD escapeWav
+    audioPath = DATA_PATH;
+    audioPath+="assets/audio/escape.wav";
+    escapeWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &escapeWavCount);
+
+    //LOAD arrowWav
+    audioPath = DATA_PATH;
+    audioPath+="assets/audio/arrow.wav";
+    arrowWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &arrowWavCount);
+
+
     controllerActive = true;
     while(controllerActive)
         updateController();
@@ -61,8 +87,10 @@ void ControllerManager::updateRearUpperButtons() {
     bool L1Pressed = controller->L1Pressed();
     bool R1Pressed = controller->R1Pressed();
     if(L1Pressed && !R1Pressed && !L1Waspressed){
+        AudioManager::mainAudioManager->playAudio(tabChangeWav,tabChangeWavCount);
         switchCurrentView(tabView->tabLeft());
     } else if(!L1Pressed && R1Pressed && !R1Waspressed){
+        AudioManager::mainAudioManager->playAudio(tabChangeWav,tabChangeWavCount);
         switchCurrentView(tabView->tabRight());
     }
     L1Waspressed = L1Pressed;
@@ -74,8 +102,10 @@ void ControllerManager::updateArrowVertical() {
     bool ArrowUpPressed = controller->DpadUpPressed();
     bool ArrowDownPressed = controller->DpadDownPressed();
     if(ArrowUpPressed && !ArrowDownPressed && !ArrowUpWasPressed){
+        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowUp();
     } else if(!ArrowUpPressed && ArrowDownPressed && !ArrowDownWasPressed){
+        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowDown();
     }
     ArrowUpWasPressed = ArrowUpPressed;
@@ -86,8 +116,10 @@ void ControllerManager::updateArrowHorizontal() {
     bool ArrowRightPressed = controller->DpadRightPressed();
     bool ArrowLeftPressed = controller->DpadLeftPressed();
     if(ArrowRightPressed && !ArrowLeftPressed && !ArrowRightWasPressed){
+        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowRight();
     } else if(!ArrowRightPressed && ArrowLeftPressed && !ArrowLeftWasPressed){
+        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowLeft();
     }
     ArrowRightWasPressed = ArrowRightPressed;
@@ -99,8 +131,10 @@ void ControllerManager::updateXCircle() {
     bool XPressed = controller->XPressed();
     bool CirclePressed = controller->CirclePressed();
     if(XPressed && !CirclePressed && !XWasPressed){
+        AudioManager::mainAudioManager->playAudio(pressXWav,pressXWavCount);
         currentSubView->pressX();
     } else if(!XPressed && CirclePressed && !CircleWasPressed){
+        AudioManager::mainAudioManager->playAudio(escapeWav,escapeWavCount);
         currentSubView->pressCircle();
     }
     XWasPressed = XPressed;
@@ -150,6 +184,16 @@ void ControllerManager::stopController() {
 }
 
 ControllerManager::~ControllerManager() {
+
+    if(tabChangeWav!= nullptr)
+        free(tabChangeWav);
+    if(pressXWav!= nullptr)
+        free(pressXWav);
+    if(escapeWav!= nullptr)
+        free(escapeWav);
+    if(arrowWav!= nullptr)
+        free(arrowWav);
+
     stopController();
     delete controller;
 }

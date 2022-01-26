@@ -1,6 +1,8 @@
 #include "../../include/utils/controller.h"
 #include "../../include/utils/logger.h"
 
+#include <orbis/UserService.h>
+
 Controller::Controller()
 {
 }

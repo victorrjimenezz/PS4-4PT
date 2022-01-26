@@ -9,31 +9,6 @@
 #include <cstdio>
 #include <ftw.h>
 #include <dirent.h>
-//#include <stb/stb_image.h>
-
-/*#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include <stb/stb_image_resize.h>
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb/stb_image_write.h>
-
-void resizeImage(){
-
-    unsigned char* input_pixels;
-    unsigned char* output_pixels;
-    int w, h;
-    int n;
-    int out_w, out_h;
-
-    input_pixels = (unsigned char *)stbi_load("/mnt/sandbox/BREW00069_000/app0/assets/images/deleteSelected.png", &w, &h, &n, STBI_default);
-    out_w = w/3;
-    out_h = h/3;
-    LOG << "Original Width:Height " << w << ":" << h;
-    output_pixels = (unsigned char*) malloc(out_w*out_h*n);
-    //stbir_resize_uint8_srgb(input_pixels, w, h, 0, output_pixels, out_w, out_h, 0, n, -1,0);
-    stbir_resize_uint8(input_pixels, w, h, 0, output_pixels, out_w, out_h, 0, n);
-    stbi_write_png("/user/app/BREW00069/golfo.png", out_w, out_h, n, output_pixels, 0);
-
-} */
 
 std::vector<std::string> lsDir(const char * dirPath){
     std::vector<std::string> files;
@@ -125,4 +100,15 @@ int folderExists(const char * path){
 
 int mkDir(const char * path){
     return mkdir(path,0777);
+}
+
+uint64_t getFileSize(const char *file) {
+    if(!fileExists(file))
+        return 0;
+    struct stat stat_buf{};
+    if(stat(file, &stat_buf) != 0) {
+        return -1;
+    }
+    return stat_buf.st_size;
+
 }
