@@ -7,10 +7,10 @@
     <img src="sce_sys/icon0.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">PS4 APT Package Manager</h3>
+<h3 align="center">4PT: PS4 APT</h3>
 
   <p align="center">
-    A package manager for the PS4. 
+    An Advanced Packaging Tool for the PS4
     <br />
     <a href="https://github.com/victorrjimenezz/4PT-Repository/issues"><strong>Request Feature / Report Bug</strong></a>
     <br />
@@ -129,7 +129,6 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Add a new PKG List view where only covers are displayed
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
-- [ ] Add title to Keyboard Input
 - [ ] Add PS4 Version Compatibility Information
 
 <div id="lt"></div>

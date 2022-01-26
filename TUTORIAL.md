@@ -7,10 +7,10 @@
     <img src="sce_sys/icon0.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">PS4 APT Package Manager</h3>
+<h3 align="center">4PT: PS4 APT</h3>
 
   <p align="center">
-    A package manager for the PS4. 
+    An Advanced Packaging Tool for the PS4. 
     <br />
     <a href="https://github.com/victorrjimenezz/PS4-4PT/issues"><strong>Request Feature / Report Bug</strong></a>
     <br />
