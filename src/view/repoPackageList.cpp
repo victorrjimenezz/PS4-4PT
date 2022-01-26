@@ -94,17 +94,17 @@ void repoPackageList::updateView() {
             mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             if(currPackage != nullptr){
                 mainScene->DrawText((char *) std::string(currPackage->getName()).substr(0,PKGLIST_CHARACTER_LIMIT).c_str(), fontMedium, packageRectangle.x, packageRectangle.y,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 printStr = "Type: ";
                 printStr+=TypeStr[currPackage->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y- 1 * packageRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    textColor, textColor);
                 printStr = "Version: ";
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
                 printStr += currPackage->getTitleID();
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 if(currPackage->isInstalled()) {
                     if(currPackage->getVersion()>currPackage->getCurrVer()) {
                         printStr = "Update Available ";
@@ -115,12 +115,12 @@ void repoPackageList::updateView() {
                         printStr = "Installed";
                         printStr += currPackage->getSFOType();
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                            selectedColor, selectedColor);
+                                            textColor, textColor);
                     }
                 } else if(strlen(currPackage->getSFOType())>1) {
                     printStr = currPackage->getSFOType();
                     mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                        selectedColor, selectedColor);
+                                        textColor, textColor);
                 }
                 currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
                 printStr = "Size: ";
@@ -128,7 +128,7 @@ void repoPackageList::updateView() {
                 printStr += "MB";
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y + 3 * packageRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    textColor, textColor);
             }
         }
     }
@@ -155,7 +155,7 @@ void repoPackageList::updateView() {
             printStr += currPackage->getTitleID();
             mainScene->DrawText((char *) printStr.c_str(), fontSmall,
                                 packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
-                                selectedColor, textColor);
+                                selectedColor, selectedColor);
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
             if(currPackage->isInstalled()) {
                 if(currPackage->getVersion()>currPackage->getCurrVer()) {

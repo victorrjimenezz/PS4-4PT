@@ -224,27 +224,27 @@ void downloadView::updateView() {
                 }
                 currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
                 mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 mainScene->DrawText((char *) currDownload->getTitleID(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 3 * repoRectangle.height / 8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 printStr = "Type: ";
                 printStr+=TypeStr[currDownload->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    textColor, textColor);
                 printStr = "Source: ";
                 printStr+=currDownload->getRepoName();
                 mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, repoRectangle.y+ 3 * repoRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    textColor, textColor);
                 printStr = "Download Date: ";
                 printStr+=currDownload->getDate();
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    textColor, textColor);
                 printStr = "Version: ";
                 printStr+=currDownload->getVersionStr();
                 mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
-                                    selectedColor, selectedColor);
+                                    textColor, textColor);
             }
         }
     }

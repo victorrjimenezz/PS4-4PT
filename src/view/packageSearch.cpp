@@ -106,7 +106,7 @@ void packageSearch::updateView() {
             mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             if(currPackage != nullptr){
                 mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 printStr = "Version: ";
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
@@ -114,12 +114,12 @@ void packageSearch::updateView() {
                 printStr += " | ";
                 printStr += currPackage->getRepoName();
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 printStr = "Type: ";
                 printStr += TypeStr[currPackage->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y - 1 * packageRectangle.height / 8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
                 currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
                 if(currPackage->isInstalled()) {
                     if(currPackage->getVersion()>currPackage->getCurrVer()) {
@@ -129,7 +129,7 @@ void packageSearch::updateView() {
                     } else {
                         printStr = "Installed";
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                            selectedColor, textColor);
+                                            textColor, textColor);
                     }
                 }
                 printStr = "Size: ";
@@ -137,7 +137,7 @@ void packageSearch::updateView() {
                 printStr += "MB";
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y + 3 * packageRectangle.height / 8,
-                                    selectedColor, textColor);
+                                    textColor, textColor);
             }
         }
     }
