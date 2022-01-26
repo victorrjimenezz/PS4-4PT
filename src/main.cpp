@@ -39,6 +39,9 @@
 
 std::stringstream debugLogStream;
 
+int libSslId = -1;
+int libNetMemId = -1;
+
 int initializeApp();
 int loadModules();
 int startProcesses();
@@ -232,14 +235,14 @@ int networkInit() {
     }
 
     LOG << "Initialized Network";
-    int libNetMemId = sceNetPoolCreate("4PT", NET_HEAP_SIZE, 0);
+    libNetMemId = sceNetPoolCreate("4PT", NET_HEAP_SIZE, 0);
     if (libNetMemId < 0) {
         LOG << "sceNetPoolCreate failed:";
         return libNetMemId;
     }
     LOG << "Created Network Pool";
 
-    int libSslId = sceSslInit(SSL_HEAP_SIZE);
+    libSslId = sceSslInit(SSL_HEAP_SIZE);
     if(libSslId < 0) {
         LOG << "Ssl Initialization Failed;";
         return libSslId;
@@ -312,7 +315,10 @@ void stopProcesses() {
 }
 void networkShutDown() {
     sceHttpTerm(fileDownloadRequest::getLibhttpCtxId());
-    sceNetPoolDestroy();
+    if(libNetMemId>=0)
+        sceNetPoolDestroy(libNetMemId);
+    if(libSslId>=0)
+        sceSslTerm(libSslId);
     sceNetTerm();
 }
 void unloadModules() {
