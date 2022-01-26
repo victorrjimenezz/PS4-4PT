@@ -95,10 +95,10 @@ The current working app features are:
 
 - Downloading PKGs from repositories/directly from a URL
 - Ability to pause/resume a download
-- Adding Repositories
+- Adding/Removing Repositories
 - Searching apps, filtering by name and repository.
 - Install/Uninstall downloaded PKGs.
-- App updates itself automatically
+- 4PT updates itself automatically
 
 ***
 
