@@ -287,7 +287,7 @@ void downloadView::updateView() {
             printStringStream << "Downloaded " << downloadRequest->getDownloadedInMb();
             printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
         }else if(!stored)
-            printStringStream <<  "Pending Download... (X to retry)";
+            printStringStream <<  "Pending Download...";
         else if(finished && !installed)
             printStringStream << "Has finished. (X to install)";
         else if(finished && installed)
