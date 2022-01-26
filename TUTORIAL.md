@@ -157,8 +157,8 @@ go to the search tab (rightmost one) and type the package name on the keyboard.
 
 ### Filter-by-repository Search
 
-<!-- <img src="screenshots/screenshot7.png" width="100%"  alt=""/>
--->
+<img src="screenshots/screenshot6.png" width="100%"  alt=""/>
+
 To search a package by its name from a specific repository,
 go to the repository tab (2nd one) select the repository from which to filter
 and, once in the repository package list, open the keyboard and search the package.
