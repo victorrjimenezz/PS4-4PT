@@ -355,7 +355,7 @@ bool fileDownloadRequest::verifyURL(const char *url) {
 }
 
 std::regex fileDownloadRequest::getUrlRegex() {
-    return std::regex(R"(^((http[s]?):\/)?\/?([^:\/\s]+)((\/\w+)*\/)([\w\-\.]+[^#?\s]+)(.*)?(#[\w\-]+)?$)");
+    return std::regex(R"(^https?:\/\/(.+\..{2,10}|localhost|(?:\d{1,3}\.){3}\d{1,3})\/?.*?$)");
 }
 
 
