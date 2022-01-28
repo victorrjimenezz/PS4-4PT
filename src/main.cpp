@@ -72,10 +72,12 @@ int main() {
     mainView mainView(isFirstRun);
     LOG << "Initialized Main view" << "\n";
 
+    sceSystemServiceHideSplashScreen();
+
     LOG << "Checking for Update";
+
     checkForUpdate();
     LOG << "Initialized APP!";
-    sceSystemServiceHideSplashScreen();
 
     try {
         // Draw loop
