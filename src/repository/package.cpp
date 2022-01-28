@@ -189,3 +189,21 @@ const char *package::getRepoName() {
 const char *package::getSFOType() {
     return pkgSFOType.c_str();
 }
+
+package::package(package *oldPackage) {
+    name = oldPackage->getName();
+    repoName = oldPackage->getRepoName();
+    url = oldPackage->getURL();
+    if(oldPackage->getIcon() == nullptr)
+        icon = nullptr;
+    else
+        icon = new PNG(oldPackage->getIcon());
+    packageType = oldPackage->getPackageType();
+    TITLE_ID = oldPackage->getTitleID();
+    packageSizeBytes = oldPackage->getPkgSize();
+    packageSizeMB = oldPackage->getPkgSizeMB();
+    version = oldPackage->getVersion();
+    pkgSFOType = oldPackage->getSFOType();
+    versionString = oldPackage->getVersionStr();
+    currentInstalledVersion = oldPackage->getCurrentInstalledVersion();
+}

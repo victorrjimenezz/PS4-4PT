@@ -33,13 +33,12 @@ private:
     double version;
     std::string pkgSFOType;
     std::string versionString;
-    double currInstalledVersion;
     double currentInstalledVersion;
     double getCurrentInstalledVersion() const;
 
 public:
     static PKGTypeENUM getPackageType(const char * packageType);
-
+    package(package * oldPackage);
     package(const char*url, bool local, bool * failed, const char * type = "", const char * repositoryName = "Direct Download");
     const char * getName();
     const char * getVersionStr();
