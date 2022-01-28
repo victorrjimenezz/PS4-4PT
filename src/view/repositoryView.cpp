@@ -5,6 +5,7 @@
 #include "../../include/view/repositoryView.h"
 #include "../../include/view/keyboardInput.h"
 #include "../../include/view/repoPackageList.h"
+#include "../../include/view/packageSearch.h"
 #include "../../include/repository/repository.h"
 #include "../../include/utils/dialog.h"
 #include "../../include/utils/PNG.h"
@@ -218,6 +219,7 @@ int repositoryView::deleteRepo(const char * id){
         }
     }
     fillPage();
+    packageSearch::mainPackageSearch->updatePackages();
     AudioManager::mainAudioManager->playAudio(deleteWav,deleteWavCount);
     return 0;
 }

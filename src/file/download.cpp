@@ -18,7 +18,7 @@ download::download(const std::shared_ptr<package>& pkg){
     std::string localDownloadPath = DOWNLOAD_PATH;
     localDownloadPath+= id+".pkg";
     this->path=localDownloadPath;
-    this->pkg = pkg;
+    this->pkg = std::shared_ptr<package>(new package(pkg.get()));
     this->finished = false;
     this->failed = false;
 
