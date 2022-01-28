@@ -6,8 +6,8 @@
 #define CYDI4_BASE_H
 
 //APP VERSION
-#define APP_VERSION 2.00
-#define APP_TITLEID "PAPT00200"
+#define APP_VERSION 2.10
+#define APP_TITLEID "PAPT00210"
 #define MAIN_URL "https://www.4pt-project.com/"
 
 
@@ -33,7 +33,7 @@
 
 //Networking
 #define ONE_MB 10e5
-#define USER_AGENT "PS4-4PT/1.00"//"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
+#define USER_AGENT "PS4-4PT/2.10"//"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
 #define HTTP_SUCCESS 1
 #define NET_POOLSIZE (4 * 1024)
 
