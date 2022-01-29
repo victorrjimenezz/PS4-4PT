@@ -115,6 +115,11 @@ void PKGInfo::loadData(uint8_t * data, uint64_t data_size){
             sfoParam = (char*)sfoFile->getEntry("APP_VER");
             if(sfoParam != nullptr)
                 PKG_APP_VERSION = std::stod(sfoParam);
+            else {
+                sfoParam = (char*)sfoFile->getEntry("VERSION");
+                if(sfoParam!= nullptr)
+                    PKG_APP_VERSION = std::stod(sfoParam);
+            }
 
             sfoParam = (char*)sfoFile->getEntry("CATEGORY");
             if(sfoParam != nullptr)
