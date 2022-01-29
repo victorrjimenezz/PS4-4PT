@@ -45,6 +45,7 @@
         <li><a href="#lt">Long Term</a></li>
       </ul>
     </li>
+    <li><a href="#lang">Languages</a></li>
     <li><a href="#buildDep">Build Dependencies</a></li>
     <li><a href="#developers">Developers</a></li>
     <li><a href="#Acknowledgments">Acnkowledgments</a></li>
@@ -98,8 +99,9 @@ The current working app features are:
 - Downloading PKGs from repositories/directly from a URL
 - Ability to pause/resume a download
 - Adding/Removing Repositories
-- Searching apps, filtering by name and repository.
-- Install/Uninstall downloaded PKGs.
+- Searching apps, filtering by name and repository
+- Install/Uninstall downloaded PKGs
+- App has English, Spanish, German, and Italian support
 - 4PT updates itself automatically
 
 ***
@@ -120,19 +122,23 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
+### Version 2.3 (few days)
+
+- [X] Support for Themes
+- [X] If the PKG has no icon, load one from the default icons
+- [ ] German, English, Spanish, Italian Language support
+
 ### Most Urgent | Version 2.4 (few days)
 
 - [ ] Fix bug that causes the app not to be able to initialize for some users
 
 ### Version 2.5 (~3 Months)
 
-- [ ] If the PKG has no icon, load one from the default icons
 - [ ] Add customization options, such as disabling notifications
 - [ ] Add a new PKG List view where only covers are displayed
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
 - [ ] Add PS4 Version Compatibility Information
-- [ ] German, English, Spanish, Italian Language support
 
 <div id="lt"></div>
 
@@ -142,6 +148,21 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Support for more languages
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
+
+***
+
+<div id="lang"></div>
+
+## Languages
+
+The app is available in:
+- [X] English
+- [ ] Italian
+- [ ] German
+- [ ] Spanish
+
+To add support for further languages, please [contact me](https://twitter.com/victorrjimenezz) or [open an issue](https://github.com/victorrjimenezz/4PT-Repository/issues)
+
 
 ***
 
