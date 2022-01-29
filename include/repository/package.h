@@ -35,6 +35,7 @@ private:
     std::string versionString;
     double currentInstalledVersion;
     double getCurrentInstalledVersion() const;
+    void setDefaultIcon();
 
 public:
     static PKGTypeENUM getPackageType(const char * packageType);

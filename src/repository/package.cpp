@@ -26,13 +26,15 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
         goto err;
     }
     fileExt = this->url.substr(this->url.find_last_of('.')).c_str();
-    if(this->url.size()<4 || strcasecmp(fileExt, ".pkg") != 0 || strcasecmp(pkgInfo.getTitle(),"") == 0 || strcasecmp(pkgInfo.getTitleID(),"") == 0 || pkgInfo.getVersion()==-1 || this->icon == nullptr) {
+    if(this->url.size()<4 || strcasecmp(fileExt, ".pkg") != 0 || strcasecmp(pkgInfo.getTitle(),"") == 0 || strcasecmp(pkgInfo.getTitleID(),"") == 0 || pkgInfo.getVersion()==-1){
         LOG << "Invalid PKG at " << url;
         goto err;
     }
     this->TITLE_ID = pkgInfo.getTitleID();
     this->name = pkgInfo.getTitle();
     this->packageType = getPackageType(type);
+    if(this->icon == nullptr)
+        setDefaultIcon();
     this->version = pkgInfo.getVersion();
     this->repoName = repositoryName;
     this->packageSizeBytes = pkgInfo.getPkgSize();
@@ -208,4 +210,34 @@ package::package(package *oldPackage) {
     pkgSFOType = oldPackage->getSFOType();
     versionString = oldPackage->getVersionStr();
     currentInstalledVersion = oldPackage->getCurrentInstalledVersion();
+}
+
+void package::setDefaultIcon() {
+    std::string iconPath = DATA_PATH;
+    iconPath+="assets/images/repository/";
+    switch(packageType){
+        case GAME:
+            iconPath+="gameDefaultIcon.png";
+            break;
+        case APP:
+            iconPath+="appDefaultIcon.png";
+            break;
+        case UPDATE:
+            iconPath+="updateDefaultIcon.png";
+            break;
+        case THEME:
+            iconPath+="themeDefaultIcon.png";
+            break;
+        case TOOL:
+            iconPath+="toolDefaultIcon.png";
+            break;
+        case CHEAT:
+            iconPath+="cheatDefaultIcon.png";
+            break;
+        case MISC:
+        default:
+            iconPath+="miscDefaultIcon.png";
+            break;
+    }
+    this->icon = new PNG(iconPath.c_str(),ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
 }
