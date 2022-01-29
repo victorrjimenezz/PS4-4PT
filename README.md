@@ -118,7 +118,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
-### Most Urgent | Version 2.50 (few days)
+### Most Urgent | Version 2.4 (few days)
 
 - [ ] Fix bug that causes the app not to be able to initialize for some users
 
