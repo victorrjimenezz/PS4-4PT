@@ -30,6 +30,61 @@ bool findStringIC(const std::string & strHaystack, const std::string & strNeedle
     return (it != strHaystack.end() );
 }
 
+
+int CharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end)
+{
+    unsigned int c = (unsigned int)-1;
+    const unsigned char* str = (const unsigned char*)in_text;
+    if (!(*str & 0x80)) {
+        c = (unsigned int)(*str++);
+        *out_char = c;
+        return 1;
+    }
+    if ((*str & 0xe0) == 0xc0) {
+        *out_char = 0xFFFD;
+        if (in_text_end && in_text_end - (const char*)str < 2) return 1;
+        if (*str < 0xc2) return 2;
+        c = (unsigned int)((*str++ & 0x1f) << 6);
+        if ((*str & 0xc0) != 0x80) return 2;
+        c += (*str++ & 0x3f);
+        *out_char = c;
+        return 2;
+    }
+    if ((*str & 0xf0) == 0xe0) {
+        *out_char = 0xFFFD;
+        if (in_text_end && in_text_end - (const char*)str < 3) return 1;
+        if (*str == 0xe0 && (str[1] < 0xa0 || str[1] > 0xbf)) return 3;
+        if (*str == 0xed && str[1] > 0x9f) return 3;
+        c = (unsigned int)((*str++ & 0x0f) << 12);
+        if ((*str & 0xc0) != 0x80) return 3;
+        c += (unsigned int)((*str++ & 0x3f) << 6);
+        if ((*str & 0xc0) != 0x80) return 3;
+        c += (*str++ & 0x3f);
+        *out_char = c;
+        return 3;
+    }
+    if ((*str & 0xf8) == 0xf0) {
+        *out_char = 0xFFFD;
+        if (in_text_end && in_text_end - (const char*)str < 4) return 1;
+        if (*str > 0xf4) return 4;
+        if (*str == 0xf0 && (str[1] < 0x90 || str[1] > 0xbf)) return 4;
+        if (*str == 0xf4 && str[1] > 0x8f) return 4;
+        c = (unsigned int)((*str++ & 0x07) << 18);
+        if ((*str & 0xc0) != 0x80) return 4;
+        c += (unsigned int)((*str++ & 0x3f) << 12);
+        if ((*str & 0xc0) != 0x80) return 4;
+        c += (unsigned int)((*str++ & 0x3f) << 6);
+        if ((*str & 0xc0) != 0x80) return 4;
+        c += (*str++ & 0x3f);
+        if ((c & 0xFFFFF800) == 0xD800) return 4;
+        *out_char = c;
+        return 4;
+    }
+    *out_char = 0;
+    return 0;
+}
+
+
 std::string genRandom(const int len) {
     static const char alphanum[] =
             "0123456789"

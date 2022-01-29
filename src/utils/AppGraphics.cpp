@@ -7,6 +7,7 @@
 
 #include "../../include/utils/AppGraphics.h"
 #include "../../include/utils/logger.h"
+#include "../../include/utils/utils.h"
 
 Scene2D::Scene2D(int w, int h, int pixelDepth)
 {
@@ -220,7 +221,7 @@ bool Scene2D::InitFont(FT_Face *face, const char *fontPath, int fontSize)
 	
 	if(rc < 0)
 		return false;
-	
+
 	return true;
 }
 #endif
@@ -262,20 +263,31 @@ void Scene2D::DrawText(char *txt, FT_Face face, int startX, int startY, Color bg
 	int rc;
 	int xOffset = 0;
 	int yOffset = 0;
-	
+
 	// Get the glyph slot for bitmap and font metrics
 	FT_GlyphSlot slot = face->glyph;
-	
+
 	// Iterate each character of the text to write to the screen
 	for(int n = 0; n < strlen(txt); n++)
 	{
+
 		FT_UInt glyph_index;
 
+
+        unsigned int cp;
+        CharFromUtf8(&cp, &txt[n], NULL);
+        glyph_index = FT_Get_Char_Index(face, cp);
+
         // Get the glyph for the ASCII code
-        glyph_index = FT_Get_Char_Index(face, txt[n]);
+        //glyph_index = FT_Get_Char_Index(face, txt[n]);
+
+
+        int flag = 0;
+        flag |= FT_LOAD_RENDER;
+        flag |= FT_LOAD_FORCE_AUTOHINT;
 
         // Load and render in 8-bit color
-        rc = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
+        rc = FT_Load_Glyph(face, glyph_index, flag);
 
         if (rc)
             continue;

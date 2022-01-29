@@ -132,13 +132,14 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
 - [ ] Add PS4 Version Compatibility Information
+- [ ] German, English, Spanish, Italian Language support
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
 - [ ] Change Keyboard to UI IME
-- [ ] Multi-language Support
+- [ ] Support for more languages
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
 
