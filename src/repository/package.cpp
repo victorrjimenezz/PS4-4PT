@@ -8,6 +8,7 @@
 #include "../../include/utils/logger.h"
 #include "../../include/utils/PNG.h"
 #include "../../include/utils/notifi.h"
+#include "../../include/utils/LANG.h"
 
 #include <sstream>
 #include <orbis/AppInstUtil.h>
@@ -51,14 +52,15 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
 
     pkgSFOType = "";
     if(strcasecmp(pkgInfo.getType(),"gc") == 0)
-        pkgSFOType = "Game Content";
+        pkgSFOType = LANG::mainLang->GAME_CONTENT;
     else if(strcasecmp(pkgInfo.getType(),"gpc") == 0 || strcasecmp(pkgInfo.getType(),"gpd") == 0)
-        pkgSFOType = "Patch";
+        pkgSFOType = LANG::mainLang->PATCH;
 
     *failed = false;
     return;
     err:
     delete icon;
+    icon = nullptr;
     *failed = true;
 }
 
@@ -134,7 +136,7 @@ int package::install(const char * path) {
     return 0;
 
     err:
-    std::string message = "Error when installing app";
+    std::string message = LANG::mainLang->ERROR_WHEN_INSTALLING_APP;
     message+=name;
     notifi(NULL,message.c_str());
     return -1;
