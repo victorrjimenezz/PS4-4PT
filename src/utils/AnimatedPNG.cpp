@@ -9,21 +9,11 @@
 AnimatedPNG::AnimatedPNG(const char *PNGFolder, Scene2D * mainScene, int width, int height) : frames(){
     numFrames = 0;
     currFrame = 0;
-    playing = false;
     this->width = width;
     this->height = height;
     this->mainScene = mainScene;
     for(const std::string& frame : lsDir(PNGFolder))
         addFrame((PNGFolder + frame).c_str());
-}
-
-void AnimatedPNG::play() {
-    playing=true;
-}
-
-void AnimatedPNG::stop() {
-    playing=false;
-    currFrame = 0;
 }
 
 int AnimatedPNG::addFrame(const char *PNGPath) {
@@ -35,8 +25,7 @@ int AnimatedPNG::addFrame(const char *PNGPath) {
         frames.emplace_back(new PNG(PNGPath, width, height));
     return ++numFrames;
 }
-
-void AnimatedPNG::Draw(int startX, int startY) {
+void AnimatedPNG::Play(int startX, int startY) {
 
     PNG * currFramePNG = frames.at(currFrame);
     if(currFramePNG == nullptr){
@@ -44,10 +33,15 @@ void AnimatedPNG::Draw(int startX, int startY) {
         return;
     }
     currFramePNG->Draw(mainScene,startX,startY);
-    if(playing) {
-        currFrame++;
-        currFrame %= numFrames;
-    }
+    currFrame++;
+    currFrame %= numFrames;
+}
+
+void AnimatedPNG::Draw(int startX, int startY) {
+    currFrame = 0;
+    if(frames.at(currFrame) == nullptr)
+        return;
+    frames.at(currFrame)->Draw(mainScene,startX,startY);
 }
 
 AnimatedPNG::~AnimatedPNG() {

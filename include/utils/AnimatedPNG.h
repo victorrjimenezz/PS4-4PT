@@ -11,12 +11,10 @@ private:
     std::vector<PNG*> frames;
     Scene2D * mainScene;
     int currFrame, numFrames, width, height;
-    bool playing;
 public:
     AnimatedPNG(const char * PNGFolder, Scene2D * mainScene, int width = -1, int height = -1);
     int addFrame(const char * PNGPath);
-    void play();
-    void stop();
+    void Play(int startX, int startY);
     void Draw(int startX, int startY);
     ~AnimatedPNG();
 };
