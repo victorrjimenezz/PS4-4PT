@@ -30,7 +30,6 @@ private:
     const char * specialKey;
     const char * del = "DEL";
     const char * enter;
-    const char * space = "SPACE";
     int delPos;
     int specialPos;
     Scene2D * mainScene;
@@ -73,7 +72,7 @@ public:
     void unSelectKeyboard();
     bool hasEntered() const;
     bool hasChanged();
-    const char * readText();
+    std::string readText();
     ~keyboardInput();
 };
 #endif //CYDI4_KEYBOARDINPUT_H

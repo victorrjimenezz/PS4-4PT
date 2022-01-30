@@ -92,6 +92,7 @@ public:
     void arrowRight();
     void arrowLeft();
     void deleteChild();
+    void langChanged();
     subView * getParent();
     subView * getChild();
     std::shared_ptr<std::vector<repository*>> getRepositoryList();

@@ -10,6 +10,7 @@
 #include "../../include/utils/AppGraphics.h"
 #include "../../include/view/keyboardInput.h"
 #include "../../include/base.h"
+#include "../../include/utils/LANG.h"
 
 
 keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * enterText, const char * placeHolderText, bool keyBoardIsSelected, bool hasEnter) : upperDict(), lowerDict(), dictPosition(), enter(enterText), specDictPosition(){
@@ -20,13 +21,13 @@ keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, in
     if(hasEnter)
         specialKey = enter;
     else
-        specialKey = space;
+        specialKey = LANG::mainLang->SPACE.c_str();
     this->font = font;
 
     this->borderColor = {180,180,180};
     this->bgColor = {255,255,255};
     this->textColor = {0,0,0};
-    this->selectedTextColor = {120,120,120};
+    this->selectedTextColor = {255,0,0};//{120,120,120};
 
 
     this->containerX = x;
@@ -167,9 +168,9 @@ void keyboardInput::unSelectKeyboard() {
 bool keyboardInput::hasEntered() const {
     return entered;
 }
-const char *keyboardInput::readText() {
+std::string keyboardInput::readText() {
     entered = false;
-    return text.c_str();
+    return text;
 }
 
 keyboardInput::~keyboardInput() {

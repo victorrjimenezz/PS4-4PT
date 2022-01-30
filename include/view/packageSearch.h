@@ -66,6 +66,7 @@ public:
     void arrowLeft();
     bool isActive();
     void deleteChild();
+    void langChanged();
     subView * getParent();
     subView * getChild();
     ~packageSearch();

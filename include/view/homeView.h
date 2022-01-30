@@ -41,6 +41,7 @@ private:
     const int frameWidth = 0;
     const int frameHeight = 0;
     void hasEntered();
+    void loadWelcomeText();
 public:
     homeView(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight);
     void updateView();
@@ -56,6 +57,7 @@ public:
     subView * getParent();
     subView * getChild();
     bool isActive();
+    void langChanged();
     ~homeView();
 };
 #endif //CYDI4_HOMEVIEW_H

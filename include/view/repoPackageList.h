@@ -69,6 +69,7 @@ public:
     bool isActive();
     void setActive();
     void deleteChild();
+    void langChanged();
     subView * getParent();
     subView * getChild();
     ~repoPackageList();

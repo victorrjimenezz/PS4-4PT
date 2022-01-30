@@ -59,6 +59,7 @@ public:
     enum tabSelected getCurrentView();
     enum tabSelected tabRight();
     enum tabSelected tabLeft();
+    void loadLang(){};
     explicit tabView(Scene2D * scene, int frameWidth, int frameHeight);
     int updateTab();
     ~tabView();

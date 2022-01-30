@@ -19,6 +19,7 @@ public:
     virtual subView * getChild()=0;
     virtual void deleteChild()=0;
     virtual bool isActive()=0;
+    virtual void langChanged()=0;
     virtual ~subView()= default;
 };
 

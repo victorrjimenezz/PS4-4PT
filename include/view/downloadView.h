@@ -95,6 +95,7 @@ public:
     void arrowRight();
     void arrowLeft();
     void deleteChild();
+    void langChanged(){};
     subView * getParent();
     subView * getChild();
     bool isActive();
