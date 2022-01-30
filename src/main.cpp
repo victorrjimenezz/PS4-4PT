@@ -7,10 +7,6 @@
 #ifndef GRAPHICS_USES_FONT
 #define GRAPHICS_USES_FONT 1
 #endif
-#define BGFT_HEAP_SIZE (1 * 1024 * 1024)
-#define HTTP_HEAP_SIZE (1024 * 1024)
-#define SSL_HEAP_SIZE (128 * 1024)
-#define NET_HEAP_SIZE   (1 * 1024 * 1024)
 
 //Include Headers
 #include "../include/utils/utils.h"
@@ -21,6 +17,7 @@
 #include "../include/utils/Updater.h"
 #include "../include/utils/dialog.h"
 #include "../include/utils/notifi.h"
+#include "../include/utils/LANG.h"
 #include "../include/utils/AudioManager.h"
 
 //Load Orbis dependencies
@@ -68,7 +65,6 @@ int main() {
         sceSystemServiceLoadExec("exit",NULL);
     } else if(ret == 1)
         isFirstRun = true;
-
     mainView mainView(isFirstRun);
     LOG << "Initialized Main view" << "\n";
 
@@ -78,6 +74,12 @@ int main() {
 
     checkForUpdate();
     LOG << "Initialized APP!";
+
+    LOG << "LOADING LANG";
+
+    LANG::mainLang->loadLang();
+
+    LOG << "LOADED LANG";
 
     try {
         // Draw loop
@@ -150,6 +152,12 @@ int initializeApp() {
 
     if(AudioManager::initAudioManager() <0)
         LOG << "Could not initialize Audio Manager";
+
+
+    LOG << "Starting Lang";
+    LANG::initLang();
+    LOG <<"Started Lang";
+
     return ret;
 }
 
@@ -277,7 +285,7 @@ int mkDirs(){
     logsPath+=LOGS_PATH;
 
     std::stringstream errorCode;
-    errorCode << "Could Not Make Dirs\nErrorCode: ";
+    errorCode << "Could Not Make Dirs\n";
 
     if(!folderExists(repoPath.c_str())) {
         ret = 1;
@@ -314,6 +322,7 @@ void stopProcesses() {
     sceUserServiceTerminate();
     networkShutDown();
     AudioManager::mainAudioManager->termAudioManager();
+    LANG::termLang();
 }
 void networkShutDown() {
     sceHttpTerm(fileDownloadRequest::getLibhttpCtxId());
