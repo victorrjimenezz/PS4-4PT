@@ -9,7 +9,7 @@
 #include "../../include/utils/utils.h"
 #include "../../include/repository/PKGInfo.h"
 #include "../../include/utils/logger.h"
-
+#include "../../include/utils/LANG.h"
 
 
 download::download(const std::shared_ptr<package>& pkg){
@@ -54,7 +54,7 @@ download::download(const char *url, bool * failedInit) {
 
     this->pkg = std::shared_ptr<package>(new package(url,false,failedInit));
     if(*failedInit) {
-        std::string msg("Failed to Download PKG From:\n");
+        std::string msg(LANG::mainLang->FAILED_TO_DOWNLOAD_PKG_FROM);
         msg += url;
         notifi(NULL,msg.c_str());
         return;
@@ -159,7 +159,7 @@ download::~download() {
 }
 
 void download::setFinished() {
-    std::string downloadMessage = "Finished downloading:\n";
+    std::string downloadMessage = LANG::mainLang->FINISHED_DOWNLOADING;
     downloadMessage += pkg->getName();
     notifi(NULL, downloadMessage.c_str());
     finished = true;
@@ -169,7 +169,7 @@ void download::setFinished() {
 
 void download::setFailed(bool failed) {
     if(failed) {
-        std::string downloadMessage = "Error when downloading:\n";
+        std::string downloadMessage = LANG::mainLang->ERROR_WHEN_DOWNLOADING;
         downloadMessage += pkg->getURL();
         notifi(NULL, downloadMessage.c_str());
     }
