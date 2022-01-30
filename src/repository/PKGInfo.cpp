@@ -124,6 +124,14 @@ void PKGInfo::loadData(uint8_t * data, uint64_t data_size){
             sfoParam = (char*)sfoFile->getEntry("CATEGORY");
             if(sfoParam != nullptr)
                 PKG_SFO_TYPE = std::string(sfoParam);
+
+            sfoParam = (char*)sfoFile->getEntry("SYSTEM_VER");
+            if(sfoParam!= nullptr) {
+                char sysverchar[4];
+                snprintf(&sysverchar[0],4,"%0.2X%0.2X",sfoParam[3],sfoParam[2]);
+                SYSTEM_VERSION = std::stod(std::string(&sysverchar[0]))/10.;
+            }
+
             free(sfo);
         }
     }
@@ -153,6 +161,10 @@ const char * PKGInfo::getType(){
 }
 double PKGInfo::getVersion() const {
     return PKG_APP_VERSION;
+}
+
+double PKGInfo::getSystemVersion() const {
+    return SYSTEM_VERSION;
 }
 
 PKGInfo::~PKGInfo() {

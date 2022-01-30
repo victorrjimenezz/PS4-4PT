@@ -24,6 +24,7 @@ private:
     std::string url;
     std::string PKG_SFO_TYPE;
     double PKG_APP_VERSION = -1;
+    double SYSTEM_VERSION = -1;
     void loadData(uint8_t * data, uint64_t data_size);
     uint8_t * loadTable(uint64_t tableOffset, uint64_t tableSize);
     uint8_t * loadSFO(uint64_t param_sfo_offset, uint64_t param_sfo_size);
@@ -37,6 +38,7 @@ public:
     uint64_t getPkgSize();
     PNG * getIconCopy();
     double getVersion() const;
+    double getSystemVersion() const;
     ~PKGInfo();
 };
 #endif //APT_PKGINFO_H
