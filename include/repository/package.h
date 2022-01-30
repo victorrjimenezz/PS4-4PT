@@ -33,6 +33,8 @@ private:
     double version;
     std::string pkgSFOType;
     std::string versionString;
+    std::string systemVersionString;
+    double systemVersion;
     double currentInstalledVersion;
     double getCurrentInstalledVersion() const;
     void setDefaultIcon();
@@ -43,11 +45,13 @@ public:
     package(const char*url, bool local, bool * failed, const char * type = "", const char * repositoryName = "Direct Download");
     const char * getName();
     const char * getVersionStr();
+    const char * getSystemVersionStr();
     PNG * getIcon();
     const char * getTitleID();
     const char * getRepoName();
     const char * getURL();
     const char * getSFOType();
+    double getSystemVersion() const;
     double getVersion() const;
     uint64_t getPkgSize();
     const char * getPkgSizeMB();

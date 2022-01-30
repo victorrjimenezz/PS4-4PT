@@ -36,6 +36,7 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
     if(this->icon == nullptr)
         setDefaultIcon();
     this->version = pkgInfo.getVersion();
+    this->systemVersion = pkgInfo.getSystemVersion();
     this->repoName = repositoryName;
     this->packageSizeBytes = pkgInfo.getPkgSize();
 
@@ -51,6 +52,10 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
 
     stringStream << std::fixed << version;
     this->versionString = stringStream.str();
+
+    stringStream.str(std::string());
+    stringStream << std::fixed << systemVersion;
+    this->systemVersionString = stringStream.str();
 
     pkgSFOType = "";
     if(strcasecmp(pkgInfo.getType(),"gc") == 0)
@@ -70,6 +75,10 @@ double package::getCurrentInstalledVersion() const{
     if(!isInstalled())
         return version;
     return currentInstalledVersion;
+}
+
+double package::getSystemVersion() const{
+    return systemVersion;
 }
 
 package::PKGTypeENUM package::getPackageType(const char *packageType) {
@@ -173,6 +182,9 @@ const char *package::getTitleID() {
 }
 const char * package::getVersionStr(){
     return versionString.c_str();
+}
+const char * package::getSystemVersionStr(){
+    return systemVersionString.c_str();
 }
 
 double package::getCurrVer() {
