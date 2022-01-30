@@ -9,7 +9,6 @@
 
 class PNG;
 class package;
-class AnimatedPNG;
 class repository {
 private:
     const std::string id;
@@ -19,14 +18,16 @@ private:
     PNG * icon;
     std::vector<std::shared_ptr<package>> *packageList;
     bool updating;
+    bool updatingPKGS;
     bool updated;
+    bool willDelete;
     int updateYML();
     int updateIcon();
     int updatePKGS();
 public:
     explicit repository(const char * id, const char *name, const char * repoURL, const char * repoLocalPath, const char * iconPath);
     static repository* fetchRepo(const char *repoURLStr);
-    int updateRepository(AnimatedPNG * updateIcon = nullptr);
+    int updateRepository();
     PNG * getIcon();
     const char * getID();
     const char * getName();

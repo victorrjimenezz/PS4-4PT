@@ -8,22 +8,26 @@
 #include "../../include/file/fileDownloadRequest.h"
 #include "../../include/utils/notifi.h"
 #include "../../include/utils/PNG.h"
-#include "../../include/utils/AnimatedPNG.h"
 #include "../../include/utils/utils.h"
 #include "../../include/view/packageSearch.h"
 #include "../../include/repository/PKGInfo.h"
 
 #include <utility>
 #include <yaml-cpp/yaml.h>
+#include <thread>
+#include <mutex>
+std::mutex mtx;
 
 repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath) {
     this->name = std::string(name);
     this->icon = new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
     this->updating = false;
+    this->updatingPKGS = false;
     this->updated = true;
+    this->updated = false;
     packageList = new std::vector<std::shared_ptr<package>>;
 
-    updatePKGS();
+    std::thread(&repository::updatePKGS, std::ref(*this)).detach();
 }
 
 const char * repository::getID() {
@@ -31,25 +35,36 @@ const char * repository::getID() {
 }
 
 int repository::updatePKGS() {
-
-    std::string repoYMLPath = repoLocalPath + "repo.yml";
-
-    if(fileExists(repoYMLPath.c_str()) == 0){
-        LOG << "REPO DIRECTORY DOES NOT EXIST!" << repoYMLPath;
-        return -1;
-    }
-    this->clearPackageList();
+    mtx.lock();
+    int ret = 0;
     std::string downloadURL;
 
     bool failedInit;
     YAML::Node repoYAML;
+
+    updatingPKGS = true;
+    std::string repoYMLPath = repoLocalPath + "repo.yml";
+
+    if(fileExists(repoYMLPath.c_str()) == 0){
+        LOG << "REPO DIRECTORY DOES NOT EXIST!" << repoYMLPath;
+        mtx.unlock();
+        ret = -1;
+        goto err;
+    }
+
+    this->clearPackageList();
+
     try {
         repoYAML = YAML::LoadFile(repoYMLPath);
     } catch(const YAML::ParserException& ex) {
         LOG << ex.what();
-        return -1;
+        mtx.unlock();
+        ret = -1;
+        goto err;
     }
     for(YAML::const_iterator it=repoYAML.begin(); it!=repoYAML.end(); ++it) {
+        if(willDelete)
+            break;
         if (it->second) {
             if((it->second).IsMap()) {
                 const std::string &key = it->first.as<std::string>();
@@ -75,7 +90,13 @@ int repository::updatePKGS() {
             }
         }
     }
-    return 0;
+
+    err:
+    packageSearch::mainPackageSearch->updatePackages();
+    updatingPKGS = false;
+    updated = true;
+    mtx.unlock();
+    return ret;
 }
 
 PNG * repository::getIcon() {
@@ -168,21 +189,31 @@ int repository::updateIcon() {
     return 0;
 }
 
-int repository::updateRepository(AnimatedPNG * updateIconPNG) {
+int repository::updateRepository() {
     if(updating)
         return -1;
     updating = true;
-    if(updateIconPNG != nullptr)
-        updateIconPNG->play();
+    int packages;
+    if(willDelete)
+        goto deleting;
     updateYML();
+    if(willDelete)
+        goto deleting;
     updateIcon();
-    int packages = updatePKGS();
-    if(updateIconPNG != nullptr)
-        updateIconPNG->stop();
+    if(willDelete)
+        goto deleting;
+    packages = updatePKGS();
+    if(willDelete)
+        goto deleting;
     updating = false;
-    packageSearch::mainPackageSearch->updatePackages();
     updated = true;
+    updatingPKGS = false;
     return packages;
+
+    deleting:
+    updating = false;
+    updatingPKGS = false;
+    return 0;
 }
 
 std::vector<std::shared_ptr<package>> * repository::getPackageList() {
@@ -200,12 +231,16 @@ void repository::clearPackageList() {
 }
 
 void repository::deleteRepository() {
-    while(updating)
+    willDelete = true;
+    while(isUpdating())
         continue;
     removeDir(repoLocalPath.c_str());
     delete this;
 }
 repository::~repository() {
+    willDelete = true;
+    while(isUpdating())
+        continue;
     delete icon;
 
     for(auto & package : *packageList)
@@ -215,7 +250,7 @@ repository::~repository() {
 }
 
 bool repository::isUpdating() const {
-    return updating;
+    return updating || updatingPKGS;
 }
 
 repository *repository::fetchRepo(const char *repoURL) {
