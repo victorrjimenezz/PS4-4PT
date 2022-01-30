@@ -99,6 +99,7 @@ int LANG::loadDefLang(){
     DOWNLOAD = ("DOWNLOAD");
     SEARCH = ("SEARCH");
     SPACE = ("SPACE");
+    FOR_FW = ("For Firmware: ");
     return 0;
 }
 
@@ -247,6 +248,11 @@ int LANG::loadLangFrom(const std::string& langFile) {
     }
     if(langFileYAML["SPACE"]){
         SPACE = langFileYAML["SPACE"].as<std::string>("");
+    } else {
+        return -1;
+    }
+    if(langFileYAML["FOR_FW"]){
+        FOR_FW = langFileYAML["FOR_FW"].as<std::string>("");
     } else {
         return -1;
     }

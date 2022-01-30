@@ -44,6 +44,7 @@ public:
     std::string DOWNLOAD;
     std::string SEARCH;
     std::string SPACE;
+    std::string FOR_FW;
     static LANG * mainLang;
     explicit LANG();
     static int initLang();
