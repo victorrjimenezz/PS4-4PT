@@ -124,7 +124,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 ### Version 2.35 (few days)
 
-- [ ] ADD View Over Repo showing a loading screen
+- [ ] Add View Over RepositoryView showing exactly what's being loaded, sort of a terminal
 - [ ] Italian Language Support
 
 ### Most Urgent | Version 2.4 (few days)
