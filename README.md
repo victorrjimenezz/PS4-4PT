@@ -126,7 +126,17 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 - [X] Support for Themes
 - [X] If the PKG has no icon, load one from the default icons
-- [ ] German, English, Spanish, Italian Language support
+- [X] Fixed a bug where invalid PKG's in /user/app would cause segmentation fault
+- [X] Add page indicator
+- [X] When users press O in the repository package list page while being on the keyboard, the keyboard is exited, instead of the whole page
+- [X] Fixed bug that would cause the app to crash if the arrow down button were pressed when the last element of a search was selected.
+- [X] Changed keyboard coloring to allow for better usability
+- [X] Add PS4 PKG Firmware Version Compatibility Information
+- [X] German, Spanish, Italian Language support
+
+### Version 2.35 (few days)
+
+- [ ] ADD View Over Repo showing a loading screen
 
 ### Most Urgent | Version 2.4 (few days)
 
@@ -135,16 +145,18 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 ### Version 2.5 (~3 Months)
 
 - [ ] Add customization options, such as disabling notifications
-- [ ] Add a new PKG List view where only covers are displayed
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
-- [ ] Add PS4 Version Compatibility Information
+- [ ] Filter PKGs by type 
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
 - [ ] Change Keyboard to UI IME
+- [ ] Implement sorting by size, version, alphabetically...
+- [ ] Add Short PKG Description when holding key
+- [ ] Add a new PKG List view where only covers are displayed
 - [ ] Support for more languages
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
@@ -157,9 +169,8 @@ See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a f
 
 The app is available in:
 - [X] English
-- [ ] Italian
-- [ ] German
-- [ ] Spanish
+- [X] German
+- [X] Spanish
 
 To add support for further languages, please [contact me](https://twitter.com/victorrjimenezz) or [open an issue](https://github.com/victorrjimenezz/4PT-Repository/issues)
 
