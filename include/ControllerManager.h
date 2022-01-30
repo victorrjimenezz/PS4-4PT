@@ -46,6 +46,7 @@ private:
     static bool controllerActive;
 
     Controller *controller = nullptr;
+    static ControllerManager * controllerManager;
     subView * currentSubView = nullptr;
     tabView * tabView = nullptr;
     subView* subViews[VIEWS];
@@ -61,6 +62,9 @@ public:
     ControllerManager(class tabView * tabView, subView* subViews[VIEWS]);
     void initController();
     void stopController();
+    int getSubViews();
+    subView* getSubViewAt(int subView);
+    static ControllerManager* getControllerManager();
     ~ControllerManager();
     subView *getCurrentView();
 };

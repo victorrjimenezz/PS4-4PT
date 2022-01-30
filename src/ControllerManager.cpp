@@ -10,7 +10,11 @@
 #include <thread>
 
 bool ControllerManager::controllerActive;
+
+ControllerManager * ControllerManager::controllerManager = nullptr;
+
 ControllerManager::ControllerManager(class tabView *tabView, subView* subViews[VIEWS]) : subViews() {
+    controllerManager=this;
     this->tabView = tabView;
     controller = new Controller();
     controller->Init(-1);
@@ -196,4 +200,17 @@ ControllerManager::~ControllerManager() {
 
     stopController();
     delete controller;
+}
+
+int ControllerManager::getSubViews() {
+    return VIEWS;
+}
+subView* ControllerManager::getSubViewAt(int subView) {
+    if(VIEWS <= subView)
+        return nullptr;
+    return subViews[subView];
+}
+
+ControllerManager *ControllerManager::getControllerManager() {
+    return controllerManager;
 }
