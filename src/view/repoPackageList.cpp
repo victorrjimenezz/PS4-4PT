@@ -132,6 +132,12 @@ void repoPackageList::updateView() {
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
                 printStr += currPackage->getTitleID();
+
+                if(currPackage->getSystemVersion() > 0) {
+                    printStr += " | "+LANG::mainLang->FOR_FW;
+                    printStr +=currPackage->getSystemVersionStr();
+                    printStr+="+";
+                }
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                     textColor, textColor);
                 if(currPackage->isInstalled()) {
@@ -182,6 +188,12 @@ void repoPackageList::updateView() {
             printStr += currPackage->getVersionStr();
             printStr += " | ";
             printStr += currPackage->getTitleID();
+
+            if(currPackage->getSystemVersion() > 0) {
+                printStr += " | "+LANG::mainLang->FOR_FW;;
+                printStr +=currPackage->getSystemVersionStr();
+                printStr+="+";
+            }
             mainScene->DrawText((char *) printStr.c_str(), fontSmall,
                                 packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                 selectedColor, selectedColor);

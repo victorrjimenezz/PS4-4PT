@@ -136,6 +136,11 @@ void packageSearch::updateView() {
                 printStr += currPackage->getTitleID();
                 printStr += " | ";
                 printStr += currPackage->getRepoName();
+                if(currPackage->getSystemVersion() > 0) {
+                    printStr += " | "+LANG::mainLang->FOR_FW;;
+                    printStr +=currPackage->getSystemVersionStr();
+                    printStr+="+";
+                }
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                     textColor, textColor);
                 printStr = LANG::mainLang->TYPE;
@@ -181,6 +186,11 @@ void packageSearch::updateView() {
             printStr += currPackage->getTitleID();
             printStr += " | ";
             printStr += currPackage->getRepoName();
+            if(currPackage->getSystemVersion() > 0) {
+                printStr += " | "+LANG::mainLang->FOR_FW;;
+                printStr +=currPackage->getSystemVersionStr();
+                printStr+="+";
+            }
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                 selectedColor, selectedColor);
             printStr = LANG::mainLang->TYPE;
