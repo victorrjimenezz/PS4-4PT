@@ -43,10 +43,10 @@ int LANG::loadLang(){
             LOG << "DETECTED SPANISH";
             ret= changeLangTo("ES");
             break;
-        case ORBIS_SYSTEM_PARAM_LANG_ITALIAN:
+       /* case ORBIS_SYSTEM_PARAM_LANG_ITALIAN:
             LOG << "DETECTED ITALIAN";
             ret= changeLangTo("IT");
-            break;
+            break;*/
         case ORBIS_SYSTEM_PARAM_LANG_ENGLISH_GB:
         case ORBIS_SYSTEM_PARAM_LANG_ENGLISH_US:
             LOG << "DETECTED ENGLISH";
