@@ -104,6 +104,15 @@ void repositoryView::updateRepositories() {
 }
 
 void repositoryView::updateView() {
+    std::string printStr;
+    int totalPages = ceil((double)repositoryList->size()/reposPerPage);
+    if(totalPages ==0) totalPages++;
+    if(currPage+1<10)
+        printStr+="0";
+    printStr+= std::to_string(currPage+1) + "/";
+    if(totalPages<10)
+        printStr+="0";
+    printStr+= std::to_string(totalPages);
     for(int i =0; i< reposPerPage; i++){
         repository * currRepo = currRepos[i];
         repoRectangle repoRectangle = repoRectangles[i];
