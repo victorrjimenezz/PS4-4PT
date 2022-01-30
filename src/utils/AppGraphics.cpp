@@ -278,9 +278,6 @@ void Scene2D::DrawText(char *txt, FT_Face face, int startX, int startY, Color bg
         CharFromUtf8(&cp, &txt[n], NULL);
         glyph_index = FT_Get_Char_Index(face, cp);
 
-        // Get the glyph for the ASCII code
-        //glyph_index = FT_Get_Char_Index(face, txt[n]);
-
 
         int flag = 0;
         flag |= FT_LOAD_RENDER;
