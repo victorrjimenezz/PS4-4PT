@@ -101,7 +101,7 @@ The current working app features are:
 - Adding/Removing Repositories
 - Searching apps, filtering by name and repository
 - Install/Uninstall downloaded PKGs
-- App has English, Spanish, German, and Italian support
+- App has English, Spanish, and German support
 - 4PT updates itself automatically
 
 ***
