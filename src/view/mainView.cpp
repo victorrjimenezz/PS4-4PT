@@ -53,7 +53,8 @@ mainView::mainView(bool isFirstRun) : subViews()  {
 
     // Initialize the font faces with arial (must be included in the package root!)
     std::string font(DATA_PATH);
-    font+="assets/fonts/Gontserrat-Regular.ttf";
+    //font+="assets/fonts/Gontserrat-Regular.ttf";
+    font+="assets/fonts/Noto_Sans/NotoSans-Regular.ttf";
 
     const char * fontC = font.c_str();
     // Set colors
