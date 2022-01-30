@@ -6,8 +6,8 @@
 #define CYDI4_BASE_H
 
 //APP VERSION
-#define APP_VERSION 2.10
-#define APP_TITLEID "PAPT00210"
+#define APP_VERSION 2.30
+#define APP_TITLEID "PAPT00230"
 #define MAIN_URL "https://www.4pt-project.com/"
 
 
@@ -17,6 +17,7 @@
 #define INSTALL_PATH "/user/app/"
 #define DOWNLOAD_PATH INSTALL_PATH
 #define REPO_PATH "repositories/"
+#define LANG_PATH DATA_PATH "assets/lang/"
 
 #define LOGS_PATH "logs/"
 #define LOGO_PATH "/mnt/sandbox/" APP_TITLEID "_000/app0/assets/images/logo.png"
@@ -33,9 +34,12 @@
 
 //Networking
 #define ONE_MB 10e5
-#define USER_AGENT "PS4-4PT/2.10"//"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
+#define USER_AGENT "PS4-4PT/2.30" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
 #define HTTP_SUCCESS 1
-#define NET_POOLSIZE (4 * 1024)
+#define BGFT_HEAP_SIZE (1 * 1024 * 1024)
+#define HTTP_HEAP_SIZE (1024 * 1024)
+#define SSL_HEAP_SIZE (4*128 * 1024)
+#define NET_HEAP_SIZE   (1 * 1024 * 1024)
 
 // Font information
 #define FONT_SIZE_LARGE  128
@@ -92,6 +96,10 @@
 #define DOWNLOAD_DATE_POS 0.6
 #define REPO_X_POS 0.1
 #define REPO_ICON_POS 0.2
+
+//SEARCH
+#define CURR_PAGE_X 0.953
+#define CURR_PAGE_Y 0.5
 
 //String
 #define DOWNLOAD_CHARACTER_LIMIT 18
