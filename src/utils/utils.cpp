@@ -20,17 +20,6 @@ uint16_t g_Firmware;
 jbc_cred g_Cred;
 jbc_cred g_RootCreds;
 
-//Find substr in String case insensitive;
-bool findStringIC(const std::string & strHaystack, const std::string & strNeedle) {
-    auto it = std::search(
-            strHaystack.begin(), strHaystack.end(),
-            strNeedle.begin(),   strNeedle.end(),
-            [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-    );
-    return (it != strHaystack.end() );
-}
-
-
 int CharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end)
 {
     unsigned int c = (unsigned int)-1;
