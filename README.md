@@ -122,21 +122,10 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
-### Version 2.3 (few days)
-
-- [X] Support for Themes
-- [X] If the PKG has no icon, load one from the default icons
-- [X] Fixed a bug where invalid PKG's in /user/app would cause segmentation fault
-- [X] Add page indicator
-- [X] When users press O in the repository package list page while being on the keyboard, the keyboard is exited, instead of the whole page
-- [X] Fixed bug that would cause the app to crash if the arrow down button were pressed when the last element of a search was selected.
-- [X] Changed keyboard coloring to allow for better usability
-- [X] Add PS4 PKG Firmware Version Compatibility Information
-- [X] German, Spanish, Italian Language support
-
 ### Version 2.35 (few days)
 
 - [ ] ADD View Over Repo showing a loading screen
+- [ ] Italian Language Support
 
 ### Most Urgent | Version 2.4 (few days)
 
