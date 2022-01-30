@@ -6,11 +6,12 @@
 #include "../../include/repository/package.h"
 #include "../../include/repository/repository.h"
 #include "../../include/utils/utils.h"
-#include "../../include/utils/notifi.h"
 #include "../../include/file/download.h"
 #include "../../include/utils/PNG.h"
+#include "../../include/utils/LANG.h"
 #include "../../include/view/downloadView.h"
 #include "../../include/view/repositoryView.h"
+#include "../../include/utils/logger.h"
 
 #include <vector>
 #include <iterator>
@@ -26,7 +27,7 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
 
     bgColor = {255,255,255};
     selectedColor = {0,0,0};
-    textColor = {90, 90, 90};
+    textColor = {180, 180, 180};
     updateTextColor = {255,0,0};
 
     this->isOnKeyboard = false;
@@ -34,7 +35,7 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,"SEARCH", "",isOnKeyboard, false);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "",isOnKeyboard, false);
 
     updatePackages();
 
@@ -76,28 +77,50 @@ void packageSearch::updatePackages() {
     packageList.clear();
     for(auto repository : *repositoryList){
         for(const auto& package : *(repository->getPackageList())){
-            packageList.emplace_back(package);
+            packageList.push_back(package);
         }
     }
-    filterPackages(keyboardInput->readText());
+    filterPackages(keyboardInput->readText().c_str());
 }
 
 void packageSearch::filterPackages(const char * name) {
+    for(auto pkg : displayPackageList)
+        pkg.reset();
     displayPackageList.clear();
-    for(auto & package : packageList){
-        std::string hayStack =  package->getName();
-        std::string needle = name;
-        if (findStringIC(hayStack,needle)) {
+    if(strcasecmp(name,"")==0) {
+        for (auto &package: packageList) {
             displayPackageList.emplace_back(package);
         }
+    }else {
+        currPage = 0;
+        selected = 0;
+        for (auto &package: packageList) {
+            std::string hayStack = package->getName();
+            std::string needle = name;
+            std::transform(hayStack.begin(), hayStack.end(), hayStack.begin(), ::toupper);
+            std::transform(needle.begin(), needle.end(), needle.begin(), ::toupper);
+
+            if (hayStack.find(needle) != std::string::npos) {
+                displayPackageList.emplace_back(package);
+            }
+        }
     }
+
     fillPage();
 }
 
 void packageSearch::updateView() {
     if(keyboardInput->hasChanged())
-        filterPackages(keyboardInput->readText());
+        filterPackages(keyboardInput->readText().c_str());
     std::string printStr;
+    int totalPages = ceil((double)displayPackageList.size()/packagesPerPage);
+    if(totalPages ==0) totalPages++;
+    if(currPage+1<10)
+        printStr+="0";
+    printStr+= std::to_string(currPage+1) + "/";
+    if(totalPages<10)
+        printStr+="0";
+    printStr+= std::to_string(totalPages);
     for(int i =0; i < packagesPerPage; i++){
         std::shared_ptr<package> currPackage = currPackages[i];
         packageRectangle packageRectangle = packageRectangles[i];
@@ -107,7 +130,7 @@ void packageSearch::updateView() {
             if(currPackage != nullptr){
                 mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                     textColor, textColor);
-                printStr = "Version: ";
+                printStr = LANG::mainLang->VERSION;
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
                 printStr += currPackage->getTitleID();
@@ -115,7 +138,7 @@ void packageSearch::updateView() {
                 printStr += currPackage->getRepoName();
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                     textColor, textColor);
-                printStr = "Type: ";
+                printStr = LANG::mainLang->TYPE;
                 printStr += TypeStr[currPackage->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y - 1 * packageRectangle.height / 8,
@@ -123,16 +146,16 @@ void packageSearch::updateView() {
                 currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
                 if(currPackage->isInstalled()) {
                     if(currPackage->getVersion()>currPackage->getCurrVer()) {
-                        printStr = "Update Available ";
+                        printStr = LANG::mainLang->UPDATE_AVAILABLE;
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                             updateTextColor, updateTextColor);
                     } else {
-                        printStr = "Installed";
+                        printStr = LANG::mainLang->INSTALLED;
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                             textColor, textColor);
                     }
                 }
-                printStr = "Size: ";
+                printStr = LANG::mainLang->SIZE;
                 printStr+= currPackage->getPkgSizeMB();
                 printStr += "MB";
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
@@ -152,7 +175,7 @@ void packageSearch::updateView() {
             std::shared_ptr<package> currPackage = currPackages[selected];
             mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                 selectedColor, selectedColor);
-            printStr = "Version: ";
+            printStr = LANG::mainLang->VERSION;
             printStr += currPackage->getVersionStr();
             printStr += " | ";
             printStr += currPackage->getTitleID();
@@ -160,7 +183,7 @@ void packageSearch::updateView() {
             printStr += currPackage->getRepoName();
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
                                 selectedColor, selectedColor);
-            printStr = "Type: ";
+            printStr = LANG::mainLang->TYPE;
             printStr += TypeStr[currPackage->getPackageType()];
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                 packageRectangle.y - 1 * packageRectangle.height / 8,
@@ -168,16 +191,16 @@ void packageSearch::updateView() {
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
             if(currPackage->isInstalled()) {
                 if(currPackage->getVersion()>currPackage->getCurrVer()) {
-                    printStr = "Update Available ";
+                    printStr = LANG::mainLang->UPDATE_AVAILABLE;
                     mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                         updateTextColor, updateTextColor);
                 } else {
-                    printStr = "Installed";
+                    printStr = LANG::mainLang->INSTALLED;
                     mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                         selectedColor, selectedColor);
                 }
             }
-            printStr = "Size: ";
+            printStr = LANG::mainLang->SIZE;
             printStr+= currPackage->getPkgSizeMB();
             printStr += "MB";
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
@@ -245,7 +268,7 @@ void packageSearch::arrowUp(){
 void packageSearch::arrowDown(){
     if(!isOnKeyboard) {
         selected++;
-        int repoSize = (int) packageList.size();
+        int repoSize = (int) displayPackageList.size();
         if (selected + packagesPerPage * currPage < repoSize) {
             if (selected >= packagesPerPage) {
                 selected = 0;
@@ -277,4 +300,10 @@ packageSearch::~packageSearch() {
 
 bool packageSearch::isActive() {
     return true;
+}
+
+void packageSearch::langChanged() {
+        delete keyboardInput;
+        keyboardInput =  new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "",isOnKeyboard, false);
+
 }
