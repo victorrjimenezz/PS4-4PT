@@ -15,6 +15,7 @@
 #include "../../include/utils/AudioManager.h"
 #include "../../include/utils/logger.h"
 #include "../../include/file/fileManager.h"
+#include "../../include/utils/LANG.h"
 
 #include <string>
 #include <vector>
@@ -32,14 +33,14 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
 
     bgColor = {255,255,255};
     selectedColor = {0,0,0};
-    textColor = {90, 90, 90};
+    textColor = {180, 180, 180};
 
     this->isOnKeyboard = false;
     this->fontLarge = fontLarge;
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, "ADD REPO","https://",isOnKeyboard);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",isOnKeyboard);
     child = nullptr;
 
     currPage = 0;
@@ -133,20 +134,26 @@ void repositoryView::updateView() {
             switch (selectedOption) {
                 case OPEN:
                     openIconSelected->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    updateIcon->Draw(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    if(currRepo->isUpdating())
+                        updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    else
+                        updateIcon->Draw(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
                     deleteIcon->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
                     break;
                 case UPDATE:
                     openIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
                     if(currRepo->isUpdating())
-                        updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
                     else
                         updateIconSelected->Draw(mainScene,updateIconX,repoRectangle.y-3*repoRectangle.height/8);
                     deleteIcon->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
                     break;
                 case DELETE:
                     openIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    updateIcon->Draw(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    if(currRepo->isUpdating())
+                        updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    else
+                        updateIcon->Draw(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
                     deleteIconSelected->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
                     break;
             }
@@ -163,13 +170,13 @@ void repositoryView::hasEntered(){
         repoURLTEMP+='/';
     const char * repoURL = repoURLTEMP.c_str();
     if(!fileDownloadRequest::verifyURL(repoURL)) {
-        popDialog("INVALID URL");
+        popDialog((LANG::mainLang->INVALID_URL+repoURLTEMP).c_str());
         return;
     }
 
     for(repository *repository : *repositoryList){
         if(strcasecmp(repository->getRepoURL(),repoURL) == 0) {
-            popDialog("Repository already loaded!");
+            popDialog(LANG::mainLang->REPO_ALREADY_LOADED.c_str());
             return;
         }
     }
@@ -178,7 +185,7 @@ void repositoryView::hasEntered(){
         addRepository(repo);
         fillPage();
     } else {
-        std::string errmessage = "Repo not found at: ";
+        std::string errmessage = LANG::mainLang->NO_REPO_FOUND_AT;
         errmessage+=repoURL;
         popDialog(errmessage.c_str());
     }
@@ -194,11 +201,14 @@ void repositoryView::pressX(){
         repoPackageList * repoPackageListView = repoPackageViewList.at(selected+currPage*reposPerPage);
         switch (selectedOption) {
             case OPEN:
-                repoPackageListView->setActive();
-                child = repoPackageListView;
+                if(!currRepo->isUpdating()) {
+                    repoPackageListView->setActive();
+                    child = repoPackageListView;
+                }
                 break;
             case UPDATE:
-                std::thread([&capture0 = *currRepo, updateIcon = std::ref(updateIcon)] { capture0.updateRepository(updateIcon); }).detach();
+                if(!currRepo->isUpdating())
+                    std::thread([&capture0 = *currRepo, updateIcon = std::ref(updateIcon)] { capture0.updateRepository(); }).detach();
                 break;
             case DELETE:
                 deleteRepo(currRepo->getID());
@@ -441,4 +451,8 @@ int repositoryView::loadSavedRepos() {
             }
         }
         return 0;
+}
+void repositoryView::langChanged() {
+    delete keyboardInput;
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",isOnKeyboard);
 }
