@@ -287,6 +287,16 @@ int mkDirs(){
     std::stringstream errorCode;
     errorCode << "Could Not Make Dirs\n";
 
+    if(!folderExists(STORED_PATH)) {
+        tempRet = mkDir(STORED_PATH);
+        if (tempRet != 0) {
+            ret = -1;
+            errorCode << std::hex << ret;
+            notifi(NULL,errorCode.str().c_str());
+            goto err;
+        }
+    }
+
     if(!folderExists(repoPath.c_str())) {
         ret = 1;
         tempRet = mkDir(repoPath.c_str());
