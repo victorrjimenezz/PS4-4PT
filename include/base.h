@@ -58,8 +58,8 @@
 //KeyboardInput
 #define DICT_SIZE 26
 #define DICT "abcdefghijklmnopqrstuvwxyz"
-#define SPEC_DICT_SIZE 15
-#define SPEC_DICT "1234567890_.:-/"
+#define SPEC_DICT_SIZE 16
+#define SPEC_DICT "1234567890?_.:-/"
 #define KEYBOARD_VERTICAL_BORDER_SIZE 0.05
 #define KEYBOARD_HORIZONTAL_BORDER_SIZE 0.01
 #define KEYBOARD_X_POS 0.05
