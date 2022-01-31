@@ -125,10 +125,8 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 ### Version 2.35 (few days)
 
 - [ ] Add View Over RepositoryView showing exactly what's being loaded, sort of a terminal
-- [ ] Italian Language Support
-
-### Most Urgent | Version 2.4 (few days)
-
+- [X] Add _ to the keyboard
+- [X] Italian Language Support
 - [ ] Fix bug that causes the app not to be able to initialize for some users
 
 ### Version 2.5 (~3 Months)
@@ -158,6 +156,7 @@ See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a f
 
 The app is available in:
 - [X] English
+- [X] Italian by [@imgiovi](https://www.twitter.com/imgiovi)
 - [X] German
 - [X] Spanish
 
