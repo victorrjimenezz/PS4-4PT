@@ -127,7 +127,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Add View Over RepositoryView showing exactly what's being loaded, sort of a terminal
 - [X] Add _,? to the keyboard
 - [X] Italian Language Support
-- [ ] Fix bug that causes the app not to be able to initialize for some users
+- [X] Fix bug that causes the app to close on initialization due to an error when initializing for some users
 - [ ] Fix bug that causes the app to hang on the initializing screen when no internet connection available
 
 ### Version 2.5 (~3 Months)
