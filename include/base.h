@@ -6,8 +6,8 @@
 #define CYDI4_BASE_H
 
 //APP VERSION
-#define APP_VERSION 2.30
-#define APP_TITLEID "PAPT00230"
+#define APP_VERSION 2.35
+#define APP_TITLEID "PAPT00235"
 #define MAIN_URL "https://www.4pt-project.com/"
 
 
@@ -34,7 +34,7 @@
 
 //Networking
 #define ONE_MB 10e5
-#define USER_AGENT "PS4-4PT/2.30" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
+#define USER_AGENT "PS4-4PT/2.35" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
 #define HTTP_SUCCESS 1
 #define BGFT_HEAP_SIZE (1 * 1024 * 1024)
 #define HTTP_HEAP_SIZE (1024 * 1024)
@@ -58,8 +58,8 @@
 //KeyboardInput
 #define DICT_SIZE 26
 #define DICT "abcdefghijklmnopqrstuvwxyz"
-#define SPEC_DICT_SIZE 14
-#define SPEC_DICT "1234567890.:-/"
+#define SPEC_DICT_SIZE 15
+#define SPEC_DICT "1234567890_.:-/"
 #define KEYBOARD_VERTICAL_BORDER_SIZE 0.05
 #define KEYBOARD_HORIZONTAL_BORDER_SIZE 0.01
 #define KEYBOARD_X_POS 0.05
