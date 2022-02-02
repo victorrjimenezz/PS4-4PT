@@ -9,8 +9,10 @@
 
 #include "subView.h"
 #include "../utils/AppGraphics.h"
+#include "../../include/view/terminalDialogView.h"
 
 #include <vector>
+
 class PNG;
 class AnimatedPNG;
 class repository;
@@ -33,6 +35,8 @@ private:
     int deleteIconX;
     int deleteRepo(const char * id);
 
+    PNG * logIcon;
+    PNG * logIconSelected;
     PNG * openIcon;
     PNG * openIconSelected;
     int openIconX;
@@ -67,10 +71,11 @@ private:
     FT_Face fontSmall{};
 
     keyboardInput * keyboardInput;
-
+    terminalDialogView* dialog;
 
     SelectedOption selectedOption;
 
+    std::string terminalRepoURL;
     bool isOnKeyboard;
     const int frameWidth = 0;
     const int frameHeight = 0;
@@ -99,5 +104,7 @@ public:
     bool isActive();
     ~repositoryView();
     void addRepository(repository * repository);
+
+    repository * getCurrentRepository();
 };
 #endif //CYDI4_REPOSITORYVIEW_H

@@ -40,7 +40,9 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",isOnKeyboard);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://192.168.1.11/victorrepo",isOnKeyboard);
+
+    this->dialog = new terminalDialogView(this, mainScene, frameWidth, frameHeight*(1-TABVIEWSIZE),fontSmall);
     child = nullptr;
 
     currPage = 0;
@@ -66,6 +68,8 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     iconPath+="assets/images/";
 
     this->openIconX=repoX+(repoRectangles[0].width-repoX)*OPEN_ICON_POS;
+    this->logIcon= new PNG((iconPath+"log.png").c_str(), ICON_DEFAULT_WIDTH, ICON_DEFAULT_HEIGHT);
+    this->logIconSelected= new PNG((iconPath+"logSelected.png").c_str(), ICON_DEFAULT_WIDTH, ICON_DEFAULT_HEIGHT);
     this->openIcon= new PNG((iconPath+"open.png").c_str());
     this->openIconSelected= new PNG((iconPath+"openSelected.png").c_str());
 
@@ -140,37 +144,53 @@ void repositoryView::updateView() {
         mainScene->DrawText((char *) currRepo->getRepoURL(), fontSmall, repoRectangle.x, repoRectangle.y+3*repoRectangle.height/8,
                             selectedColor, selectedColor);
         currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
+        if(currRepo->isUpdating()){
             switch (selectedOption) {
                 case OPEN:
-                    openIconSelected->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    if(currRepo->isUpdating())
-                        updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    else
-                        updateIcon->Draw(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    logIconSelected->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
                     deleteIcon->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
                     break;
                 case UPDATE:
-                    openIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    if(currRepo->isUpdating())
-                        updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    else
-                        updateIconSelected->Draw(mainScene,updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    logIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
                     deleteIcon->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
                     break;
                 case DELETE:
-                    openIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    if(currRepo->isUpdating())
-                        updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    else
-                        updateIcon->Draw(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    logIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
+                    updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
                     deleteIconSelected->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
                     break;
             }
+        } else {
+            switch (selectedOption) {
+                case OPEN:
+                    openIconSelected->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    break;
+                case UPDATE:
+                    openIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    updateIconSelected->Draw(mainScene, updateIconX,repoRectangle.y - 3 * repoRectangle.height / 8);
+                    deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    break;
+                case DELETE:
+                    openIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    deleteIconSelected->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                    break;
+            }
+        }
 
     }
     keyboardInput->updateView();
     if(keyboardInput->hasEntered())
         hasEntered();
+    if(!terminalRepoURL.empty()){
+        dialog->openTerminalDialogView(terminalRepoURL.c_str());
+        terminalRepoURL = "";
+        child = dialog;
+    }
 }
 
 void repositoryView::hasEntered(){
@@ -189,6 +209,9 @@ void repositoryView::hasEntered(){
             return;
         }
     }
+
+    dialog->openTerminalDialogView(repoURL);
+    this->child = dialog;
     repository *repo = repository::fetchRepo(repoURL);
     if(repo != nullptr) {
         addRepository(repo);
@@ -213,11 +236,16 @@ void repositoryView::pressX(){
                 if(!currRepo->isUpdating()) {
                     repoPackageListView->setActive();
                     child = repoPackageListView;
+                } else {
+                    terminalRepoURL = currRepo->getRepoURL();
                 }
                 break;
             case UPDATE:
-                if(!currRepo->isUpdating())
-                    std::thread([&capture0 = *currRepo, updateIcon = std::ref(updateIcon)] { capture0.updateRepository(); }).detach();
+                if(!currRepo->isUpdating()) {
+                    std::thread([&capture0 = *currRepo, updateIcon = std::ref(
+                            updateIcon)] { capture0.updateRepository(); }).detach();
+                    selectedOption = OPEN;
+                }
                 break;
             case DELETE:
                 deleteRepo(currRepo->getID());
@@ -290,9 +318,12 @@ void repositoryView::arrowDown(){
 }
 void repositoryView::arrowRight() {
     if(!isOnKeyboard) {
+        repository *currRepo = currRepos[selected];
+        if(currRepo == nullptr)
+            return;
         switch(selectedOption){
             case OPEN:
-                selectedOption = UPDATE;
+                selectedOption = currRepo->isUpdating() ? DELETE : UPDATE;
                 break;
             case UPDATE:
                 selectedOption = DELETE;
@@ -307,6 +338,9 @@ void repositoryView::arrowRight() {
 }
 void repositoryView::arrowLeft() {
     if(!isOnKeyboard) {
+        repository *currRepo = currRepos[selected];
+        if(currRepo == nullptr)
+            return;
         switch(selectedOption){
             case OPEN:
                 break;
@@ -314,7 +348,7 @@ void repositoryView::arrowLeft() {
                 selectedOption = OPEN;
                 break;
             case DELETE:
-                selectedOption = UPDATE;
+                selectedOption = currRepo->isUpdating() ? OPEN : UPDATE;
             default:
                 break;
         }
@@ -332,10 +366,21 @@ repositoryView::~repositoryView() {
         delete repoPackageView;
 
     repositoryList.reset();
-    delete child;
+
     delete keyboardInput;
+
     delete deleteIcon;
     delete deleteIconSelected;
+    delete openIcon;
+    delete openIconSelected;
+
+    delete logIcon;
+    delete logIconSelected;
+
+    delete updateIcon;
+    delete updateIconSelected;
+
+    delete dialog;
 }
 void repositoryView::deleteChild() {
     child = nullptr;
@@ -463,5 +508,9 @@ int repositoryView::loadSavedRepos() {
 }
 void repositoryView::langChanged() {
     delete keyboardInput;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",isOnKeyboard);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://192.168.1.11/victorrepo",isOnKeyboard);
+}
+
+repository * repositoryView::getCurrentRepository() {
+    return currRepos[selected];
 }
