@@ -9,6 +9,7 @@
 #include "../../include/utils/notifi.h"
 #include "../../include/utils/PNG.h"
 #include "../../include/utils/utils.h"
+#include "../../include/view/terminalDialogView.h"
 #include "../../include/view/packageSearch.h"
 #include "../../include/repository/PKGInfo.h"
 
@@ -25,6 +26,7 @@ repository::repository(const char * id, const char *name, const char *repoURL, c
     this->updatingPKGS = false;
     this->updated = true;
     this->updated = false;
+    this->willDelete =false;
     packageList = new std::vector<std::shared_ptr<package>>;
 
     std::thread(&repository::updatePKGS, std::ref(*this)).detach();
@@ -36,6 +38,7 @@ const char * repository::getID() {
 
 int repository::updatePKGS() {
     mtx.lock();
+    std::string stateString;
     int ret = 0;
     std::string downloadURL;
 
@@ -79,14 +82,24 @@ int repository::updatePKGS() {
                     continue;
                 std::string pkgPath = repoURL + attributes["pkgPath"].as<std::string>("");
                 std::string type = attributes["type"].as<std::string>("");
+
+                stateString = "Fetching: " + pkgPath;
+                LOG << stateString;
+
                 std::shared_ptr<package> pkg(
                         new package(pkgPath.c_str(), false, &failedInit, type.c_str(), name.c_str()));
                 if (failedInit) {
-                    LOG << "FAILED TO FETCH " << pkgPath;
+                    stateString = "FAILED TO FETCH: " + pkgPath;
+                    LOG << stateString;
+                    sendTerminalMessage(stateString.c_str());
                     pkg.reset();
+                    LOG << "DELETED " << pkgPath;
                     continue;
                 }
                 addPkg(pkg);
+                stateString = "Fetched: " + std::string(pkg->getName());
+                LOG << stateString;
+                sendTerminalMessage(stateString.c_str());
             }
         }
     }
@@ -94,6 +107,7 @@ int repository::updatePKGS() {
     err:
     packageSearch::mainPackageSearch->updatePackages();
     updatingPKGS = false;
+    sendTerminalMessage("Finished Updating PKGs");
     updated = true;
     mtx.unlock();
     return ret;
@@ -123,20 +137,39 @@ int repository::updateYML() {
     std::string OldLocalYMLPath = repoLocalPath+"repo.yml";
     std::string localTEMPDownloadPath = repoLocalPath+"TEMPRepo.yml";
     std::string downloadURL = repoURL + "repo.yml";
+    std::string stateString;
+
+    stateString = "Fetching: " + downloadURL;
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
+
     fileDownloadRequest YMLDownloadRequest(downloadURL.c_str(),localTEMPDownloadPath.c_str());
     if(YMLDownloadRequest.initDownload() <0){
-        LOG << "Error when downloading repo.yml from " << downloadURL<< " to "<< localTEMPDownloadPath;
+
+        stateString = "Error when downloading repo.yml from " + downloadURL + " to " + localTEMPDownloadPath;
+        LOG << stateString;
+        sendTerminalMessage(stateString.c_str());
+
         return -1;
     }
+
+    stateString = "Fetched: " + downloadURL;
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
 
     YAML::Node repoYAML;
     try {
         repoYAML  = YAML::LoadFile(localTEMPDownloadPath);
     } catch(const YAML::ParserException& ex) {
         LOG << ex.what();
+
+        stateString = "Invalid YML at " + localTEMPDownloadPath;
+        sendTerminalMessage(stateString.c_str());
         return -1;
     }
     if(!repoYAML || !repoYAML["name"]) {
+        stateString = "Repository name not found ";
+        sendTerminalMessage(stateString.c_str());
         removeFile(localTEMPDownloadPath.c_str());
         return -1;
     }
@@ -148,17 +181,31 @@ int repository::updateYML() {
     fout << repoYAML;
     fout.close();
 
+    stateString = "Repository name: " + name + " at " + repoURL;
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
+
     removeFile(localTEMPDownloadPath.c_str());
     return 0;
 }
 
 int repository::updateIcon() {
+    std::string stateString;
+
+
+    stateString = "Fetching Icon";
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
+
     std::string YMLPath = repoLocalPath+"repo.yml";
     YAML::Node repoYAML;
     try {
         repoYAML = YAML::LoadFile(YMLPath);
     } catch(const YAML::ParserException& ex) {
         LOG << ex.what();
+        stateString = "Invalid YML at " + YMLPath;
+        sendTerminalMessage(stateString.c_str());
+
         return -1;
     }
     if(!repoYAML)
@@ -166,9 +213,11 @@ int repository::updateIcon() {
 
     std::string OldLocalIconPath = icon->getPath();
 
-    if(!repoYAML["iconPath"])
+    if(!repoYAML["iconPath"]) {
+        stateString = "No icon found";
+        sendTerminalMessage(stateString.c_str());
         return 0;
-
+    }
     std::string repoIconPath = repoYAML["iconPath"].as<std::string>();
     std::string repoExt = repoIconPath.substr(repoIconPath.find_last_of('.'));
 
@@ -177,15 +226,24 @@ int repository::updateIcon() {
     downloadURL += repoIconPath;
 
     fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
-    if(iconDownloadRequest.initDownload() < 0)
-        return -1;
+    if(iconDownloadRequest.initDownload() < 0) {
+        stateString = "Error fetching Icon";
+        LOG << stateString;
+        sendTerminalMessage(stateString.c_str());
 
+        return -1;
+    }
     removeFile(OldLocalIconPath.c_str());
     OldLocalIconPath = OldLocalIconPath.substr(0,OldLocalIconPath.find_last_of('.')) +repoExt;
     moveFile(localDownloadPath.c_str(),OldLocalIconPath.c_str());
     int width = icon->getWidth(), height = icon->getHeight();
     delete icon;
     icon = new PNG(OldLocalIconPath.c_str(),width,height);
+
+    stateString = "Fetched Icon";
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
+
     return 0;
 }
 
@@ -208,6 +266,7 @@ int repository::updateRepository() {
     updating = false;
     updated = true;
     updatingPKGS = false;
+    sendTerminalMessage("Updated repository!");
     return packages;
 
     deleting:
@@ -255,7 +314,9 @@ bool repository::isUpdating() const {
 
 repository *repository::fetchRepo(const char *repoURL) {
         repository * repo = nullptr;
-
+        std::string stateString = "Fetching repository at: ";
+        stateString+=repoURL;
+        sendTerminalMessage(stateString.c_str(),repoURL);
         std::string repoURLStr = repoURL;
         if(repoURLStr.back() != '/')
             repoURLStr+= '/';
@@ -273,7 +334,9 @@ repository *repository::fetchRepo(const char *repoURL) {
         }
 
         if(mkDir(localRepositoryFolder.c_str()) <0){
-            LOG << "Error when creating folder " << localRepositoryFolder;
+            stateString = "Error when creating folder " + localRepositoryFolder;
+            LOG << stateString;
+            sendTerminalMessage(stateString.c_str(),repoURL);
             return repo;
         }
 
@@ -282,7 +345,9 @@ repository *repository::fetchRepo(const char *repoURL) {
         downloadURL+="repo.yml";
         fileDownloadRequest YMLDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
         if(YMLDownloadRequest.initDownload() <0){
-            LOG << "Error when downloading repo.yml from " << downloadURL<< " to "<< localRepositoryFolder;
+            stateString = "Error when downloadinging repo.yml from " + downloadURL + " to " + localRepositoryFolder;
+            LOG << stateString;
+            sendTerminalMessage(stateString.c_str(),repoURL);
             removeDir(localRepositoryFolder.c_str());
             return nullptr;
         }
@@ -291,6 +356,10 @@ repository *repository::fetchRepo(const char *repoURL) {
             repoYAML = YAML::LoadFile(localDownloadPath);
         } catch(const YAML::ParserException& ex) {
             LOG << ex.what();
+
+            stateString = "Invalid YML";
+            sendTerminalMessage(stateString.c_str(),repoURL);
+
             if(folderExists(localRepositoryFolder.c_str()))
                 removeFile(localRepositoryFolder.c_str());
             return nullptr;
@@ -324,7 +393,9 @@ repository *repository::fetchRepo(const char *repoURL) {
         }
 
         if(ret < 0) {
-            LOG << "Error when downloading icon from " << downloadURL<< " to "<< localDownloadPath;
+            stateString ="Error when downloading icon from " + downloadURL + " to " + localDownloadPath;
+            LOG << stateString;
+            sendTerminalMessage(stateString.c_str(),repoURL);
             localDownloadPath = localRepositoryFolder + "/icon.png";
             copyFile(iconDefaultPathChar, localDownloadPath.c_str());
         }
@@ -333,5 +404,16 @@ repository *repository::fetchRepo(const char *repoURL) {
         repo = new repository(repoID.c_str(), repoName.c_str(), repoURLStr.c_str(), localRepositoryFolder.c_str(), localDownloadPath.c_str());
 
         return repo;
+}
+
+void repository::sendTerminalMessage(const char *message) {
+    sendTerminalMessage(message,repoURL.c_str());
+}
+
+void repository::sendTerminalMessage(const char *message, const char * repoURLNew) {
+    terminalDialogView * mainDialog = terminalDialogView::mainTerminalDialogView;
+    terminalDialogView* dialog = mainDialog != nullptr && mainDialog->isForRepo(repoURLNew) ? mainDialog : nullptr;
+    if(dialog!= nullptr)
+        dialog->writeLine(message);
 }
 

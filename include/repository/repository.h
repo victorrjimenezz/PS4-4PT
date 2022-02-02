@@ -24,6 +24,8 @@ private:
     int updateYML();
     int updateIcon();
     int updatePKGS();
+    void sendTerminalMessage(const char * message);
+    static void sendTerminalMessage(const char *message, const char * repoURLNew);
 public:
     explicit repository(const char * id, const char *name, const char * repoURL, const char * repoLocalPath, const char * iconPath);
     static repository* fetchRepo(const char *repoURLStr);
