@@ -479,6 +479,8 @@ downloadView::~downloadView() {
     delete deleteIconSelected;
     delete pauseIcon;
     delete pauseIconSelected;
+    if(deleteWav!= nullptr)
+        free(deleteWav);
 }
 void downloadView::deleteChild() {
     delete child;
