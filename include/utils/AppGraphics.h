@@ -64,13 +64,18 @@ public:
 	void FrameBufferSwap();
 	void FrameBufferClear();
 	void FrameBufferFill(Color color);
-	
+
+    static void DrawPixel(uint32_t * frameBuffer, int x, int y, Color color, int width, int height);
+
 	void DrawPixel(int x, int y, Color color);
 	void DrawRectangle(int x, int y, int w, int h, Color color);
+    uint32_t * getCurrentFrameBuffer();
+    void overWriteFrameBuffer(uint32_t * newFrameBuffer, uint32_t screenSize);
 	
 #ifdef GRAPHICS_USES_FONT
 	bool InitFont(FT_Face *face, const char *fontPath, int fontSize);
 	void DrawText(char *txt, FT_Face face, int startX, int startY, Color bgColor, Color fgColor);
+    static void DrawText(uint32_t * frameBuffer, char *txt, FT_Face face, int startX, int startY, Color bgColor, Color fgColor, int width, int height);
 	void DrawTextContainer(char *txt, FT_Face face, int startX, int startY, int maxW, int maxH, Color bgColor, Color fgColor);
 #endif
 };
