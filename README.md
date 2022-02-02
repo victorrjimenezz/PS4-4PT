@@ -124,25 +124,28 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 ### Version 2.35 (few days)
 
-- [ ] Add View Over RepositoryView showing exactly what's being loaded, sort of a terminal
+- [ ] Add a terminal view over RepositoryView showing exactly what's being loaded when a repository is being updated
+- [X] Add URL Enconding to allow for special Characters (particularly spaces)
+- [X] Fix memory leaks
 - [X] Add _,? to the keyboard
 - [X] Italian Language Support
 - [X] Fix bug that causes the app to close on initialization due to an error when initializing for some users
-- [ ] Fix bug that causes the app to hang on the initializing screen when no internet connection available
 
 ### Version 2.5 (~3 Months)
 
 - [ ] Add customization options, such as disabling notifications
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
-- [ ] Filter PKGs by type 
+- [ ] Filter PKGs by type
+- [ ] Fix bug that causes the app to hang on the initializing screen when no Mac Filtering Enabled
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
 - [ ] Change Keyboard to UI IME
-- [ ] Implement sorting by size, version, alphabetically...
+- [ ] Add Http Authentication Support
+- [ ] Implement sorting by size, version, alphabetically, updates available...
 - [ ] Add Short PKG Description when holding key
 - [ ] Add a new PKG List view where only covers are displayed
 - [ ] Support for more languages
