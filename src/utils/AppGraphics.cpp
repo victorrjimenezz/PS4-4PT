@@ -231,16 +231,28 @@ void Scene2D::FrameBufferFill(Color color)
 	DrawRectangle(0, 0, this->width, this->height, color);
 }
 
+void Scene2D::DrawPixel(uint32_t *frameBuffer, int x, int y, Color color,int width, int height) {
+    // Get pixel location based on pitch
+    int pixel = (y * width) + x;
+
+    if(pixel>= width*height || color.a <= 100)
+        return;
+    uint32_t newColor = /*0x80000000 +*/ (color.a << 24) + (color.r << 16) + (color.g << 8) + color.b;
+    // Draw to the frame buffer
+    frameBuffer[pixel] = newColor;
+}
+
 void Scene2D::DrawPixel(int x, int y, Color color)
 {
 	// Get pixel location based on pitch
-	int pixel = (y * this->width) + x;
+	/*int pixel = (y * this->width) + x;
 
     if(color.a <= 100)
-        return;
-    uint32_t newColor = /*0x80000000 +*/ (color.a << 24) + (color.r << 16) + (color.g << 8) + color.b;
+        return;*/
+    //uint32_t newColor = /*0x80000000 +*/ (color.a << 24) + (color.r << 16) + (color.g << 8) + color.b;
 	// Draw to the frame buffer
-	((uint32_t *)this->frameBuffers[this->activeFrameBufferIdx])[pixel] = newColor;
+	//((uint32_t *)this->frameBuffers[this->activeFrameBufferIdx])[pixel] = newColor;
+    this->DrawPixel(((uint32_t *)this->frameBuffers[this->activeFrameBufferIdx]),x,y,color, this->width, this->height);
 }
 
 void Scene2D::DrawRectangle(int x, int y, int w, int h, Color color)
@@ -260,7 +272,8 @@ void Scene2D::DrawRectangle(int x, int y, int w, int h, Color color)
 #ifdef GRAPHICS_USES_FONT
 void Scene2D::DrawText(char *txt, FT_Face face, int startX, int startY, Color bgColor, Color fgColor)
 {
-	int rc;
+    DrawText(((uint32_t *)this->frameBuffers[this->activeFrameBufferIdx]),txt,face,startX,startY,bgColor,fgColor,this->width,this->height);
+	/*int rc;
 	int xOffset = 0;
 	int yOffset = 0;
 
@@ -328,7 +341,91 @@ void Scene2D::DrawText(char *txt, FT_Face face, int startX, int startY, Color bg
 
         // Increment x offset for the next character
         xOffset += slot->advance.x >> 6;
+    }*/
+}
+
+void Scene2D::DrawText(uint32_t * frameBuffer, char *txt, FT_Face face, int startX, int startY, Color bgColor, Color fgColor, int width, int height)
+{
+    int rc;
+    int xOffset = 0;
+    int yOffset = 0;
+
+    // Get the glyph slot for bitmap and font metrics
+    FT_GlyphSlot slot = face->glyph;
+
+    // Iterate each character of the text to write to the screen
+    for(int n = 0; n < strlen(txt); n++)
+    {
+
+        FT_UInt glyph_index;
+
+
+        unsigned int cp;
+        CharFromUtf8(&cp, &txt[n], NULL);
+        glyph_index = FT_Get_Char_Index(face, cp);
+
+
+        int flag = 0;
+        flag |= FT_LOAD_RENDER;
+        flag |= FT_LOAD_FORCE_AUTOHINT;
+
+        // Load and render in 8-bit color
+        rc = FT_Load_Glyph(face, glyph_index, flag);
+
+        if (rc)
+            continue;
+
+        rc = FT_Render_Glyph(slot, ft_render_mode_normal);
+
+        if (rc)
+            continue;
+
+        // If we get a newline, increment the y offset, reset the x offset, and skip to the next character
+        if (txt[n] == '\n')
+        {
+            xOffset = 0;
+            yOffset += slot->bitmap.width * 2;
+
+            continue;
+        }
+
+        // Parse and write the bitmap to the frame buffer
+        for (int yPos = 0; yPos < slot->bitmap.rows; yPos++)
+        {
+            for (int xPos = 0; xPos < slot->bitmap.width; xPos++)
+            {
+                // Decode the 8-bit bitmap
+                char pixel = slot->bitmap.buffer[(yPos * slot->bitmap.width) + xPos];
+
+                // Get new pixel coordinates to account for the character position and baseline, as well as newlines
+                int x = startX + xPos + xOffset + slot->bitmap_left;
+                int y = startY + yPos + yOffset - slot->bitmap_top;
+
+                // We need to do bounds checking before commiting the pixel write due to our transformations, or we
+                // could write out-of-bounds of the frame buffer
+                if (x < 0 || y < 0 || x >= width || y >= height)
+                    continue;
+
+                // If the pixel in the bitmap isn't blank, we'll draw it
+                if(pixel != 0x00)
+                    Scene2D::DrawPixel(frameBuffer, x, y, fgColor,width,height);
+            }
+        }
+
+        // Increment x offset for the next character
+        xOffset += slot->advance.x >> 6;
     }
 }
+
+uint32_t *Scene2D::getCurrentFrameBuffer() {
+    return (uint32_t *)(this->frameBuffers[this->activeFrameBufferIdx]);
+}
+
+void Scene2D::overWriteFrameBuffer(uint32_t *newFrameBuffer, uint32_t screenSize) {
+    uint32_t * currFrameBuffer = ((uint32_t *)this->frameBuffers[this->activeFrameBufferIdx]);
+    memcpy(currFrameBuffer,newFrameBuffer, sizeof(uint32_t) * screenSize);
+}
+
+
 #endif
 

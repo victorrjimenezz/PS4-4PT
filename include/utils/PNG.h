@@ -25,6 +25,7 @@ public:
     ~PNG();
     int getChannels() const;
     void Draw(Scene2D *scene, int startX, int startY);
+    void Draw(uint32_t *frameBuffer, int startX, int startY, int screenWidth, int screenHeight);
 };
 
 #endif //CYDI4_PNG_H

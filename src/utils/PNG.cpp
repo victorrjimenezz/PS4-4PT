@@ -116,10 +116,15 @@ void PNG::Draw(Scene2D *scene, int startX, int startY)
     {
         for (int xPos = 0; xPos < this->width; xPos++)
         {
+            // Do some bounds checking to make sure the pixel is actually inside the frame buffer
+            if (xPos < 0 || yPos < 0 || xPos >= this->width || yPos >= this->height)
+                continue;
             int x = startX + xPos;
             int y = startY + yPos;
 
-            auto* pixelOffset = this->img + (xPos + yPos * height) * channels;
+            auto* pixelOffset = this->img + (xPos + yPos * width) * channels;
+            if(pixelOffset == nullptr)
+                continue;
             uint8_t r = pixelOffset[0];
             uint8_t g = pixelOffset[1];
             uint8_t b = pixelOffset[2];
@@ -127,9 +132,6 @@ void PNG::Draw(Scene2D *scene, int startX, int startY)
 
             Color color = { r, g, b, a};
 
-            // Do some bounds checking to make sure the pixel is actually inside the frame buffer
-            if (xPos < 0 || yPos < 0 || xPos >= this->width || yPos >= this->height)
-                continue;
 
             scene->DrawPixel(x, y, color);
         }
@@ -144,5 +146,36 @@ PNG::PNG(PNG *png) {
     this->img = (uint8_t *) malloc(imgSize);
     memcpy(this->img,png->img,imgSize);
 
+}
+
+void PNG::Draw(uint32_t *frameBuffer, int startX, int startY, int screenWidth, int screenHeight) {
+// Don't draw non-existant images
+    if(this->img == nullptr)
+        return;
+    // Iterate the bitmap and draw the pixels
+    for (int yPos = 0; yPos < this->height; yPos++)
+    {
+        for (int xPos = 0; xPos < this->width; xPos++)
+        {
+            // Do some bounds checking to make sure the pixel is actually inside the frame buffer
+            if (xPos < 0 || yPos < 0 || xPos >= this->width || yPos >= this->height)
+                continue;
+            int x = startX + xPos;
+            int y = startY + yPos;
+
+            auto* pixelOffset = this->img + (xPos + yPos * width) * channels;
+            if(pixelOffset == nullptr)
+                continue;
+            uint8_t r = pixelOffset[0];
+            uint8_t g = pixelOffset[1];
+            uint8_t b = pixelOffset[2];
+            uint8_t a = channels >= 4 ? pixelOffset[3] : 0xff;
+
+            Color color = { r, g, b, a};
+
+
+            Scene2D::DrawPixel(frameBuffer,x, y, color,screenWidth,screenHeight);
+        }
+    }
 }
 
