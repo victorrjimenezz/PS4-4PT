@@ -29,7 +29,7 @@ int fileDownloadRequest::getLibhttpCtxId() {
     return libhttpCtxId;
 }
 fileDownloadRequest::fileDownloadRequest(const char * sourceURL, const char * destinationPath, uint64_t startByte, uint64_t fileSize) {
-    this->sourceURL = sourceURL;
+    this->sourceURL = encodeURL(std::string(sourceURL));
     this->destinationPath = destinationPath;
 
     requestID = 0;
@@ -203,7 +203,10 @@ int fileDownloadRequest::termRequest() {
     return 0;
 }
 
-int fileDownloadRequest::downloadBytes(const char * url, uint8_t * data, uint64_t startByte, uint64_t endByte) {
+int fileDownloadRequest::downloadBytes(const char * rawURL, uint8_t * data, uint64_t startByte, uint64_t endByte) {
+    std::string rawURLStr = std::string(rawURL);
+    rawURLStr = encodeURL(rawURLStr);
+    const char * url = rawURLStr.c_str();
     if(startByte > endByte) {
         LOG << "ERROR STARTBYTE>ENDBYTE";
         return -1;
@@ -351,11 +354,40 @@ int fileDownloadRequest::downloadLoop() {
 }
 
 bool fileDownloadRequest::verifyURL(const char *url) {
-    return std::regex_match(url, getUrlRegex());
+    std::string rawURL = encodeURL(std::string(url));
+    return std::regex_match(rawURL, getUrlRegex());
 }
 
 std::regex fileDownloadRequest::getUrlRegex() {
     return std::regex(R"(^https?:\/\/(.+\..{2,10}|localhost|(?:\d{1,3}\.){3}\d{1,3})\/?.*?$)");
+}
+
+std::string fileDownloadRequest::encodeURL(const std::string & url) {
+        bool countedColon = false;
+        std::stringstream escaped;
+        escaped.fill('0');
+        escaped << std::hex;
+
+        for (std::string::const_iterator i = url.begin(), n = url.end(); i != n; ++i) {
+            std::string::value_type c = (*i);
+
+            // Keep alphanumeric and other accepted characters intact
+            if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c=='/') {
+                escaped << c;
+                continue;
+            } else if(!countedColon && c == ':'){
+                countedColon = true;
+                escaped << c;
+                continue;
+            }
+
+            // Any other characters are percent-encoded
+            escaped << std::uppercase;
+            escaped << '%' << std::setw(2) << int((unsigned char) c);
+            escaped << std::nouppercase;
+        }
+
+        return escaped.str();
 }
 
 

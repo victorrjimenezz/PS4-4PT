@@ -14,6 +14,7 @@ private:
     static int libhttpCtxId;
     static const char *eoh;
     static std::regex getUrlRegex();
+    static std::string encodeURL(const std::string& url);
 
     std::string sourceURL;
     std::string destinationPath;
