@@ -121,6 +121,8 @@ void packageSearch::updateView() {
     if(totalPages<10)
         printStr+="0";
     printStr+= std::to_string(totalPages);
+    mainScene->DrawText((char *) printStr.c_str(), fontSmall, viewWidth*CURR_PAGE_X, viewHeight*CURR_PAGE_Y,
+                        selectedColor, selectedColor);
     for(int i =0; i < packagesPerPage; i++){
         std::shared_ptr<package> currPackage = currPackages[i];
         packageRectangle packageRectangle = packageRectangles[i];
