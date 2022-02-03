@@ -79,12 +79,16 @@ Furthermore, 4PT allows anyone to host their own repository and provide any apps
   <img src="screenshots/screenshot1.png" width="49%"  alt=""/>
 </p>
 <p float="left">
+  <img src="screenshots/screenshot01.png" width="49%"  alt=""/>
   <img src="screenshots/screenshot2.png" width="49%"  alt=""/>
-  <img src="screenshots/screenshot3.png" width="49%"  alt=""/>
 </p>
 <p float="left">
+  <img src="screenshots/screenshot3.png" width="49%"  alt=""/>
   <img src="screenshots/screenshot4.png" width="49%"  alt=""/>
+</p>
+<p float="left">
   <img src="screenshots/screenshot41.png" width="49%"  alt=""/>
+  <img src="screenshots/screenshot6.png" width="49%"  alt=""/>
 </p>
 </details>
 
@@ -124,7 +128,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 ### Version 2.35 (few days)
 
-- [ ] Add a terminal view over RepositoryView showing exactly what's being loaded when a repository is being updated
+- [X] Add a terminal view over RepositoryView showing exactly what's being loaded when a repository is being updated
 - [X] Add URL Enconding to allow for special Characters (particularly spaces)
 - [X] Fix memory leaks
 - [X] Add _,? to the keyboard

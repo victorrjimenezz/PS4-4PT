@@ -28,7 +28,12 @@
   <summary>Table of Contents</summary>
   <ol>
    <li><a href="#sbt">Switching Between Tabs</a></li>
-   <li><a href="#aar">Adding a Repository</a></li>
+   <li><a href="#aar">Adding a Repository</a>
+        <ul>
+           <li><a href="#upd">Updating a repository</a></li>
+           <li><a href="#trp">Track addition/update progress</a></li>
+        </ul>
+    </li>
     <li>
         <a href="#dl">Downloads List</a>
       <ul>
@@ -79,6 +84,28 @@ The list of tabs is:
 
 To add a repository:
 </br>go to the repository tab (2nd one), open the keyboard, type the URL and press Add Repo.
+
+<div id="upd"></div>
+
+### Updating a repository
+
+<img src="screenshots/screenshot010.png" width="100%"  alt=""/>
+
+To update a repository:
+</br>go to the repository tab (2nd one), select the repository, and click the update button (an arrow)
+
+<div id="trp"></div>
+
+### Tracking the progress of a repository addition/update
+
+<img src="screenshots/screenshot01.png" width="100%"  alt=""/>
+
+To track the progress of a repository update/addition:
+</br>go to the repository tab (2nd one), select the repository that is being added/updated, and press the log icon.
+To close it, press Circle.
+
+***DISCLAIMER: OPENING/CLOSING THIS TERMINAL WILL NOT AFFECT THE ADDITION/UPDATE***
+
 
 ***
 
