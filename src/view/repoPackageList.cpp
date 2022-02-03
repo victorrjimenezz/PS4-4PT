@@ -10,7 +10,6 @@
 #include "../../include/repository/repository.h"
 #include "../../include/view/downloadView.h"
 #include "../../include/file/download.h"
-#include "../../include/utils/logger.h"
 
 #include <vector>
 #include <iterator>
