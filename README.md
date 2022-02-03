@@ -19,6 +19,8 @@
     ·
     <a href="https://github.com/victorrjimenezz/4PT-Repository">4PT Template Repository</a>
     ·
+    <a href="https://github.com/victorrjimenezz/4PT-REPO-GUI">4PT Repository GUI</a>
+    ·
     <a href="https://github.com/victorrjimenezz/PS4-4PT/blob/master/TUTORIAL.md">App tutorial</a>
   </p>
 </div>
@@ -126,17 +128,10 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
-### Version 2.35 (few days)
-
-- [X] Add a terminal view over RepositoryView showing exactly what's being loaded when a repository is being updated
-- [X] Add URL Enconding to allow for special Characters (particularly spaces)
-- [X] Fix memory leaks
-- [X] Add _,? to the keyboard
-- [X] Italian Language Support
-- [X] Fix bug that causes the app to close on initialization due to an error when initializing for some users
 
 ### Version 2.5 (~3 Months)
 
+- [ ] Change 4PT Stored data path to /data/4PT/
 - [ ] Add customization options, such as disabling notifications
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
