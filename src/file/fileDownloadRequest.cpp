@@ -143,6 +143,7 @@ void fileDownloadRequest::pauseDownload() {
     downloading =false;
 }
 
+//TODO IF SSL OUT OF MEMORY 0x809517d5 retry ?
 int fileDownloadRequest::initRequest() {
     const char * src = sourceURL.c_str();
     std::string byteRange = "bytes="+ std::to_string(downloadedBytes)+"-";
@@ -262,7 +263,7 @@ int fileDownloadRequest::downloadBytes(const char * rawURL, uint8_t * data, uint
     }
 
     ret = sceHttpGetStatusCode(reqID, &statusCode);
-    if (ret < 0 || statusCode != 206) {
+    if (ret < 0 || (statusCode != 200 && statusCode != 206)) {
         if(ret<0){
             errorStream << "StatusCode: " << std::hex << statusCode << std::endl;
             LOG << "ERROR WITH CODE" << errorStream.str();
