@@ -8,6 +8,7 @@
 #include <fstream>
 class logger {
 private:
+    std::mutex mtx;
     static std::ofstream logStream;
 public:
     static int init(const char *PATH);
@@ -17,6 +18,7 @@ public:
     template<typename T>
     logger& operator<<(T value) {return logger::operator<<(std::to_string(value));};
     static void closeLogger();
+    ~logger();
 };
 
 #define LOG logger(__FUNCTION__)

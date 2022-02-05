@@ -77,15 +77,20 @@ void terminalDialogView::newPage() {
     this->currentLineHeight = baseyPos+2*lineSeparator;
 }
 
-void terminalDialogView::writeLine(const char *line) {
+void terminalDialogView::writeLineRecursive(const char *line) {
     std::string lineStr = line;
+    if(currentLineHeight > maxyPos)
+        newPage();
     Scene2D::DrawText(lastInstanceFrameBuffer,(char *) lineStr.substr(0,MAX_TERMINAL_CHARS).c_str(), font, lineXPAD, currentLineHeight,
                        textColor, textColor,viewWidth,viewHeight);
     this->currentLineHeight += lineSeparator;
-    if(currentLineHeight > maxyPos)
-        newPage();
     if(lineStr.size() > MAX_TERMINAL_CHARS)
-        writeLine(lineStr.substr(MAX_TERMINAL_CHARS,2*MAX_TERMINAL_CHARS).c_str());
+        writeLineRecursive(lineStr.substr(MAX_TERMINAL_CHARS,2*MAX_TERMINAL_CHARS).c_str());
+}
+void terminalDialogView::writeLine(const char *line) {
+    std::unique_lock<std::mutex> lock(writeLock);
+    writeLineRecursive(line);
+
 }
 int terminalDialogView::closeTerminalDialogView(){
     active = false;

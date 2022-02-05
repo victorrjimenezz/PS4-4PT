@@ -6,12 +6,15 @@
 #define INC_4PT_TERMINALDIALOGVIEW_H
 #include "../../include/utils/AppGraphics.h"
 #include "../../include/view/subView.h"
+
 #include <string>
+#include <mutex>
 
 class subView;
 class PNG;
 class terminalDialogView : public subView {
 private:
+    std::mutex writeLock;
     int active;
     int lineSeparator;
     int basexPos;
@@ -30,6 +33,8 @@ private:
     Scene2D * mainView;
     PNG * terminal;
     void generateDarkenedImage();
+    void newPage();
+    void writeLineRecursive(const char * line);
 public:
     static terminalDialogView * mainTerminalDialogView;
     explicit terminalDialogView(subView * parentView, Scene2D * mainView,const int screenWidth,const int screenHeight, FT_Face font);
@@ -37,7 +42,6 @@ public:
     int closeTerminalDialogView();
     void writeLine(const char * line);
     void updateView();
-    void newPage();
     void pressX(){};
     void pressCircle();
     void pressTriangle(){};

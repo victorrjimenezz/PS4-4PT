@@ -5,7 +5,8 @@
 #include "../../include/utils/notifi.h"
 
 std::ofstream logger::logStream;
-logger::logger(const std::string &funcName) {
+logger::logger(const std::string &funcName) : mtx() {
+    mtx.lock();
     auto currentTime = std::chrono::system_clock::now(); // get the time
     auto formattedTime = std::chrono::system_clock::to_time_t(currentTime); // convert it to time_t type (loses some precision)
     std::string time(std::ctime(&formattedTime));
@@ -33,28 +34,10 @@ logger& logger::operator<<(const std::string& message){
     logStream.flush();
     return *this;
 }
-/*
-logger& logger::operator<<(const double value){
-    logStream << value;
-    logStream.flush();
-    return *this;
-}
-logger& logger::operator<<(const int value){
-    logStream << value;
-    logStream.flush();
-    return *this;
-}
-logger& logger::operator<<(const float value){
-    logStream << value;
-    logStream.flush();
-    return *this;
-}
-logger& logger::operator<<(const uint64_t value){
-    logStream << value;
-    logStream.flush();
-    return *this;
-}*/
 
+logger::~logger() {
+    mtx.unlock();
+}
 void logger::closeLogger() {
     if(logStream.is_open())
         logStream.close();
