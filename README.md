@@ -149,13 +149,12 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 ### Future versions (~1/2 Year)
 
 - [ ] Fix Hungarian automatic detection
-- [ ] Change Keyboard to UI IME
+- [ ] Custom Port http connection
 - [ ] Add Http Authentication Support
-- [ ] Add Short PKG Description when holding key
 - [ ] Add a new PKG List view where only covers are displayed
-- [ ] Support for more languages
+- [ ] Change Keyboard to UI IME
 - [ ] Download pkgs in the background with DAEMONS
-- [ ] Disable need for the repository to be fully updated to display the packages that have been added already
+- [ ] Support for more languages
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
 
