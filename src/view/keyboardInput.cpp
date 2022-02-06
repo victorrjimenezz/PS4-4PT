@@ -13,7 +13,7 @@
 #include "../../include/utils/LANG.h"
 
 
-keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * enterText, const char * placeHolderText, bool keyBoardIsSelected, bool hasEnter) : upperDict(), lowerDict(), dictPosition(), enter(enterText), specDictPosition(){
+keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * enterText, const char * placeHolderText, bool hasEnter) : upperDict(), lowerDict(), dictPosition(), enter(enterText), specDictPosition(){
     this->mainScene = mainScene;
     text = placeHolderText;
     this->currChar = 0;
@@ -48,7 +48,7 @@ keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, in
     this->yKeyboardTextUpper = y + borderSize + height / 8;
     this->yKeyboardTextLower = y + borderSize + 3* height / 8;
 
-    this->keyBoardIsSelected = keyBoardIsSelected;
+    this->keyBoardIsSelected = false;
     this->isOnUpperRow = true;
     this->entered = false;
     this->changed = false;
@@ -127,7 +127,7 @@ void keyboardInput::deleteChar() {
     text.pop_back();
     changed = true;
 }
-void keyboardInput::pressKey() {
+void keyboardInput::pressX() {
     if(currChar == DICT_SIZE && isOnUpperRow)
         deleteChar();
     else if(currChar == SPEC_DICT_SIZE && !isOnUpperRow) {
@@ -186,6 +186,10 @@ bool keyboardInput::hasChanged() {
     bool hasChanged = changed;
     changed = false;
     return hasChanged;
+}
+
+bool keyboardInput::active() {
+    return keyBoardIsSelected;
 }
 
 

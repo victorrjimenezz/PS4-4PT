@@ -11,13 +11,15 @@
 #include "../../include/utils/LANG.h"
 #include "../../include/view/downloadView.h"
 #include "../../include/view/repositoryView.h"
-#include "../../include/utils/logger.h"
+#include "../../include/view/filterView.h"
 
 #include <vector>
 #include <iterator>
 
+filterView::sort packageSearch::currentSort = filterView::ALPHABET;
+filterView::sortOrder packageSearch::currentSortOrder = filterView::ASCENDANT;
 packageSearch * packageSearch::mainPackageSearch;
-packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : currPackages(), packageRectangles(), viewWidth(frameWidth), viewHeight(frameHeight * TOPVIEWSIZE) {
+packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : currPackages(), packageRectangles(), viewWidth(frameWidth), viewHeight(frameHeight * TOPVIEWSIZE), updatePKGSMutex(), filterPKGSMutex(), fillPageMutex() {
     this->mainScene = mainScene;
     packageSearch::mainPackageSearch = this;
     this->repositoryList = repositoryView::mainRepositoryView->getRepositoryList();
@@ -30,12 +32,12 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
     textColor = {180, 180, 180};
     updateTextColor = {255,0,0};
 
-    this->isOnKeyboard = false;
     this->fontLarge = fontLarge;
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "",isOnKeyboard, false);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "", false);
+    filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
     updatePackages();
 
@@ -53,8 +55,12 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
 
 
 void packageSearch::fillPage() {
+    std::unique_lock<std::mutex> lock(fillPageMutex);
+
     int j;
     size_t repoListSize = displayPackageList.size();
+    size_t pages = repoListSize/packagesPerPage;
+
     for(int i =0; i < packagesPerPage; i++){
         j = currPage * packagesPerPage + i;
         if(repoListSize<=j)
@@ -69,12 +75,11 @@ void packageSearch::fillPage() {
 }
 
 void packageSearch::updatePackages() {
-    for(auto & package : displayPackageList)
-        package.reset();
+    std::unique_lock<std::mutex> lock(updatePKGSMutex);
+
     displayPackageList.clear();
-    for(auto & package : packageList)
-        package.reset();
     packageList.clear();
+
     for(auto repository : *repositoryList){
         for(const auto& package : *(repository->getPackageList())){
             packageList.push_back(package);
@@ -84,14 +89,10 @@ void packageSearch::updatePackages() {
 }
 
 void packageSearch::filterPackages(const char * name) {
-    for(auto pkg : displayPackageList)
-        pkg.reset();
+    std::unique_lock<std::mutex> lock(filterPKGSMutex);
+
     displayPackageList.clear();
-    if(strcasecmp(name,"")==0) {
-        for (auto &package: packageList) {
-            displayPackageList.emplace_back(package);
-        }
-    }else {
+
         currPage = 0;
         selected = 0;
         for (auto &package: packageList) {
@@ -100,17 +101,20 @@ void packageSearch::filterPackages(const char * name) {
             std::transform(hayStack.begin(), hayStack.end(), hayStack.begin(), ::toupper);
             std::transform(needle.begin(), needle.end(), needle.begin(), ::toupper);
 
-            if (hayStack.find(needle) != std::string::npos) {
+            if ((strcasecmp(name,"")==0 || hayStack.find(needle) != std::string::npos) && meetsCriteria(package)) {
                 displayPackageList.emplace_back(package);
             }
         }
-    }
 
+
+    currentSort = filterView->getCurrentSort();
+    currentSortOrder = filterView->getCurrentSortOrder();
+    std::sort(displayPackageList.begin(), displayPackageList.end(), &packageSearch::packageCompare);
     fillPage();
 }
 
 void packageSearch::updateView() {
-    if(keyboardInput->hasChanged())
+    if(keyboardInput->hasChanged() || filterView->hasChanged())
         filterPackages(keyboardInput->readText().c_str());
     std::string printStr;
     int totalPages = ceil((double)displayPackageList.size()/packagesPerPage);
@@ -126,13 +130,14 @@ void packageSearch::updateView() {
     for(int i =0; i < packagesPerPage; i++){
         std::shared_ptr<package> currPackage = currPackages[i];
         packageRectangle packageRectangle = packageRectangles[i];
-        if(selected != i || isOnKeyboard){
+        if(selected != i || keyboardInput->active() || filterView->active()){
             mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             if(currPackage != nullptr){
                 mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                     textColor, textColor);
                 printStr = LANG::mainLang->VERSION;
+                printStr += ": ";
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
                 printStr += currPackage->getTitleID();
@@ -152,7 +157,7 @@ void packageSearch::updateView() {
                                     textColor, textColor);
                 currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
                 if(currPackage->isInstalled()) {
-                    if(currPackage->getVersion()>currPackage->getCurrVer()) {
+                    if(currPackage->updateAvailable()) {
                         printStr = LANG::mainLang->UPDATE_AVAILABLE;
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                             updateTextColor, updateTextColor);
@@ -163,6 +168,7 @@ void packageSearch::updateView() {
                     }
                 }
                 printStr = LANG::mainLang->SIZE;
+                printStr += ": ";
                 printStr+= currPackage->getPkgSizeMB();
                 printStr += "MB";
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
@@ -172,7 +178,7 @@ void packageSearch::updateView() {
         }
     }
     bool empty = displayPackageList.empty();
-    if(!isOnKeyboard) {
+    if(!keyboardInput->active() && !filterView->active()) {
         packageRectangle packageRectangle = packageRectangles[selected];
         if(!empty) {
         mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
@@ -183,6 +189,7 @@ void packageSearch::updateView() {
             mainScene->DrawText((char *) currPackage->getName(), fontMedium, packageRectangle.x, packageRectangle.y,
                                 selectedColor, selectedColor);
             printStr = LANG::mainLang->VERSION;
+            printStr += ": ";
             printStr += currPackage->getVersionStr();
             printStr += " | ";
             printStr += currPackage->getTitleID();
@@ -202,7 +209,7 @@ void packageSearch::updateView() {
                                 selectedColor, selectedColor);
             currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
             if(currPackage->isInstalled()) {
-                if(currPackage->getVersion()>currPackage->getCurrVer()) {
+                if(currPackage->updateAvailable()) {
                     printStr = LANG::mainLang->UPDATE_AVAILABLE;
                     mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                         updateTextColor, updateTextColor);
@@ -213,6 +220,7 @@ void packageSearch::updateView() {
                 }
             }
             printStr = LANG::mainLang->SIZE;
+            printStr += ": ";
             printStr+= currPackage->getPkgSizeMB();
             printStr += "MB";
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
@@ -224,11 +232,15 @@ void packageSearch::updateView() {
         }
     }
     keyboardInput->updateView();
+    if(!keyboardInput->active())
+        filterView->updateView();
 }
 
 void packageSearch::pressX(){
-    if(isOnKeyboard)
-        keyboardInput->pressKey();
+    if(keyboardInput->active())
+        keyboardInput->pressX();
+    else if(filterView->active())
+        filterView->pressX();
     else {
         std::shared_ptr<package> currpkg = currPackages[selected];
         if(currPackages[selected] == nullptr)
@@ -248,24 +260,30 @@ subView* packageSearch::getChild(){
     return nullptr;
 }
 void packageSearch::pressCircle(){
-    if(isOnKeyboard) {
-        isOnKeyboard = false;
+    if(keyboardInput->active())
         keyboardInput->unSelectKeyboard();
-    }
+
 }
 void packageSearch::pressTriangle(){
-    isOnKeyboard = !isOnKeyboard;
-    if(isOnKeyboard)
-        keyboardInput->selectKeyboard();
-    else
+    if(keyboardInput->active())
         keyboardInput->unSelectKeyboard();
+    else
+        keyboardInput->selectKeyboard();
 }
 void packageSearch::pressSquare(){
-    if(isOnKeyboard)
+    if(keyboardInput->active())
         keyboardInput->deleteChar();
+    else if(!filterView->active())
+        filterView->enableFilterView();
+    else
+        filterView->disableFilterView();
 }
 void packageSearch::arrowUp(){
-    if(!isOnKeyboard) {
+    if(keyboardInput->active())
+        keyboardInput->setUpperRow();
+    else if(filterView->active())
+        filterView->arrowUP();
+    else {
         selected--;
         if (selected + packagesPerPage * currPage < 0) {
             selected = 0;
@@ -274,11 +292,14 @@ void packageSearch::arrowUp(){
             currPage--;
             fillPage();
         }
-    } else
-        keyboardInput->setUpperRow();
+    }
 }
 void packageSearch::arrowDown(){
-    if(!isOnKeyboard) {
+    if(keyboardInput->active())
+        keyboardInput->setLowerRow();
+    else if(filterView->active())
+        filterView->arrowDown();
+    else  {
         selected++;
         int repoSize = (int) displayPackageList.size();
         if (selected + packagesPerPage * currPage < repoSize) {
@@ -290,23 +311,27 @@ void packageSearch::arrowDown(){
         } else {
             selected--;
         }
-    } else
-        keyboardInput->setLowerRow();
+    }
 }
 void packageSearch::arrowRight() {
-    if(isOnKeyboard)
+    if(keyboardInput->active())
         keyboardInput->nextKey();
+    else if(filterView->active())
+        filterView->nextOption();
 
 }
 void packageSearch::arrowLeft() {
-    if(isOnKeyboard)
+    if(keyboardInput->active())
         keyboardInput->previousKey();
+    else if(filterView->active())
+        filterView->prevOption();
 
 }
 packageSearch::~packageSearch() {
     for(auto repository : packageList)
         repository.reset();
     repositoryList.reset();
+    delete filterView;
     delete keyboardInput;
 }
 
@@ -316,6 +341,55 @@ bool packageSearch::isActive() {
 
 void packageSearch::langChanged() {
         delete keyboardInput;
-        keyboardInput =  new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "",isOnKeyboard, false);
+        keyboardInput =  new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "", false);
+        delete filterView;
+        filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
+}
+bool packageSearch::meetsCriteria(std::shared_ptr<package> &sharedPtr) {
+    if(!filterView->isEnabled(sharedPtr->getPackageType()))
+        return false;
+    if(filterView->onlyUpdates())
+        return sharedPtr->updateAvailable() && sharedPtr->isInstalled();
+    return true;
+}
+
+bool packageSearch::packageCompare(const std::shared_ptr<package> &lhs, const std::shared_ptr<package> &rhs) {
+    std::string lhsName= lhs->getName();
+    std::string rhsName = rhs->getName();
+
+    bool value;
+    if(currentSortOrder == filterView::ASCENDANT) {
+        switch (currentSort) {
+            case filterView::SIZE:
+                value = lhs->getPkgSize() > rhs->getPkgSize();
+                break;
+            case filterView::VERSION:
+                value = lhs->getVersion() > rhs->getVersion();
+                break;
+            case filterView::ALPHABET:
+            default:
+                std::transform(lhsName.begin(), lhsName.end(), lhsName.begin(), ::toupper);
+                std::transform(rhsName.begin(), rhsName.end(), rhsName.begin(), ::toupper);
+                value = lhsName.compare(rhsName) < 0;
+                break;
+        }
+    } else {
+        switch (currentSort) {
+            case filterView::SIZE:
+                value = lhs->getPkgSize() < rhs->getPkgSize();
+                break;
+            case filterView::VERSION:
+                value = lhs->getVersion() < rhs->getVersion();
+                break;
+            case filterView::ALPHABET:
+            default:
+                std::transform(lhsName.begin(), lhsName.end(), lhsName.begin(), ::toupper);
+                std::transform(rhsName.begin(), rhsName.end(), rhsName.begin(), ::toupper);
+                value = lhsName.compare(rhsName) > 0;
+                break;
+        }
+    }
+
+    return value;
 }

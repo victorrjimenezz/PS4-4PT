@@ -10,9 +10,11 @@
 
 #include "subView.h"
 #include "../utils/AppGraphics.h"
+#include "filterView.h"
 
 #include <vector>
-#include <unordered_map>
+#include <mutex>
+
 class package;
 class repository;
 class keyboardInput;
@@ -24,7 +26,12 @@ class repoPackageList : public subView {
         int height;
     };
 private:
+    std::mutex filterMtx;
+    static filterView::sort currentSort;
+    static filterView::sortOrder currentSortOrder;
+    static bool packageCompare(const std::shared_ptr<package> &lhs, const std::shared_ptr<package> &rhs);
     int repoIconX;
+
     const static int packagesPerPage = 5;
     int currPage;
     int selected;
@@ -45,16 +52,18 @@ private:
     FT_Face fontSmall{};
     repository * repo;
     keyboardInput * keyboardInput;
+    filterView * filterView;
 
     subView * parent;
     subView * child;
 
-    bool isOnKeyboard;
+
     bool active;
     const int viewWidth = 0;
     const int viewHeight = 0;
     void fillPage();
     void filterPackages(const char * name);
+    bool meetsCriteria(std::shared_ptr<package> &sharedPtr);
 public:
     repoPackageList(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight, repository * repository, subView * parent);
     void updateView();
@@ -73,5 +82,6 @@ public:
     subView * getParent();
     subView * getChild();
     ~repoPackageList();
+
 };
 #endif //CYDI4_REPOPACKAGELIST_H

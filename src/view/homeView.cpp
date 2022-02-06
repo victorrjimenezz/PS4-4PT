@@ -29,6 +29,7 @@ homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, F
     keyboardX = HOMEVIEW_KEYBOARD_X*frameWidth;
 
     keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,LANG::mainLang->DOWNLOAD.c_str(), "https://",true);
+    keyboardInput->selectKeyboard();
 
     logoWidth = HOMEVIEW_LOGO_WIDTH*frameWidth;
     logoX = HOMEVIEW_LOGO_X*frameWidth-logoWidth/2;
@@ -48,7 +49,7 @@ void homeView::loadWelcomeText(){
     out << std::fixed << APP_VERSION;
     std::string welcomeString(LANG::mainLang->WELCOME_MESSAGE);
     welcomeString.replace(welcomeString.find(".user."),6,username);
-    welcomeText = welcomeString + out.str();//"Welcome " + username + " to 4PT\n Version: " + out.str();
+    welcomeText = welcomeString + ": " + out.str();
     welcomeSubText = std::string(LANG::mainLang->DEVELOPED_BY) + "@victorrjimenezz";
     pkgLink = LANG::mainLang->PKG_DIRECT_DOWNLOAD;
 }
@@ -56,6 +57,7 @@ void homeView::langChanged() {
     loadWelcomeText();
     delete keyboardInput;
     keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,LANG::mainLang->DOWNLOAD.c_str(), "https://",true);
+    keyboardInput->selectKeyboard();
 }
 void homeView::updateView() {
     logo->Draw(mainScene,logoX,logoY);
@@ -85,7 +87,7 @@ void homeView::hasEntered() {
     downloadView::downloadManager->addDownload( download);
 }
 void homeView::pressX(){
-    keyboardInput->pressKey();
+    keyboardInput->pressX();
 }
 
 void homeView::pressCircle(){

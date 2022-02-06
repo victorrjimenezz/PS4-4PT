@@ -10,9 +10,12 @@
 
 #include "subView.h"
 #include "../utils/AppGraphics.h"
+#include "../../include/view/filterView.h"
 
 #include <vector>
 #include <unordered_map>
+#include <mutex>
+
 class package;
 class repository;
 class keyboardInput;
@@ -24,6 +27,14 @@ class packageSearch : public subView {
         int height;
     };
 private:
+    static filterView::sort currentSort;
+    static filterView::sortOrder currentSortOrder;
+    bool meetsCriteria(std::shared_ptr<package> &sharedPtr);
+    static bool packageCompare(const std::shared_ptr<package> &lhs, const std::shared_ptr<package> &rhs);
+
+    std::mutex updatePKGSMutex;
+    std::mutex filterPKGSMutex;
+    std::mutex fillPageMutex;
     int repoIconX;
     const static int packagesPerPage = 5;
     int currPage;
@@ -46,8 +57,8 @@ private:
     FT_Face fontSmall{};
 
     keyboardInput * keyboardInput;
+    filterView * filterView;
 
-    bool isOnKeyboard;
     const int viewWidth = 0;
     const int viewHeight = 0;
     void fillPage();

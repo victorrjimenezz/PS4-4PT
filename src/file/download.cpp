@@ -73,10 +73,12 @@ download::download(const char *url, bool * failedInit) {
 
 }
 void download::initDownload(){
+    LOG << "Starting download" << getURL();
     mutex.lock();
     if(downloadRequest != nullptr)
         downloadRequest->initDownload(this);
     mutex.unlock();
+    LOG << "Finishing download" << getURL();
 }
 
 std::shared_ptr<fileDownloadRequest> download::getRequest() {

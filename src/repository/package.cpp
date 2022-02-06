@@ -253,3 +253,7 @@ void package::setDefaultIcon() {
     }
     this->icon = new PNG(iconPath.c_str(),ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
 }
+
+bool package::updateAvailable() {
+    return this->getVersion()>this->getCurrVer();
+}

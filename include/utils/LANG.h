@@ -45,6 +45,12 @@ public:
     std::string SEARCH;
     std::string SPACE;
     std::string FOR_FW;
+    std::string ONLY_UPDATES;
+    std::string ORDER;
+    std::string FILTER;
+    std::string ALPHABETICALLY;
+    std::string ASCENDING;
+    std::string DESCENDING;
     static LANG * mainLang;
     explicit LANG();
     static int initLang();

@@ -60,11 +60,11 @@ private:
     char getCurrentKey();
 
 public:
-    keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * enterText = "ENTER", const char * placeHolderText = "Input Text...", bool keyBoardIsSelected = false, bool hasEnter = true);
+    keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * enterText = "ENTER", const char * placeHolderText = "Input Text...", bool hasEnter = true);
     void updateView();
     void nextKey();
     void previousKey();
-    void pressKey();
+    void pressX();
     void setUpperRow();
     void setLowerRow();
     void deleteChar();
@@ -73,6 +73,7 @@ public:
     bool hasEntered() const;
     bool hasChanged();
     std::string readText();
+    bool active();
     ~keyboardInput();
 };
 #endif //CYDI4_KEYBOARDINPUT_H

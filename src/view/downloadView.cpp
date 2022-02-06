@@ -215,9 +215,10 @@ void downloadView::updateView() {
                     printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
                 } else if(!currDownload->stored())
                     printStringStream <<  LANG::mainLang->PENDING_DOWNLOAD;
-                else if(currDownload->hasFinished() && !currDownload->isInstalled())
+                else if(currDownload->hasFinished() && !currDownload->isInstalled()) {
                     printStringStream << LANG::mainLang->HAS_FINISHED;
-                else if(currDownload->hasFinished() && currDownload->isInstalled())
+                    printStringStream << " | " << LANG::mainLang->SIZE << ": " << downloadRequest->getTotalSizeInMb() << "MBs";
+                } else if(currDownload->hasFinished() && currDownload->isInstalled())
                     printStringStream << LANG::mainLang->INSTALLED;
                 else {
                     printStringStream << LANG::mainLang->DOWNLOADED << downloadRequest->getDownloadedInMb();
@@ -243,6 +244,7 @@ void downloadView::updateView() {
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
                                     textColor, textColor);
                 printStr = LANG::mainLang->VERSION;
+                printStr += ": ";
                 printStr+=currDownload->getVersionStr();
                 mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
                                     textColor, textColor);
@@ -274,6 +276,7 @@ void downloadView::updateView() {
         mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
                             selectedColor, selectedColor);
         printStr = LANG::mainLang->VERSION;
+        printStr += ": ";
         printStr+=currDownload->getVersionStr();
         mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
                             selectedColor, selectedColor);
@@ -289,9 +292,10 @@ void downloadView::updateView() {
             printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
         }else if(!stored)
             printStringStream <<  LANG::mainLang->PENDING_DOWNLOAD;
-        else if(finished && !installed)
+        else if(finished && !installed) {
             printStringStream << LANG::mainLang->HAS_FINISHED;
-        else if(finished && installed)
+            printStringStream << " | " << LANG::mainLang->SIZE << ": " << downloadRequest->getTotalSizeInMb() << "MBs";
+        } else if(finished && installed)
             printStringStream << LANG::mainLang->INSTALLED;
         else {
             printStringStream << LANG::mainLang->DOWNLOADED << downloadRequest->getDownloadedInMb();

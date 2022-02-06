@@ -40,7 +40,7 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",isOnKeyboard);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",true);
 
     this->dialog = new terminalDialogView(this, mainScene, frameWidth, frameHeight*(1-TABVIEWSIZE),fontSmall);
     child = nullptr;
@@ -225,7 +225,7 @@ void repositoryView::hasEntered(){
 
 void repositoryView::pressX(){
     if(isOnKeyboard)
-        keyboardInput->pressKey();
+        keyboardInput->pressX();
     else {
         repository *currRepo = currRepos[selected];
         if(currRepo == nullptr)
@@ -508,7 +508,7 @@ int repositoryView::loadSavedRepos() {
 }
 void repositoryView::langChanged() {
     delete keyboardInput;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",isOnKeyboard);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",true);
 }
 
 repository * repositoryView::getCurrentRepository() {
