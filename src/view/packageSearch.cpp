@@ -18,10 +18,9 @@
 
 filterView::sort packageSearch::currentSort = filterView::ALPHABET;
 filterView::sortOrder packageSearch::currentSortOrder = filterView::ASCENDANT;
-packageSearch * packageSearch::mainPackageSearch;
+packageSearch * packageSearch::mainPackageSearch = nullptr;
 packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : currPackages(), packageRectangles(), viewWidth(frameWidth), viewHeight(frameHeight * TOPVIEWSIZE), updatePKGSMutex(), filterPKGSMutex(), fillPageMutex() {
     this->mainScene = mainScene;
-    packageSearch::mainPackageSearch = this;
     this->repositoryList = repositoryView::mainRepositoryView->getRepositoryList();
 
     rectangleBaseHeight = ((frameHeight-frameHeight*TABVIEWSIZE-viewHeight) / packagesPerPage);
@@ -39,7 +38,6 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
     keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "", false);
     filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
-    updatePackages();
 
     currPage = 0;
     selected = 0;
@@ -49,8 +47,7 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
     for(int i =0; i < packagesPerPage; i++)
         packageRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight};
     this->packageTypeX=repoX+ (packageRectangles[0].width - repoX) * PKGLIST_TYPE_POS;
-    packageSearch::fillPage();
-
+    packageSearch::mainPackageSearch = this;
 }
 
 
@@ -59,7 +56,6 @@ void packageSearch::fillPage() {
 
     int j;
     size_t repoListSize = displayPackageList.size();
-    size_t pages = repoListSize/packagesPerPage;
 
     for(int i =0; i < packagesPerPage; i++){
         j = currPage * packagesPerPage + i;
