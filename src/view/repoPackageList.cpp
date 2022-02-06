@@ -104,6 +104,7 @@ void repoPackageList::filterPackages(const char * name) {
 }
 
 void repoPackageList::updateView() {
+    int selectedTemp;
     if(keyboardInput->hasChanged() || filterView->hasChanged())
         filterPackages(keyboardInput->readText().c_str());
 
@@ -118,10 +119,11 @@ void repoPackageList::updateView() {
     printStr+= std::to_string(totalPages);
         mainScene->DrawText((char *) printStr.c_str(), fontSmall, viewWidth*CURR_PAGE_X, viewHeight*CURR_PAGE_Y,
                             selectedColor, selectedColor);
+    selectedTemp = selected;
     for(int i =0; i < packagesPerPage; i++){
         std::shared_ptr<package> currPackage = currPackages[i];
         packageRectangle packageRectangle = packageRectangles[i];
-        if(selected != i || keyboardInput->active() || filterView->active()){
+        if(selectedTemp != i || keyboardInput->active() || filterView->active()){
             mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
             if(currPackage != nullptr){
@@ -174,13 +176,13 @@ void repoPackageList::updateView() {
     }
     bool empty = displayPackageList.empty();
     if(!keyboardInput->active() && !filterView->active()) {
-        packageRectangle packageRectangle = packageRectangles[selected];
+        packageRectangle packageRectangle = packageRectangles[selectedTemp];
         if(!empty) {
             mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
                                      rectangleDivisorHeight, selectedColor);
             mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
                                      packageRectangle.width, rectangleDivisorHeight, selectedColor);
-            std::shared_ptr<package> currPackage = currPackages[selected];
+            std::shared_ptr<package> currPackage = currPackages[selectedTemp];
             mainScene->DrawText((char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
                                 fontMedium, packageRectangle.x, packageRectangle.y,
                                 selectedColor, selectedColor);

@@ -15,8 +15,7 @@
 bool mainView::updatingView;
 int mainView::updateView() {
 
-    //mainScene->FrameBufferFill(bgColor);
-    mainScene->DrawRectangle(0,0,frameWidth,frameHeight,bgColor);
+    mainScene->FrameBufferClear();
 
     updatingView = true;
     controllerManager->getCurrentView()->updateView();

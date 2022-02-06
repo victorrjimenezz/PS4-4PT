@@ -1,7 +1,7 @@
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+#include <cerrno>
 
 #include <string>
 
@@ -202,9 +202,7 @@ void Scene2D::FrameBufferSwap()
 
 void Scene2D::FrameBufferClear()
 {
-	// Clear the screen with a white frame buffer
-	Color blank = { 255, 255, 255 };
-	FrameBufferFill(blank);
+    memset(this->frameBuffers[this->activeFrameBufferIdx],0xFF,frameBufferSize);
 }
 
 #ifdef GRAPHICS_USES_FONT
