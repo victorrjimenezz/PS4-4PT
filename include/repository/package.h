@@ -60,6 +60,7 @@ public:
     double getCurrVer();
     int unInstall();
     int install(const char * path = "");
+    bool updateAvailable();
     bool isInstalled() const;
 };
 

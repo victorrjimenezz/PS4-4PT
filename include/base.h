@@ -6,14 +6,16 @@
 #define CYDI4_BASE_H
 
 //APP VERSION
-#define APP_VERSION 2.35
-#define APP_TITLEID "PAPT00235"
+#define APP_VERSION 2.5
+#define APP_TITLEID "PAPT00250"
 #define MAIN_URL "https://www.4pt-project.com/"
 
 
 //default data path
 #define DATA_PATH "/mnt/sandbox/" APP_TITLEID "_000/app0/"
-#define STORED_PATH "/user/app/" APP_TITLEID "/"
+
+#define STORED_DATA_PATH "/data/"
+#define STORED_PATH STORED_DATA_PATH "4PT/"
 #define INSTALL_PATH "/user/app/"
 #define DOWNLOAD_PATH INSTALL_PATH
 #define REPO_PATH "repositories/"
@@ -26,20 +28,32 @@
 #define UPDATES_FILE_URL MAIN_URL UPDATES_FILE
 
 #define DOWNLOADS_FILE "downloads.yml"
-#define DOWNLOADS_PATH "/user/app/" APP_TITLEID "/" DOWNLOADS_FILE
+#define DOWNLOADS_PATH STORED_PATH DOWNLOADS_FILE
+
+#define STORED_PATH_OLD "/user/app/" APP_TITLEID "/"
+#define DOWNLOADS_PATH_OLD STORED_PATH_OLD DOWNLOADS_FILE
 
 //PACKAGES
 #define PKG_EXTENSION ".pkg"
 #define PKG_TYPE_AMOUNT 7
 
+//FILTER VIEW
+#define PKG_SORT_AMOUNT 3
+#define PKG_FILTER_AMOUNT PKG_TYPE_AMOUNT+1
+#define FILTER_TITLE_OFFSET 25;
+#define FILTER_CHAR_OFFSET 5
+#define FILTER_CHECKBOX_WIDTH 25
+#define FILTER_CHECKBOX_HEIGHT 25
+
 //Networking
 #define ONE_MB 10e5
-#define USER_AGENT "PS4-4PT/2.35" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
+#define USER_AGENT "PS4-4PT/2.5" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
 #define HTTP_SUCCESS 1
 #define BGFT_HEAP_SIZE (1 * 1024 * 1024)
 #define HTTP_HEAP_SIZE (1024 * 1024)
-#define SSL_HEAP_SIZE (4*128 * 1024)
+#define SSL_HEAP_SIZE (15*128 * 1024)
 #define NET_HEAP_SIZE   (1 * 1024 * 1024)
+#define THREADPOOL_AMOUNT 20
 
 // Font information
 #define FONT_SIZE_LARGE  128

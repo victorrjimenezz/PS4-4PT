@@ -6,17 +6,22 @@
 #define CYDI4_REPOSITORY_H
 #include <string>
 #include <vector>
+#include "../../include/utils/threadPool.h"
 
 class PNG;
 class package;
 class repository {
 private:
+
+    std::mutex pkgMTX;
+    int updatedCount;
     const std::string id;
     std::string name;
     const std::string repoURL;
     const std::string repoLocalPath;
     PNG * icon;
     std::vector<std::shared_ptr<package>> *packageList;
+    void addPKG(std::string pkgURL, std::string pkgType);
     bool updating;
     bool updatingPKGS;
     bool updated;
@@ -37,7 +42,7 @@ public:
     const char * getLocalPath();
     bool hasUpdated();
     void clearPackageList();
-    void addPkg(const std::shared_ptr<package>& package);
+    //void addPkg(const std::shared_ptr<package>& package);
     void setName(const char * newName);
     void deleteRepository();
     std::vector<std::shared_ptr<package>>* getPackageList();

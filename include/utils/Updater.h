@@ -11,7 +11,6 @@ class Updater{
 private:
     static std::string getLatestUpdate(const char * YAML);
     static bool installUpdate(package package);
-    int static migrateFiles(const char * newStoredPath);
     static bool uninstallApp(const char *);
 public:
     static int checkForUpdate();

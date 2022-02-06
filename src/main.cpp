@@ -19,6 +19,7 @@
 #include "../include/utils/notifi.h"
 #include "../include/utils/LANG.h"
 #include "../include/utils/AudioManager.h"
+#include "../include/utils/threadPool.h"
 
 //Load Orbis dependencies
 #include <orbis/Sysmodule.h>
@@ -48,6 +49,7 @@ int mkDirs();
 std::string unique_log_name();
 int openLogger();
 int checkForUpdate();
+int migrate();
 
 void exitApp();
 void stopProcesses();
@@ -157,6 +159,12 @@ int initializeApp() {
     LOG << "Starting Lang";
     LANG::initLang();
     LOG <<"Started Lang";
+
+    if(migrate() < 0)
+        LOG << "Could not migrate files";
+
+    if(threadPool::init() < 0)
+        LOG << "Could not init Thread Pool";
 
     return ret;
 }
@@ -276,18 +284,36 @@ int openLogger() {
     logPath+=unique_log_name();
     return logger::init(logPath.c_str());
 }
+int migrate() {
+    int ret =0;
+    if(fileExists(DOWNLOADS_PATH_OLD))
+        ret = moveFile(DOWNLOADS_PATH_OLD,DOWNLOADS_PATH);
+
+
+    if(folderExists(STORED_PATH_OLD REPO_PATH))
+        ret = moveFile(STORED_PATH_OLD REPO_PATH,STORED_PATH REPO_PATH);
+
+    return ret;
+}
 int mkDirs(){
     int ret = 0, tempRet;
-    std::string repoPath = STORED_PATH;
-    repoPath+=REPO_PATH;
-
-    std::string logsPath = STORED_PATH;
-    logsPath+=LOGS_PATH;
 
     std::stringstream errorCode;
     errorCode << "Could Not Make Dirs\n";
 
+    if(!folderExists(STORED_DATA_PATH)) {
+        ret = 1;
+        tempRet = mkDir(STORED_DATA_PATH);
+        if (tempRet != 0) {
+            ret = -1;
+            errorCode << std::hex << ret;
+            notifi(NULL,errorCode.str().c_str());
+            goto err;
+        }
+    }
+
     if(!folderExists(STORED_PATH)) {
+        ret = 1;
         tempRet = mkDir(STORED_PATH);
         if (tempRet != 0) {
             ret = -1;
@@ -297,9 +323,9 @@ int mkDirs(){
         }
     }
 
-    if(!folderExists(repoPath.c_str())) {
+    if(!folderExists(STORED_PATH REPO_PATH)) {
         ret = 1;
-        tempRet = mkDir(repoPath.c_str());
+        tempRet = mkDir(STORED_PATH REPO_PATH);
         if (tempRet != 0) {
             ret = -1;
             errorCode << std::hex << ret;
@@ -307,8 +333,8 @@ int mkDirs(){
             goto err;
         }
     }
-    if(!folderExists(logsPath.c_str())) {
-        tempRet = mkDir(logsPath.c_str());
+    if(!folderExists(STORED_PATH LOGS_PATH)) {
+        tempRet = mkDir(STORED_PATH LOGS_PATH);
         if (tempRet != 0) {
             ret = -1;
             errorCode << std::hex << ret;
@@ -321,6 +347,7 @@ int mkDirs(){
 }
 
 void exitApp(){
+    threadPool::term();
     stopProcesses();
     unloadModules();
     closeLogger();
