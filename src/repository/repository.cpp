@@ -8,6 +8,7 @@
 #include "../../include/file/fileDownloadRequest.h"
 #include "../../include/utils/notifi.h"
 #include "../../include/utils/PNG.h"
+#include "../../include/utils/GIF.h"
 #include "../../include/utils/utils.h"
 #include "../../include/view/terminalDialogView.h"
 #include "../../include/view/packageSearch.h"
@@ -20,7 +21,8 @@
 
 repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), pkgMTX() {
     this->name = std::string(name);
-    this->icon = new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
+    std::string iconPathStr = iconPath;
+    this->icon = hasEnding(iconPath,".gif") ? new GIF(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT) : new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
     this->updating = false;
     this->updatingPKGS = false;
     this->updated = true;
@@ -127,10 +129,6 @@ void repository::setName(const char * newName) {
     this->name = std::string(newName);
 }
 
-/*void repository::addPkg(const std::shared_ptr<package>& package){
-    packageList->emplace_back(package);
-}*/
-
 int repository::updateYML() {
     std::string OldLocalYMLPath = repoLocalPath+"repo.yml";
     std::string localTEMPDownloadPath = repoLocalPath+"TEMPRepo.yml";
@@ -197,6 +195,7 @@ int repository::updateIcon() {
 
     std::string YMLPath = repoLocalPath+"repo.yml";
     YAML::Node repoYAML;
+
     try {
         repoYAML = YAML::LoadFile(YMLPath);
     } catch(const YAML::ParserException& ex) {
@@ -216,27 +215,39 @@ int repository::updateIcon() {
         sendTerminalMessage(stateString.c_str());
         return 0;
     }
-    std::string repoIconPath = repoYAML["iconPath"].as<std::string>();
+
+    std::string repoIconPath = repoYAML["iconPath"].as<std::string>("");
     std::string repoExt = repoIconPath.substr(repoIconPath.find_last_of('.'));
 
     std::string localDownloadPath = repoLocalPath+"tempicon"+repoExt;
     std::string downloadURL = repoURL;
     downloadURL += repoIconPath;
 
+    stateString = "Downloading Icon";
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
+
     fileDownloadRequest iconDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
     if(iconDownloadRequest.initDownload() < 0) {
-        stateString = "Error fetching Icon";
+        stateString = "Error downloading Icon";
         LOG << stateString;
         sendTerminalMessage(stateString.c_str());
 
         return -1;
     }
+
+    stateString = "Loading icon into memory";
+    LOG << stateString;
+    sendTerminalMessage(stateString.c_str());
+
     removeFile(OldLocalIconPath.c_str());
     OldLocalIconPath = OldLocalIconPath.substr(0,OldLocalIconPath.find_last_of('.')) +repoExt;
     moveFile(localDownloadPath.c_str(),OldLocalIconPath.c_str());
-    int width = icon->getWidth(), height = icon->getHeight();
-    delete icon;
-    icon = new PNG(OldLocalIconPath.c_str(),width,height);
+
+    PNG * newIcon = hasEnding(OldLocalIconPath,".gif") ? new GIF(OldLocalIconPath.c_str(),ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT) : new PNG(OldLocalIconPath.c_str(),ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
+    PNG * oldIcon = icon;
+    icon = newIcon;
+    delete oldIcon;
 
     stateString = "Fetched Icon";
     LOG << stateString;

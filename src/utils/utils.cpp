@@ -73,6 +73,13 @@ int CharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_tex
     return 0;
 }
 
+bool hasEnding (std::string const &fullString, std::string const &ending) {
+    if (fullString.length() >= ending.length()) {
+        return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+    } else {
+        return false;
+    }
+}
 
 std::string genRandom(const int len) {
     static const char alphanum[] =

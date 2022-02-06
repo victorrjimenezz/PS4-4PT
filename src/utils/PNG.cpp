@@ -53,7 +53,7 @@ PNG::PNG(const char *imagePath, int width, int height)
 {
     const unsigned char * tempIMG = ( unsigned char *)stbi_load(imagePath, &this->width, &this->height, &this->channels, STBI_default);
 
-    if (tempIMG == NULL)
+    if (tempIMG == nullptr)
     {
         this->img = nullptr;
         LOG << "Failed to load image '" << imagePath << "': " << stbi_failure_reason();
@@ -62,7 +62,7 @@ PNG::PNG(const char *imagePath, int width, int height)
     this->img = (unsigned char *) malloc(width*height*channels);
     stbir_resize_uint8(tempIMG, this->width, this->height, 0, img, width, height, 0, channels);
     stbi_image_free((uint32_t *)tempIMG);
-    if (this->img == NULL)
+    if (this->img == nullptr)
     {
         this->img = nullptr;
         LOG << "Failed to load image '" << imagePath << "': " << stbi_failure_reason();
@@ -81,13 +81,13 @@ PNG::PNG(const uint8_t *imageData, uint32_t dataLen, int width, int height) {
     if (tempIMG == NULL)
     {
         this->img = nullptr;
-        LOG << "Failed to load image" << stbi_failure_reason();
+        LOG << "Failed to load image " << stbi_failure_reason();
         return;
     }
     this->img = (unsigned char *) malloc(width*height*channels);
     stbir_resize_uint8(tempIMG, this->width, this->height, 0, img, width, height, 0, channels);
     stbi_image_free((uint32_t *)tempIMG);
-    if (this->img == NULL)
+    if (this->img == nullptr)
     {
         this->img = nullptr;
         LOG << "Failed to load image" << stbi_failure_reason();
@@ -101,7 +101,7 @@ PNG::PNG(const uint8_t *imageData, uint32_t dataLen, int width, int height) {
 
 PNG::~PNG()
 {
-    if(this->img != NULL)
+    if(this->img != nullptr)
         stbi_image_free(this->img);
 }
 

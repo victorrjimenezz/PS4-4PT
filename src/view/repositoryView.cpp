@@ -124,7 +124,8 @@ void repositoryView::updateView() {
             mainScene->DrawRectangle(0, repoRectangle.y-repoRectangle.height/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, repoRectangle.y+repoRectangle.height/2-rectangleDivisorHeight/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             if(currRepo != nullptr){
-                currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
+                if(currRepo->getIcon()!= nullptr)
+                    currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
                 mainScene->DrawText((char *) currRepo->getName(), fontMedium, repoRectangle.x, repoRectangle.y,
                                     selectedColor, textColor);
                 mainScene->DrawText((char *) currRepo->getRepoURL(), fontSmall, repoRectangle.x, repoRectangle.y+3*repoRectangle.height/8,
@@ -143,7 +144,8 @@ void repositoryView::updateView() {
                             selectedColor, selectedColor);
         mainScene->DrawText((char *) currRepo->getRepoURL(), fontSmall, repoRectangle.x, repoRectangle.y+3*repoRectangle.height/8,
                             selectedColor, selectedColor);
-        currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
+        if(currRepo->getIcon()!= nullptr)
+            currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
         if(currRepo->isUpdating()){
             switch (selectedOption) {
                 case OPEN:

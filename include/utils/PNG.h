@@ -22,9 +22,9 @@ public:
     int getWidth() const;
     int getHeight() const;
     std::string getPath();
-    ~PNG();
+    virtual ~PNG();
     int getChannels() const;
-    void Draw(Scene2D *scene, int startX, int startY);
+    virtual void Draw(Scene2D *scene, int startX, int startY);
     void Draw(uint32_t *frameBuffer, int startX, int startY, int screenWidth, int screenHeight);
 };
 

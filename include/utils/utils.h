@@ -5,6 +5,7 @@ extern jbc_cred g_Cred;
 extern jbc_cred g_RootCreds;
 
 int CharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end);
+bool hasEnding (std::string const &fullString, std::string const &ending);
 std::string genRandom(int len);
 std::string genDate();
 
