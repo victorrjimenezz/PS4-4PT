@@ -34,6 +34,10 @@ int LANG::loadLang(){
     sceSystemServiceParamGetInt(ORBIS_SYSTEM_SERVICE_PARAM_ID_LANG, &systemLanguage);
 
     switch (systemLanguage){
+        case ORBIS_SYSTEM_PARAM_LANG_HUNGARIAN:
+            LOG << "DETECTED HUNGARIAN";
+            ret= changeLangTo("HU");
+            break;
         case ORBIS_SYSTEM_PARAM_LANG_GERMAN:
             LOG << "DETECTED GERMAN";
             ret= changeLangTo("DE");
