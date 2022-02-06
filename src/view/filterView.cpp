@@ -5,7 +5,6 @@
 #include "../../include/utils/PNG.h"
 #include "../../include/repository/package.h"
 #include "../../include/utils/LANG.h"
-#include "../../include/utils/logger.h"
 
 
 filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width, int height) : font(font), positionsLOWER() {
@@ -38,11 +37,9 @@ filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width
     SortOrderStr[0] = LANG::mainLang->ASCENDING;
     SortOrderStr[1] = LANG::mainLang->DESCENDING;
 
-    LOG << "here";
     for(bool & i : enabled)
         i = true;
 
-    LOG << "THERE";
     for(int i =0; i<PKG_FILTER_AMOUNT-1; i++) {
         positionsLOWER[i].xBox = x + (i+1) * (width) / (PKG_FILTER_AMOUNT + 2);;
         positionsLOWER[i].yBox = y + height / 6;
