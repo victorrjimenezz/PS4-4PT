@@ -137,9 +137,8 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [X] If Repo update fails, do not delete all packages :)
 - [X] Filter PKGs by type, updates available
 - [X] Implement sorting by size, version, alphabetically...
-- [ ] Fix package flicker when rapidly changing
+- [X] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add customization options, such as disabling notifications or changing language
-- [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
 - [ ] Fix bug that causes the app to hang on the initializing screen when no Mac Filtering Enabled
 - [ ] Merge packageSearch and repoPackageList into a one unique class
@@ -148,6 +147,7 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 
 ### Future versions (~1/2 Year)
 
+- [ ] Fix package flicker when rapidly changing selected package
 - [ ] Fix Hungarian automatic detection
 - [ ] Change Keyboard to UI IME
 - [ ] Add Http Authentication Support
