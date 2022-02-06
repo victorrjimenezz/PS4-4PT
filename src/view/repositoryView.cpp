@@ -108,6 +108,7 @@ void repositoryView::updateRepositories() {
 }
 
 void repositoryView::updateView() {
+    int selectedTemp;
     std::string printStr;
     int totalPages = ceil((double)repositoryList->size()/reposPerPage);
     if(totalPages ==0) totalPages++;
@@ -117,10 +118,11 @@ void repositoryView::updateView() {
     if(totalPages<10)
         printStr+="0";
     printStr+= std::to_string(totalPages);
+    selectedTemp = selected;
     for(int i =0; i< reposPerPage; i++){
         repository * currRepo = currRepos[i];
         repoRectangle repoRectangle = repoRectangles[i];
-        if(selected != i || isOnKeyboard){
+        if(selectedTemp != i || isOnKeyboard){
             mainScene->DrawRectangle(0, repoRectangle.y-repoRectangle.height/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, repoRectangle.y+repoRectangle.height/2-rectangleDivisorHeight/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             if(currRepo != nullptr){
@@ -134,8 +136,8 @@ void repositoryView::updateView() {
         }
     }
     if(!isOnKeyboard && !repositoryList->empty()) {
-        repository * currRepo = currRepos[selected];
-        repoRectangle repoRectangle = repoRectangles[selected];
+        repository * currRepo = currRepos[selectedTemp];
+        repoRectangle repoRectangle = repoRectangles[selectedTemp];
         mainScene->DrawRectangle(0, repoRectangle.y - repoRectangle.height / 2, repoRectangle.width,
                                  rectangleDivisorHeight, selectedColor);
         mainScene->DrawRectangle(0, repoRectangle.y + repoRectangle.height / 2 - rectangleDivisorHeight / 2,
