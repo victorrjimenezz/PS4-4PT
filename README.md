@@ -131,23 +131,31 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 ### Version 2.5 (~3 Months)
 
-- [ ] Change 4PT Stored data path to /data/4PT/
-- [ ] Add customization options, such as disabling notifications
+- [X] Change 4PT Stored data path to /data/4PT/
+- [X] Optimize Loading Repository Speed, gone from 1.25 Packages per second to 9.12 Packages per second. A 
+Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
+- [X] If Repo update fails, do not delete all packages :)
+- [X] Filter PKGs by type, updates available
+- [X] Implement sorting by size, version, alphabetically...
+- [ ] Fix package flicker when rapidly changing
+- [ ] Add customization options, such as disabling notifications or changing language
 - [ ] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [ ] Add functionality to download binaries
-- [ ] Filter PKGs by type
 - [ ] Fix bug that causes the app to hang on the initializing screen when no Mac Filtering Enabled
+- [ ] Merge packageSearch and repoPackageList into a one unique class
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
+- [ ] Fix Hungarian automatic detection
 - [ ] Change Keyboard to UI IME
 - [ ] Add Http Authentication Support
-- [ ] Implement sorting by size, version, alphabetically, updates available...
 - [ ] Add Short PKG Description when holding key
 - [ ] Add a new PKG List view where only covers are displayed
 - [ ] Support for more languages
+- [ ] Download pkgs in the background with DAEMONS
+- [ ] Disable need for the repository to be fully updated to display the packages that have been added already
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
 
@@ -159,6 +167,7 @@ See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a f
 
 The app is available in:
 - [X] English
+- [X] Hungarian by [Damy](https://github.com/dagadtwok)
 - [X] Italian by [@imgiovi](https://www.twitter.com/imgiovi)
 - [X] German
 - [X] Spanish
