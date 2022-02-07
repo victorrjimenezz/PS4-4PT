@@ -95,7 +95,7 @@ int fileDownloadRequest::downloadError(const char *message, int statusCode) {
 
 int fileDownloadRequest::initDownload(download * download) {
     int ret = 0;
-    if(!verifyURL(sourceURL.c_str())){
+    if(!verifyURL(sourceURL.c_str(),true)){
         std::string message = "INVALID URL AT ";
         message+=sourceURL;
         ret = downloadError(message.c_str());
@@ -211,7 +211,7 @@ int fileDownloadRequest::downloadBytes(const char * rawURL, uint8_t * data, uint
     if(startByte > endByte) {
         LOG << "ERROR STARTBYTE>ENDBYTE";
         return -1;
-    } else if(!verifyURL(url)) {
+    } else if(!verifyURL(url,true)) {
         LOG << "INVALID URL " << url;
         return -2;
     }
@@ -354,8 +354,8 @@ int fileDownloadRequest::downloadLoop() {
     return 0;
 }
 
-bool fileDownloadRequest::verifyURL(const char *url) {
-    std::string rawURL = encodeURL(std::string(url));
+bool fileDownloadRequest::verifyURL(const char *url, bool isEncoded) {
+    std::string rawURL = isEncoded ? url : encodeURL(std::string(url));
     return std::regex_match(rawURL, getUrlRegex());
 }
 
@@ -364,20 +364,35 @@ std::regex fileDownloadRequest::getUrlRegex() {
 }
 
 std::string fileDownloadRequest::encodeURL(const std::string & url) {
-        bool countedColon = false;
+        int index = 0;
+        int countForSlash = 0;
+        int thirdForSlash = -1;
+        for(auto character : url){
+            index++;
+            if(character == '/'){
+                countForSlash++;
+                if(countForSlash==3) {
+                    thirdForSlash = index;
+                    break;
+                }
+            }
+        }
+        if(url.size() <= thirdForSlash)
+            return url;
+
+        std::string base = url.substr(0,thirdForSlash);
+        std::string path = url.substr(thirdForSlash);
+
         std::stringstream escaped;
         escaped.fill('0');
         escaped << std::hex;
+        escaped << base;
 
-        for (std::string::const_iterator i = url.begin(), n = url.end(); i != n; ++i) {
+        for (std::string::const_iterator i = path.begin(), n = path.end(); i != n; ++i) {
             std::string::value_type c = (*i);
 
             // Keep alphanumeric and other accepted characters intact
             if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c=='/') {
-                escaped << c;
-                continue;
-            } else if(!countedColon && c == ':'){
-                countedColon = true;
                 escaped << c;
                 continue;
             }
@@ -387,7 +402,6 @@ std::string fileDownloadRequest::encodeURL(const std::string & url) {
             escaped << '%' << std::setw(2) << int((unsigned char) c);
             escaped << std::nouppercase;
         }
-
         return escaped.str();
 }
 

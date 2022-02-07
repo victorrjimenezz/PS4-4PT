@@ -43,7 +43,7 @@ private:
 public:
     fileDownloadRequest(const char * sourceURL, const char * destinationPath, uint64_t startByte = 0, uint64_t fileSize = 0);
     int static downloadBytes(const char * url, uint8_t * data, uint64_t startByte, uint64_t endByte);
-    bool static verifyURL(const char * url);
+    bool static verifyURL(const char * url, bool isEncoded = false);
 
     static void setLibhttpCtxId(int libhttpCtxId);
     static int getLibhttpCtxId();
