@@ -100,7 +100,7 @@ void keyboardInput::updateView() {
             mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, textColor, textColor);
         } else {
             if(currChar < SPEC_DICT_SIZE) {
-                mainScene->DrawText((char *) lowerDict[currChar], font, specDictPosition[currCharTEMP], yKeyboardTextLower, selectedTextColor, selectedTextColor);
+                mainScene->DrawText((char *) lowerDict[currCharTEMP], font, specDictPosition[currCharTEMP], yKeyboardTextLower, selectedTextColor, selectedTextColor);
                 mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, textColor, textColor);
             }else
                 mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, selectedTextColor, selectedTextColor);
