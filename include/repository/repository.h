@@ -12,8 +12,8 @@ class PNG;
 class package;
 class repository {
 private:
-
     std::mutex updateMtx;
+    std::mutex addPKGMtx;
     int updatedCount;
     const std::string id;
     std::string name;

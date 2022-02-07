@@ -19,7 +19,7 @@
 #include <yaml-cpp/yaml.h>
 #include <thread>
 
-repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), updateMtx() {
+repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), addPKGMtx(), updateMtx() {
     this->name = std::string(name);
     std::string iconPathStr = iconPath;
     this->icon = hasEnding(iconPath,".gif") ? new GIF(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT) : new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
@@ -41,7 +41,6 @@ int repository::updatePKGS() {
     std::string stateString;
     int ret = 0;
     int cnt = 0;
-    int currCnt = 0;
     updatedCount = 0;
     std::string downloadURL;
 
@@ -68,10 +67,8 @@ int repository::updatePKGS() {
     }
     for(YAML::const_iterator it=repoYAML.begin(); it!=repoYAML.end(); ++it) {
         if(willDelete) {
-            cnt = currCnt;
             break;
         }
-        currCnt++;
         if (it->second) {
             if((it->second).IsMap()) {
                 const std::string &key = it->first.as<std::string>();
@@ -89,9 +86,8 @@ int repository::updatePKGS() {
 
                 stateString = "Fetching: " + pkgPath;
                 LOG << stateString;
-                cnt++;
-
                 threadPool::addJob([this, capture0 = pkgPath, capture1 = type] { addPKG(capture0, capture1); });
+                cnt++;
             }
         }
     }
@@ -414,7 +410,6 @@ void repository::addPKG(std::string pkgURL, std::string pkgType) {
 
     bool failedInit;
     std::string stateString;
-    std::mutex newMutex;
     std::shared_ptr<package> pkg(
             new package(pkgURL.c_str(), false, &failedInit, pkgType.c_str(), name.c_str()));
 
@@ -425,8 +420,10 @@ void repository::addPKG(std::string pkgURL, std::string pkgType) {
         sendTerminalMessage(stateString.c_str());
         pkg.reset();
         LOG << "DELETED " << pkgURL;
-        newMutex.lock();
-        goto finish;
+
+        std::unique_lock<std::mutex> lock(addPKGMtx);
+        updatedCount++;
+        return;
     }
 
 
@@ -434,11 +431,10 @@ void repository::addPKG(std::string pkgURL, std::string pkgType) {
     LOG << stateString;
     sendTerminalMessage(stateString.c_str());
 
-    newMutex.lock();
-    packageList->emplace_back(pkg);
-
-    finish:
-    updatedCount++;
-    newMutex.unlock();
+    {
+        std::unique_lock<std::mutex> lock(addPKGMtx);
+        packageList->emplace_back(pkg);
+        updatedCount++;
+    }
 }
 
