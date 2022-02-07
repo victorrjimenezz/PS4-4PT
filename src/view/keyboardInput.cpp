@@ -91,15 +91,15 @@ void keyboardInput::updateView() {
                 mainScene->DrawText((char *) lowerDict[i], font, specDictPosition[i], yKeyboardTextLower, textColor, textColor);
             }
         }
-        if(isOnUpperRow) {
-            if(currChar < DICT_SIZE) {
+        if(isOnUpperRowTEMP) {
+            if(currCharTEMP < DICT_SIZE) {
                 mainScene->DrawText((char *) upperDict[currCharTEMP], font, dictPosition[currCharTEMP], yKeyboardTextUpper, selectedTextColor, selectedTextColor);
                 mainScene->DrawText((char*) del, font, delPos, yKeyboardTextUpper, textColor, textColor);
             }else
                 mainScene->DrawText((char*) del, font, delPos, yKeyboardTextUpper, selectedTextColor, selectedTextColor);
             mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, textColor, textColor);
         } else {
-            if(currChar < SPEC_DICT_SIZE) {
+            if(currCharTEMP < SPEC_DICT_SIZE) {
                 mainScene->DrawText((char *) lowerDict[currCharTEMP], font, specDictPosition[currCharTEMP], yKeyboardTextLower, selectedTextColor, selectedTextColor);
                 mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, textColor, textColor);
             }else
@@ -110,20 +110,22 @@ void keyboardInput::updateView() {
 }
 
 void keyboardInput::nextKey() {
-    currChar++;
+    int tempCurrChar = currChar+1;
     if(isOnUpperRow)
-        currChar = currChar%(DICT_SIZE+1);
+        currChar = tempCurrChar%(DICT_SIZE+1);
     else
-        currChar = currChar%(SPEC_DICT_SIZE+1);
+        currChar = tempCurrChar%(SPEC_DICT_SIZE+1);
 }
 
 void keyboardInput::previousKey() {
-    currChar--;
-    if(currChar < 0) {
+    int tempCurrChar = currChar-1;
+    if(tempCurrChar < 0) {
         if (isOnUpperRow)
             currChar = DICT_SIZE;
         else
             currChar = SPEC_DICT_SIZE;
+    } else {
+        currChar = tempCurrChar;
     }
 }
 
