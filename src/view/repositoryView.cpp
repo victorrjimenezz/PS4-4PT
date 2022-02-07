@@ -114,6 +114,8 @@ void repositoryView::updateView() {
     if(totalPages<10)
         printStr+="0";
     printStr+= std::to_string(totalPages);
+    mainScene->DrawText((char *) printStr.c_str(), fontSmall, viewWidth*CURR_PAGE_X, viewHeight*CURR_PAGE_Y,
+                        selectedColor, selectedColor);
     selectedTemp = selected;
     for(int i =0; i< reposPerPage; i++){
         repository * currRepo = currRepos[i];
