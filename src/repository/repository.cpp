@@ -350,7 +350,7 @@ repository *repository::fetchRepo(const char *repoURL) {
         downloadURL+="repo.yml";
         fileDownloadRequest YMLDownloadRequest(downloadURL.c_str(),localDownloadPath.c_str());
         if(YMLDownloadRequest.initDownload() <0){
-            stateString = "Error when downloadinging repo.yml from " + downloadURL + " to " + localRepositoryFolder;
+            stateString = "Error when downloading repo.yml from " + downloadURL + " to " + localRepositoryFolder;
             LOG << stateString;
             sendTerminalMessage(stateString.c_str(),repoURL);
             removeDir(localRepositoryFolder.c_str());
