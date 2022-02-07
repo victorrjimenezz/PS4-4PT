@@ -19,12 +19,11 @@
 #include <yaml-cpp/yaml.h>
 #include <thread>
 
-repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), pkgMTX() {
+repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), updateMtx() {
     this->name = std::string(name);
     std::string iconPathStr = iconPath;
     this->icon = hasEnding(iconPath,".gif") ? new GIF(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT) : new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
     this->updating = false;
-    this->updatingPKGS = false;
     this->updated = true;
     this->updated = false;
     this->willDelete =false;
@@ -39,8 +38,6 @@ const char * repository::getID() {
 }
 
 int repository::updatePKGS() {
-    std::unique_lock<std::mutex> lock(pkgMTX);
-
     std::string stateString;
     int ret = 0;
     int cnt = 0;
@@ -49,7 +46,6 @@ int repository::updatePKGS() {
 
     YAML::Node repoYAML;
 
-    updatingPKGS = true;
     std::string repoYMLPath = repoLocalPath + "repo.yml";
 
 
@@ -107,7 +103,6 @@ int repository::updatePKGS() {
     err:
     while(packageSearch::mainPackageSearch == nullptr) continue;
     packageSearch::mainPackageSearch->updatePackages();
-    updatingPKGS = false;
     sendTerminalMessage("Finished Updating PKGs");
     updated = true;
     return ret;
@@ -257,31 +252,22 @@ int repository::updateIcon() {
 }
 
 int repository::updateRepository() {
-    if(updating)
-        return -1;
     updating = true;
-    int packages;
+    std::unique_lock<std::mutex> lock(updateMtx);
+    int packages = 0;
+
     if(willDelete)
         goto deleting;
+
     updateYML();
-    if(willDelete)
-        goto deleting;
     updateIcon();
-    if(willDelete)
-        goto deleting;
     packages = updatePKGS();
-    if(willDelete)
-        goto deleting;
-    updating = false;
-    updated = true;
-    updatingPKGS = false;
     sendTerminalMessage("Updated repository!");
-    return packages;
 
     deleting:
     updating = false;
-    updatingPKGS = false;
-    return 0;
+    updated = true;
+    return packages;
 }
 
 std::vector<std::shared_ptr<package>> * repository::getPackageList() {
@@ -292,21 +278,19 @@ bool repository::hasUpdated(){
     updated = false;
     return oldUpdated;
 }
-void repository::clearPackageList() {
-    packageList->clear();
-}
 
 void repository::deleteRepository() {
     willDelete = true;
-    while(isUpdating())
-        continue;
-    removeDir(repoLocalPath.c_str());
+    {
+        std::unique_lock<std::mutex> lock(updateMtx);
+        removeDir(repoLocalPath.c_str());
+    }
     delete this;
 }
+
 repository::~repository() {
     willDelete = true;
-    while(isUpdating())
-        continue;
+    std::unique_lock<std::mutex> lock(updateMtx);
     delete icon;
 
     packageList->clear();
@@ -314,7 +298,7 @@ repository::~repository() {
 }
 
 bool repository::isUpdating() const {
-    return updating || updatingPKGS;
+    return updating;
 }
 
 repository *repository::fetchRepo(const char *repoURL) {

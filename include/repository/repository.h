@@ -13,7 +13,7 @@ class package;
 class repository {
 private:
 
-    std::mutex pkgMTX;
+    std::mutex updateMtx;
     int updatedCount;
     const std::string id;
     std::string name;
@@ -23,7 +23,6 @@ private:
     std::vector<std::shared_ptr<package>> *packageList;
     void addPKG(std::string pkgURL, std::string pkgType);
     bool updating;
-    bool updatingPKGS;
     bool updated;
     bool willDelete;
     int updateYML();
@@ -41,8 +40,6 @@ public:
     const char * getRepoURL();
     const char * getLocalPath();
     bool hasUpdated();
-    void clearPackageList();
-    //void addPkg(const std::shared_ptr<package>& package);
     void setName(const char * newName);
     void deleteRepository();
     std::vector<std::shared_ptr<package>>* getPackageList();
