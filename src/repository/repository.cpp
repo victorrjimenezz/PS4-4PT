@@ -41,6 +41,7 @@ int repository::updatePKGS() {
     std::string stateString;
     int ret = 0;
     int cnt = 0;
+    int currCnt = 0;
     updatedCount = 0;
     std::string downloadURL;
 
@@ -66,8 +67,11 @@ int repository::updatePKGS() {
         goto err;
     }
     for(YAML::const_iterator it=repoYAML.begin(); it!=repoYAML.end(); ++it) {
-        if(willDelete)
+        if(willDelete) {
+            cnt = currCnt;
             break;
+        }
+        currCnt++;
         if (it->second) {
             if((it->second).IsMap()) {
                 const std::string &key = it->first.as<std::string>();
@@ -92,7 +96,7 @@ int repository::updatePKGS() {
         }
     }
 
-    while(cnt != updatedCount) continue;
+    while(updatedCount < cnt) continue;
 
     if(packageList->empty() && cnt > 0)
         for(const auto& pkg : oldPackageList)
