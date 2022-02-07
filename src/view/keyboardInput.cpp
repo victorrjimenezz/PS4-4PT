@@ -72,31 +72,35 @@ keyboardInput::keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, in
 }
 
 void keyboardInput::updateView() {
+    int currCharTEMP;
+    bool isOnUpperRowTEMP;
     mainScene->DrawRectangle(containerX, containerY, containerWidth, containerHeight, borderColor);
     mainScene->DrawRectangle(boxX, yInputBox, boxWidth, boxHeight, bgColor);
     mainScene->DrawText((char*)text.c_str(),font,xText,yInputText,textColor,textColor);
+    currCharTEMP = currChar;
+    isOnUpperRowTEMP = isOnUpperRow;
     if(keyBoardIsSelected){
         mainScene->DrawRectangle(boxX, yKeyboardBox, boxWidth, boxHeight, bgColor);
         for(int i = 0; i < DICT_SIZE; i++) {
-            if (currChar != i || !isOnUpperRow) {
+            if (currCharTEMP != i || !isOnUpperRowTEMP) {
                 mainScene->DrawText((char *) upperDict[i], font, dictPosition[i], yKeyboardTextUpper, textColor, textColor);
             }
         }
         for(int i = 0; i < SPEC_DICT_SIZE; i++) {
-            if (currChar != i || isOnUpperRow) {
+            if (currCharTEMP != i || isOnUpperRowTEMP) {
                 mainScene->DrawText((char *) lowerDict[i], font, specDictPosition[i], yKeyboardTextLower, textColor, textColor);
             }
         }
         if(isOnUpperRow) {
             if(currChar < DICT_SIZE) {
-                mainScene->DrawText((char *) upperDict[currChar], font, dictPosition[currChar], yKeyboardTextUpper, selectedTextColor, selectedTextColor);
+                mainScene->DrawText((char *) upperDict[currCharTEMP], font, dictPosition[currCharTEMP], yKeyboardTextUpper, selectedTextColor, selectedTextColor);
                 mainScene->DrawText((char*) del, font, delPos, yKeyboardTextUpper, textColor, textColor);
             }else
                 mainScene->DrawText((char*) del, font, delPos, yKeyboardTextUpper, selectedTextColor, selectedTextColor);
             mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, textColor, textColor);
         } else {
             if(currChar < SPEC_DICT_SIZE) {
-                mainScene->DrawText((char *) lowerDict[currChar], font, specDictPosition[currChar], yKeyboardTextLower, selectedTextColor, selectedTextColor);
+                mainScene->DrawText((char *) lowerDict[currChar], font, specDictPosition[currCharTEMP], yKeyboardTextLower, selectedTextColor, selectedTextColor);
                 mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, textColor, textColor);
             }else
                 mainScene->DrawText((char*) specialKey, font, specialPos, yKeyboardTextLower, selectedTextColor, selectedTextColor);

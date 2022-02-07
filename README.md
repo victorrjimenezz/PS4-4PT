@@ -142,12 +142,12 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [ ] Add customization options, such as disabling notifications or changing language
 - [ ] Add functionality to download binaries
 - [ ] Fix bug that causes the app to hang on the initializing screen
-- [ ] Merge packageSearch and repoPackageList into a one unique class
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
+- [ ] get Abstract Class from packageSearch and repoPackageList
 - [ ] Fix Hungarian automatic detection
 - [ ] Custom Port http connection
 - [ ] Add Http Authentication Support
