@@ -17,11 +17,7 @@ int threadPool::init() {
     if(!pool.empty())
         return 1;
 
-    {
-        std::unique_lock<std::mutex> lock(threadPoolMutex);
-        shutdown = false; // use this flag in condition.wait
-    }
-
+    shutdown = false;
     for(int i=0; i < THREADPOOL_AMOUNT; i++)
         pool.emplace_back(std::thread(&threadPool::waitForTask));
     return 0;
@@ -74,5 +70,4 @@ int threadPool::addJob(const std::function<void()>& newJob) {
     jobQueue.emplace(newJob);
     return 0;
 }
-
 
