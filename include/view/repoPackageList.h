@@ -27,6 +27,7 @@ class repoPackageList : public subView {
     };
 private:
     std::mutex filterMtx;
+    std::mutex updateMtx;
     static filterView::sort currentSort;
     static filterView::sortOrder currentSortOrder;
     static bool packageCompare(const std::shared_ptr<package> &lhs, const std::shared_ptr<package> &rhs);

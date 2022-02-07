@@ -105,6 +105,7 @@ void repoPackageList::filterPackages(const char * name) {
 
 void repoPackageList::updateView() {
     int selectedTemp;
+    bool empty;
     if(keyboardInput->hasChanged() || filterView->hasChanged())
         filterPackages(keyboardInput->readText().c_str());
 
@@ -120,124 +121,147 @@ void repoPackageList::updateView() {
         mainScene->DrawText((char *) printStr.c_str(), fontSmall, viewWidth*CURR_PAGE_X, viewHeight*CURR_PAGE_Y,
                             selectedColor, selectedColor);
     selectedTemp = selected;
-    for(int i =0; i < packagesPerPage; i++){
-        std::shared_ptr<package> currPackage = currPackages[i];
-        packageRectangle packageRectangle = packageRectangles[i];
-        if(selectedTemp != i || keyboardInput->active() || filterView->active()){
-            mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
-            mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
-            if(currPackage != nullptr){
-                mainScene->DrawText((char *) std::string(currPackage->getName()).substr(0,PKGLIST_CHARACTER_LIMIT).c_str(), fontMedium, packageRectangle.x, packageRectangle.y,
-                                    textColor, textColor);
+    empty = displayPackageList.empty();
+    {
+        std::unique_lock<std::mutex> lock(updateMtx);
+        for (int i = 0; i < packagesPerPage; i++) {
+            std::shared_ptr<package> currPackage = currPackages[i];
+            packageRectangle packageRectangle = packageRectangles[i];
+            if (selectedTemp != i || keyboardInput->active() || filterView->active()) {
+                mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
+                                         rectangleDivisorHeight, textColor);
+                mainScene->DrawRectangle(0,
+                                         packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
+                                         packageRectangle.width, rectangleDivisorHeight, textColor);
+                if (currPackage != nullptr) {
+                    mainScene->DrawText(
+                            (char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
+                            fontMedium, packageRectangle.x, packageRectangle.y,
+                            textColor, textColor);
+                    printStr = LANG::mainLang->TYPE;
+                    printStr += TypeStr[currPackage->getPackageType()];
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                        packageRectangle.y - 1 * packageRectangle.height / 8,
+                                        textColor, textColor);
+                    printStr = LANG::mainLang->VERSION;
+                    printStr += ": ";
+                    printStr += currPackage->getVersionStr();
+                    printStr += " | ";
+                    printStr += currPackage->getTitleID();
+
+                    if (currPackage->getSystemVersion() > 0) {
+                        printStr += " | " + LANG::mainLang->FOR_FW;
+                        printStr += currPackage->getSystemVersionStr();
+                        printStr += "+";
+                    }
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x,
+                                        packageRectangle.y + 3 * packageRectangle.height / 8,
+                                        textColor, textColor);
+                    if (currPackage->isInstalled()) {
+                        if (currPackage->updateAvailable()) {
+                            printStr = LANG::mainLang->UPDATE_AVAILABLE;
+                            printStr += currPackage->getSFOType();
+                            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                                packageRectangle.y + 1 * packageRectangle.height / 8,
+                                                updateTextColor, updateTextColor);
+                        } else {
+                            printStr = LANG::mainLang->INSTALLED;
+                            printStr += currPackage->getSFOType();
+                            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                                packageRectangle.y + 1 * packageRectangle.height / 8,
+                                                textColor, textColor);
+                        }
+                    } else if (strlen(currPackage->getSFOType()) > 1) {
+                        printStr = currPackage->getSFOType();
+                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                            packageRectangle.y + 1 * packageRectangle.height / 8,
+                                            textColor, textColor);
+                    }
+                    currPackage->getIcon()->Draw(mainScene, repoIconX,
+                                                 packageRectangle.y - 3 * packageRectangle.height / 8);
+                    printStr = LANG::mainLang->SIZE;
+                    printStr += ": ";
+                    printStr += currPackage->getPkgSizeMB();
+                    printStr += "MB";
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                        packageRectangle.y + 3 * packageRectangle.height / 8,
+                                        textColor, textColor);
+                }
+            }
+        }
+        if (!keyboardInput->active() && !filterView->active()) {
+            packageRectangle packageRectangle = packageRectangles[selectedTemp];
+            if (!empty) {
+                mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
+                                         rectangleDivisorHeight, selectedColor);
+                mainScene->DrawRectangle(0,
+                                         packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
+                                         packageRectangle.width, rectangleDivisorHeight, selectedColor);
+                std::shared_ptr<package> currPackage = currPackages[selectedTemp];
+                mainScene->DrawText(
+                        (char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
+                        fontMedium, packageRectangle.x, packageRectangle.y,
+                        selectedColor, selectedColor);
                 printStr = LANG::mainLang->TYPE;
-                printStr+=TypeStr[currPackage->getPackageType()];
-                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y- 1 * packageRectangle.height / 8,
-                                    textColor, textColor);
+                printStr += TypeStr[currPackage->getPackageType()];
+                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                    packageRectangle.y - 1 * packageRectangle.height / 8,
+                                    selectedColor, selectedColor);
                 printStr = LANG::mainLang->VERSION;
                 printStr += ": ";
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
                 printStr += currPackage->getTitleID();
 
-                if(currPackage->getSystemVersion() > 0) {
-                    printStr += " | "+LANG::mainLang->FOR_FW;
-                    printStr +=currPackage->getSystemVersionStr();
-                    printStr+="+";
+                if (currPackage->getSystemVersion() > 0) {
+                    printStr += " | " + LANG::mainLang->FOR_FW;;
+                    printStr += currPackage->getSystemVersionStr();
+                    printStr += "+";
                 }
-                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
-                                    textColor, textColor);
-                if(currPackage->isInstalled()) {
-                    if(currPackage->updateAvailable()) {
+                mainScene->DrawText((char *) printStr.c_str(), fontSmall,
+                                    packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
+                                    selectedColor, selectedColor);
+                currPackage->getIcon()->Draw(mainScene, repoIconX,
+                                             packageRectangle.y - 3 * packageRectangle.height / 8);
+                if (currPackage->isInstalled()) {
+                    if (currPackage->updateAvailable()) {
                         printStr = LANG::mainLang->UPDATE_AVAILABLE;
                         printStr += currPackage->getSFOType();
-                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
+                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                            packageRectangle.y + 1 * packageRectangle.height / 8,
                                             updateTextColor, updateTextColor);
                     } else {
                         printStr = LANG::mainLang->INSTALLED;
                         printStr += currPackage->getSFOType();
-                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                            textColor, textColor);
+                        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                            packageRectangle.y + 1 * packageRectangle.height / 8,
+                                            selectedColor, selectedColor);
                     }
-                } else if(strlen(currPackage->getSFOType())>1) {
+                } else if (strlen(currPackage->getSFOType()) > 1) {
                     printStr = currPackage->getSFOType();
-                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                        textColor, textColor);
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
+                                        packageRectangle.y + 1 * packageRectangle.height / 8,
+                                        selectedColor, selectedColor);
                 }
-                currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
                 printStr = LANG::mainLang->SIZE;
                 printStr += ": ";
                 printStr += currPackage->getPkgSizeMB();
                 printStr += "MB";
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y + 3 * packageRectangle.height / 8,
-                                    textColor, textColor);
-            }
-        }
-    }
-    bool empty = displayPackageList.empty();
-    if(!keyboardInput->active() && !filterView->active()) {
-        packageRectangle packageRectangle = packageRectangles[selectedTemp];
-        if(!empty) {
-            mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
-                                     rectangleDivisorHeight, selectedColor);
-            mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
-                                     packageRectangle.width, rectangleDivisorHeight, selectedColor);
-            std::shared_ptr<package> currPackage = currPackages[selectedTemp];
-            mainScene->DrawText((char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
-                                fontMedium, packageRectangle.x, packageRectangle.y,
-                                selectedColor, selectedColor);
-            printStr = LANG::mainLang->TYPE;
-            printStr += TypeStr[currPackage->getPackageType()];
-            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
-                                packageRectangle.y - 1 * packageRectangle.height / 8,
-                                selectedColor, selectedColor);
-            printStr = LANG::mainLang->VERSION;
-            printStr += ": ";
-            printStr += currPackage->getVersionStr();
-            printStr += " | ";
-            printStr += currPackage->getTitleID();
-
-            if(currPackage->getSystemVersion() > 0) {
-                printStr += " | "+LANG::mainLang->FOR_FW;;
-                printStr +=currPackage->getSystemVersionStr();
-                printStr+="+";
-            }
-            mainScene->DrawText((char *) printStr.c_str(), fontSmall,
-                                packageRectangle.x, packageRectangle.y + 3 * packageRectangle.height / 8,
-                                selectedColor, selectedColor);
-            currPackage->getIcon()->Draw(mainScene, repoIconX, packageRectangle.y - 3 * packageRectangle.height / 8);
-            if(currPackage->isInstalled()) {
-                if(currPackage->updateAvailable()) {
-                    printStr = LANG::mainLang->UPDATE_AVAILABLE;
-                    printStr += currPackage->getSFOType();
-                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                        updateTextColor, updateTextColor);
-                } else {
-                    printStr = LANG::mainLang->INSTALLED;
-                    printStr += currPackage->getSFOType();
-                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
-                                        selectedColor, selectedColor);
-                }
-            } else if(strlen(currPackage->getSFOType())>1) {
-                printStr = currPackage->getSFOType();
-                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, packageRectangle.y+ 1 * packageRectangle.height / 8,
                                     selectedColor, selectedColor);
+            } else {
+                mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width,
+                                         rectangleDivisorHeight, textColor);
+                mainScene->DrawRectangle(0,
+                                         packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2,
+                                         packageRectangle.width, rectangleDivisorHeight, textColor);
             }
-            printStr = LANG::mainLang->SIZE;
-            printStr += ": ";
-            printStr+= currPackage->getPkgSizeMB();
-            printStr += "MB";
-            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
-                                packageRectangle.y + 3 * packageRectangle.height / 8,
-                                selectedColor, selectedColor);
-        } else {
-            mainScene->DrawRectangle(0, packageRectangle.y - packageRectangle.height / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
-            mainScene->DrawRectangle(0, packageRectangle.y + packageRectangle.height / 2 - rectangleDivisorHeight / 2, packageRectangle.width, rectangleDivisorHeight, textColor);
         }
+        keyboardInput->updateView();
+        if (!keyboardInput->active())
+            filterView->updateView();
     }
-    keyboardInput->updateView();
-    if(!keyboardInput->active())
-        filterView->updateView();
 }
 
 void repoPackageList::pressX(){
@@ -299,6 +323,7 @@ void repoPackageList::arrowUp(){
     else if(filterView->active())
         filterView->arrowUP();
     else {
+        std::unique_lock<std::mutex> lock(updateMtx);
         selected--;
         if (selected + packagesPerPage * currPage < 0) {
             selected = 0;
@@ -315,6 +340,7 @@ void repoPackageList::arrowDown(){
     else if(filterView->active())
         filterView->arrowDown();
     else {
+        std::unique_lock<std::mutex> lock(updateMtx);
         selected++;
         int repoSize = (int) displayPackageList.size();
         if (selected + packagesPerPage * currPage < repoSize) {
