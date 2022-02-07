@@ -4,9 +4,9 @@
 #include "../../include/utils/logger.h"
 #include "../../include/utils/notifi.h"
 
+std::mutex logger::mtx;
 std::ofstream logger::logStream;
-logger::logger(const std::string &funcName) : mtx() {
-    mtx.lock();
+logger::logger(const std::string &funcName) : lock(mtx) {
     auto currentTime = std::chrono::system_clock::now(); // get the time
     auto formattedTime = std::chrono::system_clock::to_time_t(currentTime); // convert it to time_t type (loses some precision)
     std::string time(std::ctime(&formattedTime));
@@ -35,9 +35,6 @@ logger& logger::operator<<(const std::string& message){
     return *this;
 }
 
-logger::~logger() {
-    mtx.unlock();
-}
 void logger::closeLogger() {
     if(logStream.is_open())
         logStream.close();

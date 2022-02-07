@@ -8,8 +8,9 @@
 #include <fstream>
 class logger {
 private:
-    std::mutex mtx;
+    static std::mutex mtx;
     static std::ofstream logStream;
+    std::unique_lock<std::mutex> lock;
 public:
     static int init(const char *PATH);
     explicit logger(const std::string &funcName);
@@ -18,7 +19,6 @@ public:
     template<typename T>
     logger& operator<<(T value) {return logger::operator<<(std::to_string(value));};
     static void closeLogger();
-    ~logger();
 };
 
 #define LOG logger(__FUNCTION__)
