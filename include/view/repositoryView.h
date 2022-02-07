@@ -33,7 +33,7 @@ private:
     PNG * deleteIcon;
     PNG * deleteIconSelected;
     int deleteIconX;
-    int deleteRepo(const char * id);
+    int deleteRepo(const char * id, int selectedTEMP);
 
     PNG * logIcon;
     PNG * logIconSelected;
@@ -53,7 +53,6 @@ private:
     int rectangleDivisorHeight;
     Scene2D * mainScene;
     repository * currRepos[reposPerPage];
-    void updateRepositories();
 
     //Delete Sound
     drwav_int16  * deleteWav;

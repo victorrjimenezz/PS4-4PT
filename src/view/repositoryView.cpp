@@ -48,13 +48,19 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     currPage = 0;
     selected = 0;
     repositoryList = std::shared_ptr<std::vector<repository*>>(new std::vector<repository*>);
-    if(isFirstRun){
-        repository * repo = repository::fetchRepo(MAIN_URL);
-        if(repo != nullptr)
-            addRepository(repo);
 
-    } else {
-        loadSavedRepos();
+    loadSavedRepos();
+    bool found = false;
+    for(auto repository : *repositoryList){
+        if(strcasecmp(repository->getRepoURL(),MAIN_URL) == 0) {
+            found = true;
+            break;
+        }
+    }
+    if(!found){
+        repository * repo = repository::fetchRepo(MAIN_URL);
+        if(repo!= nullptr)
+            addRepository(repo);
     }
 
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
@@ -91,20 +97,10 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
 }
 
 void repositoryView::fillPage() {
-    int j;
     size_t repoListSize = repositoryList->size();
-    for(int i =0; i< reposPerPage; i++){
-        j = currPage*reposPerPage+i;
-        if(repoListSize<=j)
-            currRepos[i] = nullptr;
-        else
-            currRepos[i] = repositoryList->at(j);
-    }
-}
+    for(int i =currPage*reposPerPage; i< currPage*reposPerPage+reposPerPage; i++)
+        currRepos[i] = i < repoListSize? repositoryList->at(i) : nullptr;
 
-void repositoryView::updateRepositories() {
-    for(auto & repository : *repositoryList)
-        repository->updateRepository();
 }
 
 void repositoryView::updateView() {
@@ -122,7 +118,7 @@ void repositoryView::updateView() {
     for(int i =0; i< reposPerPage; i++){
         repository * currRepo = currRepos[i];
         repoRectangle repoRectangle = repoRectangles[i];
-        if(selectedTemp != i || isOnKeyboard){
+        if(selectedTemp != i || isOnKeyboard || currRepo == nullptr){
             mainScene->DrawRectangle(0, repoRectangle.y-repoRectangle.height/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, repoRectangle.y+repoRectangle.height/2-rectangleDivisorHeight/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             if(currRepo != nullptr){
@@ -135,56 +131,60 @@ void repositoryView::updateView() {
             }
         }
     }
-    if(!isOnKeyboard && !repositoryList->empty()) {
+    if(!isOnKeyboard && !repositoryList->empty() && currRepos[selectedTemp] != nullptr) {
         repository * currRepo = currRepos[selectedTemp];
         repoRectangle repoRectangle = repoRectangles[selectedTemp];
         mainScene->DrawRectangle(0, repoRectangle.y - repoRectangle.height / 2, repoRectangle.width,
                                  rectangleDivisorHeight, selectedColor);
         mainScene->DrawRectangle(0, repoRectangle.y + repoRectangle.height / 2 - rectangleDivisorHeight / 2,
                                  repoRectangle.width, rectangleDivisorHeight, selectedColor);
-        mainScene->DrawText((char *) currRepo->getName(), fontMedium, repoRectangle.x, repoRectangle.y,
-                            selectedColor, selectedColor);
-        mainScene->DrawText((char *) currRepo->getRepoURL(), fontSmall, repoRectangle.x, repoRectangle.y+3*repoRectangle.height/8,
-                            selectedColor, selectedColor);
-        if(currRepo->getIcon()!= nullptr)
-            currRepo->getIcon()->Draw(mainScene,repoIconX,repoRectangle.y-3*repoRectangle.height/8);
-        if(currRepo->isUpdating()){
-            switch (selectedOption) {
-                case OPEN:
-                    logIconSelected->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    deleteIcon->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    break;
-                case UPDATE:
-                    logIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    deleteIcon->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    break;
-                case DELETE:
-                    logIcon->Draw(mainScene,openIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    updateIcon->Play(updateIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    deleteIconSelected->Draw(mainScene,deleteIconX,repoRectangle.y-3*repoRectangle.height/8);
-                    break;
+            mainScene->DrawText((char *) currRepo->getName(), fontMedium, repoRectangle.x, repoRectangle.y,
+                                selectedColor, selectedColor);
+            mainScene->DrawText((char *) currRepo->getRepoURL(), fontSmall, repoRectangle.x,
+                                repoRectangle.y + 3 * repoRectangle.height / 8,
+                                selectedColor, selectedColor);
+            if (currRepo->getIcon() != nullptr)
+                currRepo->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+            if (currRepo->isUpdating()) {
+                switch (selectedOption) {
+                    case OPEN:
+                        logIconSelected->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        break;
+                    case UPDATE:
+                        logIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        break;
+                    case DELETE:
+                        logIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIcon->Play(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        deleteIconSelected->Draw(mainScene, deleteIconX,
+                                                 repoRectangle.y - 3 * repoRectangle.height / 8);
+                        break;
+                }
+            } else {
+                switch (selectedOption) {
+                    case OPEN:
+                        openIconSelected->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        break;
+                    case UPDATE:
+                        openIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIconSelected->Draw(mainScene, updateIconX,
+                                                 repoRectangle.y - 3 * repoRectangle.height / 8);
+                        deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        break;
+                    case DELETE:
+                        openIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
+                        deleteIconSelected->Draw(mainScene, deleteIconX,
+                                                 repoRectangle.y - 3 * repoRectangle.height / 8);
+                        break;
+                }
             }
-        } else {
-            switch (selectedOption) {
-                case OPEN:
-                    openIconSelected->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    break;
-                case UPDATE:
-                    openIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    updateIconSelected->Draw(mainScene, updateIconX,repoRectangle.y - 3 * repoRectangle.height / 8);
-                    deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    break;
-                case DELETE:
-                    openIcon->Draw(mainScene, openIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    updateIcon->Draw(updateIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    deleteIconSelected->Draw(mainScene, deleteIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                    break;
-            }
-        }
 
     }
     keyboardInput->updateView();
@@ -231,10 +231,11 @@ void repositoryView::pressX(){
     if(isOnKeyboard)
         keyboardInput->pressX();
     else {
-        repository *currRepo = currRepos[selected];
+        int selectedTEMP = selected;
+        repository *currRepo = currRepos[selectedTEMP];
         if(currRepo == nullptr)
             return;
-        repoPackageList * repoPackageListView = repoPackageViewList.at(selected+currPage*reposPerPage);
+        repoPackageList * repoPackageListView = repoPackageViewList.at(selectedTEMP+currPage*reposPerPage);
         switch (selectedOption) {
             case OPEN:
                 if(!currRepo->isUpdating()) {
@@ -252,13 +253,14 @@ void repositoryView::pressX(){
                 }
                 break;
             case DELETE:
-                deleteRepo(currRepo->getID());
+                deleteRepo(currRepo->getID(), selectedTEMP);
                 break;
         }
     }
 }
 
-int repositoryView::deleteRepo(const char * id){
+int repositoryView::deleteRepo(const char * id, int selectedTEMP){
+    currRepos[selectedTEMP] = nullptr;
     repoPackageViewList.erase(repoPackageViewList.begin() + selected+currPage*reposPerPage);
     repositoryList->erase(std::remove_if(repositoryList->begin(), repositoryList->end(), [&id](repository* repo){bool found = strcasecmp(repo->getID(), id) == 0; if(found) repo->deleteRepository(); return found;}), repositoryList->end());
 
