@@ -368,7 +368,12 @@ void repoPackageList::arrowLeft() {
         filterView->prevOption();
 }
 repoPackageList::~repoPackageList() {
+    std::unique_lock<std::mutex> lock(updateMtx);
+    packageList->clear();
+    delete packageList;
+
     displayPackageList.clear();
+
     delete filterView;
     delete keyboardInput;
 }

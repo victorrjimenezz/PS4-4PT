@@ -368,11 +368,8 @@ bool repositoryView::isActive() {
     return true;
 }
 repositoryView::~repositoryView() {
-    for(auto repository : *repositoryList)
-        delete repository;
-    for(auto repoPackageView : repoPackageViewList)
-        delete repoPackageView;
-
+    repoPackageViewList.clear();
+    repositoryList->clear();
     repositoryList.reset();
 
     delete keyboardInput;
