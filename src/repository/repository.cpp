@@ -91,7 +91,6 @@ int repository::updatePKGS() {
             }
         }
     }
-
     while(updatedCount < cnt) continue;
 
     if(packageList->empty() && cnt > 0)

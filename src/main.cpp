@@ -80,29 +80,29 @@ int main() {
         isFirstRun = true;
 
 
-        mainView = new class mainView(isFirstRun);
+    mainView = new class mainView(isFirstRun);
 
-        LOG << "Initialized Main view" << "\n";
+    LOG << "Initialized Main view" << "\n";
 
-        sceSystemServiceHideSplashScreen();
+    sceSystemServiceHideSplashScreen();
 
-        LOG << "Checking for Update";
+    LOG << "Checking for Update";
 
-        checkForUpdate();
-        LOG << "Initialized APP!";
+    checkForUpdate();
+    LOG << "Initialized APP!";
 
-        LOG << "LOADING LANG";
+    LOG << "LOADING LANG";
 
-        LANG::mainLang->loadLang();
+    LANG::mainLang->loadLang();
 
-        LOG << "LOADED LANG";
+    LOG << "LOADED LANG";
 
-        try {
-            // Draw loop
-            while (mainView->updateView() >= 0) continue;
-        } catch (const std::exception &exception) {
-            LOG << "FATAL ERROR:\n" << exception.what();
-        }
+    try {
+        // Draw loop
+        while (mainView->updateView() >= 0) continue;
+    } catch (const std::exception &exception) {
+        LOG << "FATAL ERROR:\n" << exception.what();
+    }
 
     delete mainView;
     exitApp();
@@ -214,7 +214,7 @@ int loadModules() {
     if(sceSysmoduleLoadModule(ORBIS_SYSMODULE_MESSAGE_DIALOG) < 0)
         return -1;
     if(sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL))
-       return -1;
+        return -1;
     return 0;
 }
 
