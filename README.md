@@ -140,7 +140,9 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [X] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [X] Fix package flicker when rapidly changing selected package
 - [X] Implemented custom port support!
-- [X] Fix bug that causes the app to hang on the initializing screen
+- [ ] Fix bug that causes the app to hang on the initializing screen
+- [X] Fix bug that would cause the app to crash when rapidly changing selected PKG
+- [ ] Implement proper App deallocation when error signal detected or on app closure
 - [ ] Add customization options, such as disabling notifications or changing language
 
 <div id="lt"></div>
