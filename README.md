@@ -142,7 +142,8 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [X] Implemented custom port support!
 - [ ] Fix bug that causes the app to hang on the initializing screen
 - [X] Fix bug that would cause the app to crash when rapidly changing selected PKG
-- [ ] Implement proper App deallocation when error signal detected or on app closure
+- [X] Implement proper App deallocation when error signal sent
+- [ ] Implement proper App deallocation on app closure
 - [ ] Add customization options, such as disabling notifications or changing language
 
 <div id="lt"></div>
