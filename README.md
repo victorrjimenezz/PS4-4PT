@@ -140,16 +140,16 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [X] Add Animated GIF STBI Reading (Repo/PKG Icons)
 - [X] Fix package flicker when rapidly changing selected package
 - [X] Implemented custom port support!
-- [ ] Fix bug that causes the app to hang on the initializing screen
+- [X] Fix bug that causes the app to hang when loading a repositories packages
 - [X] Fix bug that would cause the app to crash when rapidly changing selected PKG
 - [X] Implement proper App deallocation when error signal sent
-- [ ] Implement proper App deallocation on app closure
-- [ ] Add customization options, such as disabling notifications or changing language
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
+- [ ] Add customization options, such as disabling notifications or changing language
+- [ ] Implement proper App deallocation when pressing the Close Application button on the PS Menu
 - [ ] Add functionality to download binaries
 - [ ] Save on external HDD
 - [ ] get Abstract Class from packageSearch and repoPackageList
