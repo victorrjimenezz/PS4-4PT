@@ -34,8 +34,15 @@
 #include <orbis/CommonDialog.h>
 #include <orbis/MsgDialog.h>
 
+#include <csignal>
+
+
+void SignalHandler(int signal);
+
+void SignalInit();
 
 std::stringstream debugLogStream;
+mainView * mainView = nullptr;
 
 int libSslId = -1;
 int libNetMemId = -1;
@@ -58,40 +65,47 @@ void unloadModules();
 void closeLogger();
 
 int main() {
+    SignalInit();
     atexit(&exitApp);
+    at_quick_exit(&exitApp);
+
     bool isFirstRun = false;
     int ret = initializeApp();
+
     if(ret < 0){
         notifi(NULL,"ERROR WHILE INITIALIZING APP!");
         LOG << "ERROR WHILE INITIALIZING APP!" << "\n";
-        sceSystemServiceLoadExec("exit",NULL);
+        exit(0);
     } else if(ret == 1)
         isFirstRun = true;
-    mainView mainView(isFirstRun);
-    LOG << "Initialized Main view" << "\n";
 
-    sceSystemServiceHideSplashScreen();
 
-    LOG << "Checking for Update";
+        mainView = new class mainView(isFirstRun);
 
-    checkForUpdate();
-    LOG << "Initialized APP!";
+        LOG << "Initialized Main view" << "\n";
 
-    LOG << "LOADING LANG";
+        sceSystemServiceHideSplashScreen();
 
-    LANG::mainLang->loadLang();
+        LOG << "Checking for Update";
 
-    LOG << "LOADED LANG";
+        checkForUpdate();
+        LOG << "Initialized APP!";
 
-    try {
-        // Draw loop
-        for (;;) {
-            mainView.updateView();
+        LOG << "LOADING LANG";
+
+        LANG::mainLang->loadLang();
+
+        LOG << "LOADED LANG";
+
+        try {
+            // Draw loop
+            while (mainView->updateView() >= 0) continue;
+        } catch (const std::exception &exception) {
+            LOG << "FATAL ERROR:\n" << exception.what();
         }
-    } catch(const std::exception& exception){
-        LOG << "FATAL ERROR:\n" << exception.what();
-    }
 
+    delete mainView;
+    exitApp();
     return 0;
 }
 std::string unique_log_name(){
@@ -348,10 +362,18 @@ int mkDirs(){
 
 void exitApp(){
     threadPool::term();
+    LOG << "Terminated threadPool";
+
     stopProcesses();
+    LOG << "Stopped Processes";
+
     unloadModules();
+    LOG << "Unloaded modules";
+    LOG << "Closing logger: Bye Bye!";
+
     closeLogger();
     unjailbreak();
+    sceSystemServiceLoadExec("exit",NULL);
 }
 void stopProcesses() {
     sceAppInstUtilTerminate();
@@ -383,4 +405,20 @@ void unloadModules() {
 void closeLogger() {
     logger::closeLogger();
 }
+void SignalHandler(int signal) {
+    LOG << "Received Signal: " << signal;
+    delete mainView;
+    mainView = nullptr;
+    exit(0);
+}
+void SignalInit(){
 
+    struct sigaction sigIntHandler{};
+
+    sigIntHandler.sa_handler = SignalHandler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    for(int i = 1; i<=_NSIG; i++)
+        sigaction(i,&sigIntHandler,NULL);
+
+}
