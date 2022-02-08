@@ -20,7 +20,6 @@ class mainView {
 private:
     Scene2D * mainScene;
     tabView * tabView;
-    subView * currentSubView = nullptr;
     ControllerManager * controllerManager;
     const static int views = VIEWS;
     subView* subViews[views];

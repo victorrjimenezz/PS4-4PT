@@ -29,7 +29,8 @@ int mainView::updateView() {
 
     // Swap to the next buffer
     mainScene->FrameBufferSwap();
-    return frameID++;
+    frameID++;
+    return controllerManager->getExit();
 }
 
 mainView::mainView(bool isFirstRun) : subViews()  {
@@ -115,9 +116,15 @@ mainView::mainView(bool isFirstRun) : subViews()  {
 }
 
 mainView::~mainView() {
+    delete controllerManager;
+    LOG << "Deleted controllerManager";
+
+    delete tabView;
+    LOG << "Deleted tabView";
+
     for(auto & subView : subViews)
         delete subView;
-    //delete mainScene;
-    delete controllerManager;
-    delete tabView;
+
+    LOG << "Deleted subViews";
+
 }
