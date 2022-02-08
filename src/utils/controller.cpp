@@ -171,3 +171,7 @@ bool Controller::TouchpadPressed()
 {
     return CheckButtonsPressed(ORBIS_PAD_BUTTON_TOUCH_PAD);
 }
+
+bool Controller::OptionsPressed() {
+    return CheckButtonsPressed(ORBIS_PAD_BUTTON_OPTIONS);
+}

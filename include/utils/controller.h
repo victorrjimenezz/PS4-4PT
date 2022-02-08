@@ -36,6 +36,7 @@ public:
     bool DpadDownPressed();
     bool DpadLeftPressed();
     bool TouchpadPressed();
+    bool OptionsPressed();
 };
 
 #endif
