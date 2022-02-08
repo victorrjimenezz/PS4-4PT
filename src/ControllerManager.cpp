@@ -15,6 +15,7 @@ ControllerManager * ControllerManager::controllerManager = nullptr;
 
 ControllerManager::ControllerManager(class tabView *tabView, subView* subViews[VIEWS]) : subViews() {
     controllerManager=this;
+    this->exit = 0;
     this->tabView = tabView;
     controller = new Controller();
     controller->Init(-1);
@@ -57,7 +58,7 @@ subView * ControllerManager::getCurrentView(){
 }
 
 void ControllerManager::initController() {
-    mutex.lock();
+    std::unique_lock<std::mutex> lock(mutex);
 
     //LOAD tabChangeWav
     std::string audioPath = DATA_PATH;
@@ -81,10 +82,10 @@ void ControllerManager::initController() {
 
 
     controllerActive = true;
+
     while(controllerActive)
         updateController();
 
-    mutex.unlock();
 }
 
 void ControllerManager::updateRearUpperButtons() {
@@ -181,6 +182,7 @@ void ControllerManager::updateController() {
     updateXCircle();
     updateTriangle();
     updateSquare();
+    exit = controller->OptionsPressed() ? -1 : 0;
 }
 
 void ControllerManager::stopController() {
@@ -188,6 +190,9 @@ void ControllerManager::stopController() {
 }
 
 ControllerManager::~ControllerManager() {
+    controllerActive = false;
+
+    std::unique_lock<std::mutex> lock(mutex);
 
     if(tabChangeWav!= nullptr)
         free(tabChangeWav);
@@ -213,4 +218,8 @@ subView* ControllerManager::getSubViewAt(int subView) {
 
 ControllerManager *ControllerManager::getControllerManager() {
     return controllerManager;
+}
+
+int ControllerManager::getExit() {
+    return exit;
 }

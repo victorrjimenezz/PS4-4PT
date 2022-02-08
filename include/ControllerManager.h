@@ -18,6 +18,8 @@ class ControllerManager {
 private:
     std::mutex mutex;
 
+    int exit;
+
     bool L1Waspressed{};
     bool R1Waspressed{};
     bool ArrowUpWasPressed{};
@@ -67,5 +69,7 @@ public:
     static ControllerManager* getControllerManager();
     ~ControllerManager();
     subView *getCurrentView();
+
+    int getExit();
 };
 #endif //CYDI4_CONTROLLERMANAGER_H
