@@ -1,6 +1,6 @@
 FAILED_TO_DOWNLOAD_PKG_FROM: "Sikertelen PKG letöltés innen"
 FINISHED_DOWNLOADING: "Letöltés befejeződött"
-ERROR_WHEN_DOWNLOADING: "Hiba a letöltés közben:\n"
+ERROR_WHEN_DOWNLOADING: "Hiba a letöltés közben"
 ERROR_WHEN_INSTALLING_APP: "Hiba az alkalmazás telepítése során:\n"
 GAME_CONTENT: "Játéktartalom"
 PATCH: "Patch"

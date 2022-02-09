@@ -1,6 +1,6 @@
 FAILED_TO_DOWNLOAD_PKG_FROM: "Impossibile scaricare PKG da"
 FINISHED_DOWNLOADING: "Download completato"
-ERROR_WHEN_DOWNLOADING: "Errore durante il download:\n"
+ERROR_WHEN_DOWNLOADING: "Errore durante il download"
 ERROR_WHEN_INSTALLING_APP: "Errore durante l'istallazine dell'app:\n"
 GAME_CONTENT: "Contenuto aggiuntivo"
 PATCH: "File di aggiornamento"

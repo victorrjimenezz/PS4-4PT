@@ -87,9 +87,9 @@ void LANG::langChanged(){
 }
 
 int LANG::loadDefLang(){
-    FAILED_TO_DOWNLOAD_PKG_FROM = ("Failed to Download PKG From:\n");
+    FAILED_TO_DOWNLOAD_PKG_FROM = ("Failed to Download PKG From");
     FINISHED_DOWNLOADING = ("Finished downloading");
-    ERROR_WHEN_DOWNLOADING = ("Error when downloading:\n");
+    ERROR_WHEN_DOWNLOADING = ("Error when downloading");
     ERROR_WHEN_INSTALLING_APP = ("Error when installing app:\n");
     GAME_CONTENT = ("Game Content");
     PATCH = ("Patch");

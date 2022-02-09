@@ -1,6 +1,6 @@
 FAILED_TO_DOWNLOAD_PKG_FROM: "No se ha podido descargar el PKG de"
 FINISHED_DOWNLOADING: "Descarga finalizada"
-ERROR_WHEN_DOWNLOADING: "Error al descargar:\n"
+ERROR_WHEN_DOWNLOADING: "Error al descargar"
 ERROR_WHEN_INSTALLING_APP: "Error al instalar la app:\n"
 GAME_CONTENT: "Contenido de juego"
 PATCH: "Parche"
