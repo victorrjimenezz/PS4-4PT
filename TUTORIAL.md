@@ -59,6 +59,10 @@
 
 ***
 
+***DISCLAIMER: TO CLOSE THE APP PRESS THE OPTIONS BUTTON </br>
+DO NOT USE THE PS MENU***
+
+***
 <div id="sbt"></div>
 
 ## Switching between tabs
