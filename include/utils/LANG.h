@@ -15,7 +15,7 @@ private:
     int loadLangFrom(const std::string & langFile);
     int loadDefLang();
     void langChanged();
-    int changeLangTo(std::string lang);
+    int changeLangTo(const std::string& lang);
 public:
     std::string FAILED_TO_DOWNLOAD_PKG_FROM;
     std::string FINISHED_DOWNLOADING;
@@ -51,6 +51,9 @@ public:
     std::string ALPHABETICALLY;
     std::string ASCENDING;
     std::string DESCENDING;
+    std::string LANGUAGE;
+    std::string NOTIFICATIONS;
+    std::string ADDED_TO_DOWNLOADS;
     static LANG * mainLang;
     explicit LANG();
     static int initLang();
