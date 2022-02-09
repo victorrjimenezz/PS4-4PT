@@ -39,17 +39,8 @@ int Updater::checkForUpdate() {
             return -2;
         if(!installUpdate(updatePKG))
             return -3;
-        else /*{
-            std::string newStoredPath = INSTALL_PATH;
-            newStoredPath+=updatePKG.getTitleID();
-            newStoredPath+='/';
-            const char * newPathChar = newStoredPath.c_str();
-            while(!folderExists(newPathChar))
-                continue;
-            if(migrateFiles(newPathChar)<0)
-                popDialog("Failed when migrating data!\nRepositories or downloads might have been lost");*/
+        else
             popDialog("Installed Update!\nPlease restart the APP");
-        //}
         if(!uninstallApp(APP_TITLEID))
             return -4;
     }
