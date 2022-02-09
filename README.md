@@ -105,9 +105,10 @@ The current working app features are:
 - Downloading PKGs from repositories/directly from a URL
 - Ability to pause/resume a download
 - Adding/Removing Repositories
-- Searching apps, filtering by name and repository
+- Searching apps, filtering by name, repository, and type
+- Sorting apps, alphabetically, by size, or by version
 - Install/Uninstall downloaded PKGs
-- App has English, Spanish, and German support
+- App has English, Hungarian, Italian, Spanish, and German support
 - 4PT updates itself automatically
 
 ***
