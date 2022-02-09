@@ -150,6 +150,7 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 
 ### Future versions (~1/2 Year)
 
+- [ ] Fix bug that causes the app to hang on repository load
 - [ ] Add Http Authentication Support
 - [ ] Change Keyboard to UI IME
 - [ ] Fix Hungarian automatic detection
