@@ -143,7 +143,7 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [X] Fix bug that causes the app to hang when loading a repositories packages
 - [X] Fix bug that would cause the app to crash when rapidly changing selected PKG
 - [X] Implement proper App deallocation when error signal sent
-- [ ] Fix bug that causes the app to hang on repository load
+- [X] Fix bug that causes the app to hang on repository load
 - [X] Add settings tab. Now users can manually change the language or disable/enable notifications.
 
 <div id="lt"></div>
