@@ -10,6 +10,7 @@
 #include "../../include/repository/PKGInfo.h"
 #include "../../include/utils/logger.h"
 #include "../../include/utils/LANG.h"
+#include "../../include/utils/settings.h"
 
 
 download::download(const std::shared_ptr<package>& pkg){
@@ -53,8 +54,8 @@ download::download(const char * id, const char * date, const char * localPath, b
 download::download(const char *url, bool * failedInit) {
 
     this->pkg = std::shared_ptr<package>(new package(url,false,failedInit));
-    if(*failedInit) {
-        std::string msg(LANG::mainLang->FAILED_TO_DOWNLOAD_PKG_FROM);
+    if(*failedInit && settings::getMainSettings()->isFailedDownloadingNotification()) {
+        std::string msg(LANG::mainLang->FAILED_TO_DOWNLOAD_PKG_FROM + ":\n");
         msg += url;
         notifi(NULL,msg.c_str());
         return;
@@ -161,17 +162,19 @@ download::~download() {
 }
 
 void download::setFinished() {
-    std::string downloadMessage = LANG::mainLang->FINISHED_DOWNLOADING;
-    downloadMessage += pkg->getName();
-    notifi(NULL, downloadMessage.c_str());
+    if(settings::getMainSettings()->isFinishedDownloadingNotification()){
+        std::string downloadMessage = LANG::mainLang->FINISHED_DOWNLOADING + ":\n";
+        downloadMessage += pkg->getName();
+        notifi(NULL, downloadMessage.c_str());
+    }
     finished = true;
     //pkg->updateInstalled();
 
 }
 
 void download::setFailed(bool failed) {
-    if(failed) {
-        std::string downloadMessage = LANG::mainLang->ERROR_WHEN_DOWNLOADING;
+    if(failed && settings::getMainSettings()->isFailedDownloadingNotification()) {
+        std::string downloadMessage = LANG::mainLang->ERROR_WHEN_DOWNLOADING + ":\n";;
         downloadMessage += pkg->getURL();
         notifi(NULL, downloadMessage.c_str());
     }

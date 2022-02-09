@@ -8,6 +8,7 @@
 #include "../../include/utils/logger.h"
 #include "../../include/utils/notifi.h"
 #include "../../include/utils/PNG.h"
+#include "../../include/utils/settings.h"
 #include "../../include/utils/utils.h"
 #include "../../include/file/fileManager.h"
 #include "../../include/file/download.h"
@@ -179,9 +180,11 @@ int downloadView::loadDownloadList(){
 void downloadView::addDownload(download * newDownload) {
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
     std::thread(&download::initDownload,std::ref(*newDownload)).detach();
-    std::string notification = newDownload->getName();
-    notification += "\nAdded to downloads";
-    notifi(NULL,notification.c_str());
+    if(settings::getMainSettings()->isAddedToDownloadsNotification()) {
+        std::string notification = newDownload->getName();
+        notification += "\n" + LANG::mainLang->ADDED_TO_DOWNLOADS;
+        notifi(NULL, notification.c_str());
+    }
     downloadList.emplace_back(newDownload);
     downloadsYAML[newDownload->getID()];
     downloadsYAML[newDownload->getID()]["date"] = newDownload->getDate();
