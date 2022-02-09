@@ -47,10 +47,10 @@ settingsView::settingsView(Scene2D *mainScene, FT_Face fontLarge, FT_Face fontMe
     notificationsXText = flagTextPosX;
     notificationsYText = frameHeight * SETTINGS_VIEW_NOTIFICATIONS_Y_PAD*2;
     notificationsY = notificationsYText + SETTINGS_VIEW_FLAG_Y_PAD_IMAGE;
-    int notificationsOptionsDivider = settings::getMainSettings()->getNotificationsOptions()+2;
-    notifications1X = frameWidth/notificationsOptionsDivider;
-    notifications2X = 2*frameWidth/notificationsOptionsDivider;
-    notifications3X = 3*frameWidth/notificationsOptionsDivider;
+    int notificationsOptionsDivider = settings::getMainSettings()->getNotificationsOptions();
+    notifications1X = notificationsXText + frameWidth/notificationsOptionsDivider * 0.1;
+    notifications2X = notificationsXText + 1*frameWidth/notificationsOptionsDivider;
+    notifications3X = notificationsXText + 2*frameWidth/notificationsOptionsDivider;
     checkboxBorder = new PNG(DATA_PATH "assets/images/filters/boxSelected.png", SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT);
     checkboxCross = new PNG(DATA_PATH "assets/images/filters/cross.png",SETTINGS_CHECKBOX_WIDTH,SETTINGS_CHECKBOX_HEIGHT);
     checkboxSelectedCross = new PNG(DATA_PATH "assets/images/filters/crossSelected.png",SETTINGS_CHECKBOX_WIDTH,SETTINGS_CHECKBOX_HEIGHT);
