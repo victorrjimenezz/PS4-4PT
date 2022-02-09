@@ -143,21 +143,21 @@ Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
 - [X] Fix bug that causes the app to hang when loading a repositories packages
 - [X] Fix bug that would cause the app to crash when rapidly changing selected PKG
 - [X] Implement proper App deallocation when error signal sent
+- [ ] Fix bug that causes the app to hang on repository load
+- [ ] Add customization options, such as disabling notifications or changing language
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
-- [ ] Add customization options, such as disabling notifications or changing language
+- [ ] Add Http Authentication Support
+- [ ] Change Keyboard to UI IME
+- [ ] Fix Hungarian automatic detection
 - [ ] Implement proper App deallocation when pressing the Close Application button on the PS Menu
 - [ ] Add functionality to download binaries
 - [ ] Save on external HDD
 - [ ] get Abstract Class from packageSearch and repoPackageList
-- [ ] Fix Hungarian automatic detection
-- [ ] Custom Port http connection
-- [ ] Add Http Authentication Support
 - [ ] Add a new PKG List view where only covers are displayed
-- [ ] Change Keyboard to UI IME
 - [ ] Download pkgs in the background with DAEMONS
 - [ ] Support for more languages
 

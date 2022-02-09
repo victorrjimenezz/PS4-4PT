@@ -10,16 +10,19 @@
 
 #include <orbis/SystemService.h>
 #include <string>
+#include "../../include/utils/settings.h"
 #include <yaml-cpp/yaml.h>
 
 int32_t LANG::systemLanguage = 0;
 LANG * LANG::mainLang = nullptr;
 
-int LANG::changeLangTo(std::string lang){
+int LANG::changeLangTo(const std::string& lang){
     int loadLangRet;
     std::string langFile = LANG_PATH;
+    langFile = langFile+lang+".yml";
+    if(!fileExists(langFile.c_str()))
+        return 1;
     try {
-        langFile = langFile+lang+".yml";
         loadLangRet = loadLangFrom(langFile);
     } catch(const YAML::ParserException& ex){
         LOG << ex.what();
@@ -34,7 +37,13 @@ int LANG::changeLangTo(std::string lang){
 int LANG::loadLang(){
     int ret = 1;
     sceSystemServiceParamGetInt(ORBIS_SYSTEM_SERVICE_PARAM_ID_LANG, &systemLanguage);
-
+    if(settings::getMainSettings() != nullptr) {
+        ret = changeLangTo(settings::getMainSettings()->getCurrLang());
+        if (ret == 0) {
+            langChanged();
+            return 0;
+        }
+    }
     switch (systemLanguage){
         case ORBIS_SYSTEM_PARAM_LANG_HUNGARIAN:
             LOG << "DETECTED HUNGARIAN";
@@ -79,7 +88,7 @@ void LANG::langChanged(){
 
 int LANG::loadDefLang(){
     FAILED_TO_DOWNLOAD_PKG_FROM = ("Failed to Download PKG From:\n");
-    FINISHED_DOWNLOADING = ("Finished downloading:\n");
+    FINISHED_DOWNLOADING = ("Finished downloading");
     ERROR_WHEN_DOWNLOADING = ("Error when downloading:\n");
     ERROR_WHEN_INSTALLING_APP = ("Error when installing app:\n");
     GAME_CONTENT = ("Game Content");
@@ -112,6 +121,9 @@ int LANG::loadDefLang(){
     ALPHABETICALLY = ("Alphabetically");
     ASCENDING = ("Ascending");
     DESCENDING = ("Descending");
+    LANGUAGE = ("Language: ");
+    NOTIFICATIONS = ("Notifications: ");
+    ADDED_TO_DOWNLOADS = ("Added to downloads");
     return 0;
 }
 
@@ -297,6 +309,21 @@ int LANG::loadLangFrom(const std::string& langFile) {
         DESCENDING = langFileYAML["DESCENDING"].as<std::string>("");
     } else {
         return -34;
+    }
+    if(langFileYAML["LANGUAGE"]){
+        LANGUAGE = langFileYAML["LANGUAGE"].as<std::string>("");
+    } else {
+        return -35;
+    }
+    if(langFileYAML["NOTIFICATIONS"]){
+        NOTIFICATIONS = langFileYAML["NOTIFICATIONS"].as<std::string>("");
+    } else {
+        return -36;
+    }
+    if(langFileYAML["ADDED_TO_DOWNLOADS"]){
+        ADDED_TO_DOWNLOADS = langFileYAML["ADDED_TO_DOWNLOADS"].as<std::string>("");
+    } else {
+        return -37;
     }
     return 0;
 }
