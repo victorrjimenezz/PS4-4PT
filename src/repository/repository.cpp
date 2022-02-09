@@ -39,7 +39,7 @@ const char * repository::getID() {
 
 int repository::updatePKGS() {
     std::string stateString;
-    int ret = 0;
+    int ret = 0, tempCNT = 0;
     int cnt = 0;
     updatedCount = 0;
     std::string downloadURL;
@@ -65,6 +65,7 @@ int repository::updatePKGS() {
         ret = -1;
         goto err;
     }
+    LOG << "Fetching packages...";
     for(YAML::const_iterator it=repoYAML.begin(); it!=repoYAML.end(); ++it) {
         if(willDelete) {
             break;
@@ -91,14 +92,17 @@ int repository::updatePKGS() {
             }
         }
     }
-    while(updatedCount < cnt) continue;
+
+    while(tempCNT < cnt) {
+        std::unique_lock<std::mutex> lock(addPKGMtx);
+        tempCNT = updatedCount;
+    }
 
     if(packageList->empty() && cnt > 0)
         for(const auto& pkg : oldPackageList)
             packageList->emplace_back(pkg);
 
     oldPackageList.clear();
-
     err:
     while(packageSearch::mainPackageSearch == nullptr) continue;
     packageSearch::mainPackageSearch->updatePackages();
