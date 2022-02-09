@@ -51,6 +51,9 @@ void ControllerManager::switchCurrentView(tabSelected tabSelected){
         case SEARCH:
             currentSubView = subViews[3];
             break;
+        case SETTINGS:
+            currentSubView = subViews[4];
+            break;
     }
 }
 subView * ControllerManager::getCurrentView(){

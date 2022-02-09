@@ -16,10 +16,12 @@
 
 #define STORED_DATA_PATH "/data/"
 #define STORED_PATH STORED_DATA_PATH "4PT/"
+#define SETTINGS_FILE STORED_PATH "settings.yml"
 #define INSTALL_PATH "/user/app/"
 #define DOWNLOAD_PATH INSTALL_PATH
 #define REPO_PATH "repositories/"
 #define LANG_PATH DATA_PATH "assets/lang/"
+#define LANG_FLAG_PATH DATA_PATH "assets/images/settings/"
 
 #define LOGS_PATH "logs/"
 #define LOGO_PATH "/mnt/sandbox/" APP_TITLEID "_000/app0/assets/images/logo.png"
@@ -62,7 +64,7 @@
 #define FONT_SIZE_SMALL   32
 
 //Amount of Views Information
-#define VIEWS 4
+#define VIEWS 5
 
 // Screen Dimensions
 #define FRAME_WIDTH     1920
@@ -96,6 +98,16 @@
 #define HOMEVIEW_KEYBOARD_Y 0.75
 #define HOMEVIEW_KEYBOARD_WIDTH 0.7
 #define HOMEVIEW_KEYBOARD_HEIGHT 0.15
+
+//HOMEVIEW
+#define SETTINGS_VIEW_FLAG_WIDTH 0.1
+#define SETTINGS_VIEW_FLAG_CHAR_TEXT_OFFSET 0.05
+#define SETTINGS_VIEW_FLAG_TEXT_X_PAD 0.05
+#define SETTINGS_VIEW_FLAG_Y_PAD 0.1
+#define SETTINGS_VIEW_FLAG_Y_PAD_IMAGE 50
+#define SETTINGS_VIEW_NOTIFICATIONS_Y_PAD 0.3
+#define SETTINGS_CHECKBOX_WIDTH 50
+#define SETTINGS_CHECKBOX_HEIGHT 50
 
 //DIVISORS
 #define RECTANGLEDIVISORHEIGHT 0.05

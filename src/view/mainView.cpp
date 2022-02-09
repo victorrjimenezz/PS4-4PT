@@ -6,6 +6,7 @@
 #include "../../include/view/repositoryView.h"
 #include "../../include/view/homeView.h"
 #include "../../include/view/downloadView.h"
+#include "../../include/view/settingsView.h"
 #include "../../include/utils/logger.h"
 #include "../../include/ControllerManager.h"
 #include "../../include/view/packageSearch.h"
@@ -107,6 +108,8 @@ mainView::mainView(bool isFirstRun) : subViews()  {
     LOG << "Initialized downloadView" << "\n";
     subViews[3] = new packageSearch(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
     LOG << "Initialized packageSearch" << "\n";
+    subViews[4] = new settingsView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
+    LOG << "Initialized settingsView" << "\n";
 
     LOG << "Initializing ControllerManager" << "\n";
     controllerManager = new ControllerManager(tabView,subViews);

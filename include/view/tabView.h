@@ -41,9 +41,9 @@ private:
     PNG * sourcesIcon;
     PNG * sourcesSelectedIcon;
 
-    /*pos downloadPos{};
-    PNG * downloadIcon;
-    PNG * downloadSelectedIcon;*/
+    pos settingsPos{};
+    PNG * settingsIcon;
+    PNG * settingsSelectedIcon;
 
     pos installedPos{};
     PNG * installedIcon;
