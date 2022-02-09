@@ -129,7 +129,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
-### Version 2.55 (~2 Month)
+### Version 2.50
 
 - [ ] Fix bug that causes the app to hang on repository load
 
