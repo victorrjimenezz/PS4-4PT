@@ -505,8 +505,8 @@ int repositoryView::loadSavedRepos() {
                     removeDir(loadingRepoFolder.c_str());
                 }
             } else {
-                LOG << "repo.yml NOT found. Removing Directory" << loadingRepoFolder;
-                removeDir(loadingRepoFolder.c_str());
+                LOG << "repo.yml NOT found. Removing Directory " << loadingRepoFolder.substr(0,loadingRepoFolder.size()-1);
+                removeDir(loadingRepoFolder.substr(0,loadingRepoFolder.size()-1).c_str());
             }
         }
         return 0;
