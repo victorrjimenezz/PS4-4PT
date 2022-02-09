@@ -184,11 +184,20 @@ go to the search tab (rightmost one) and type the package name on the keyboard.
 
 ### Filter-by-repository Search
 
-<img src="screenshots/screenshot6.png" width="100%"  alt=""/>
 
 To search a package by its name from a specific repository,
 go to the repository tab (2nd one) select the repository from which to filter
 and, once in the repository package list, open the keyboard and search the package.
+
+<div id="srbfltr"></div>
+
+### Filtering and sorting
+
+To sort the packages of a list, press the square button, and select sorting criteria
+(Alphabet, size, version) and whether you want it to be in Ascending or Descending order.
+
+To filter packages by their type, press the square button and select the type you desire.
+Also, if you only want available updates to be shown, select the ***only updates*** option.
 
 <div id="pkgdd"></div>
 
@@ -197,6 +206,20 @@ and, once in the repository package list, open the keyboard and search the packa
 
 To download a PKG directly from a URL, go to the home tab
 (leftmost one), enter the package URL on the keyboard and press download.
+
+***
+
+<div id="setandlang"></div>
+
+## Settings and language
+
+<img src="screenshots/screenshot6.png" width="100%"  alt=""/>
+
+To change the language, go to the settings tab (the right-most one) and 
+and select the language you desire from the available ones, by using the arrow
+and pressing X on the desired language.
+
+To enable/disable specific notifications, select them with the arrows and press X.
 
 ***
 

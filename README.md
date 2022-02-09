@@ -128,30 +128,19 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
+### Version 2.55 (~2 Month)
 
-### Version 2.5 (~3 Months)
+- [ ] Fix bug that causes the app to hang on repository load
 
-- [X] Change 4PT Stored data path to /data/4PT/
-- [X] Optimize Loading Repository Speed, gone from 1.25 Packages per second to 9.12 Packages per second. A 
-Repo with 123 packages now takes 13.5 seconds to load, instead of 98 seconds.
-- [X] If Repo update fails, do not delete all packages :)
-- [X] Filter PKGs by type, updates available
-- [X] Implement sorting by size, version, alphabetically...
-- [X] Add Animated GIF STBI Reading (Repo/PKG Icons)
-- [X] Fix package flicker when rapidly changing selected package
-- [X] Implemented custom port support!
-- [X] Fix bug that causes the app to hang when loading a repositories packages
-- [X] Fix bug that would cause the app to crash when rapidly changing selected PKG
-- [X] Implement proper App deallocation when error signal sent
-- [X] Add settings tab. Now users can manually change the language or disable/enable notifications.
+### Version 3.00 (~2 Month)
+
+- [ ] Add Http Authentication Support
+- [ ] Change Keyboard to UI IME
 
 <div id="lt"></div>
 
 ### Future versions (~1/2 Year)
 
-- [ ] Fix bug that causes the app to hang on repository load
-- [ ] Add Http Authentication Support
-- [ ] Change Keyboard to UI IME
 - [ ] Fix Hungarian automatic detection
 - [ ] Implement proper App deallocation when pressing the Close Application button on the PS Menu
 - [ ] Add functionality to download binaries
