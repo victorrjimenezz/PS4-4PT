@@ -18,6 +18,7 @@
 #include "../include/utils/dialog.h"
 #include "../include/utils/notifi.h"
 #include "../include/utils/LANG.h"
+#include "../include/utils/settings.h"
 #include "../include/utils/AudioManager.h"
 #include "../include/utils/threadPool.h"
 
@@ -91,10 +92,12 @@ int main() {
     checkForUpdate();
     LOG << "Initialized APP!";
 
+    LOG << "Loading SETTINGS";
+    settings::getMainSettings()->loadSettings();
+    LOG << "Loaded SETTINGS";
+
     LOG << "LOADING LANG";
-
     LANG::mainLang->loadLang();
-
     LOG << "LOADED LANG";
 
     try {
@@ -169,6 +172,10 @@ int initializeApp() {
     if(AudioManager::initAudioManager() <0)
         LOG << "Could not initialize Audio Manager";
 
+
+    LOG << "Starting SETTINGS";
+    settings::initSettings();
+    LOG << "Started SETTINGS";
 
     LOG << "Starting Lang";
     LANG::initLang();
@@ -361,6 +368,9 @@ int mkDirs(){
 }
 
 void exitApp(){
+    settings::termSettings();
+    LOG << "Terminated settings";
+
     threadPool::term();
     LOG << "Terminated threadPool";
 
