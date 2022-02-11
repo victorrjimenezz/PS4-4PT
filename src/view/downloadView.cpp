@@ -387,6 +387,8 @@ int downloadView::deleteDownload(download * dld){
     downloadsFile << downloadsYAML;
     downloadsFile.flush();
     downloadsFile.close();
+
+    option = INSTALL;
     if(!(selected==0 && currPage==0)) {
         selected--;
         if(selected < 0) {
@@ -405,7 +407,6 @@ void downloadView::pressTriangle(){
 
 }
 void downloadView::pressSquare(){
-    option = REMOVE;
 }
 void downloadView::arrowUp(){
         selected--;
