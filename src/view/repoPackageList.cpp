@@ -36,7 +36,7 @@ repoPackageList::repoPackageList(Scene2D * mainScene, FT_Face fontLarge, FT_Face
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->SEARCH.c_str(),"", false);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2, LANG::mainLang->SEARCH.c_str(),"");
     filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
     currPage = 0;
@@ -106,7 +106,7 @@ void repoPackageList::filterPackages(const char * name) {
 void repoPackageList::updateView() {
     int selectedTemp;
     bool empty;
-    if(keyboardInput->hasChanged() || filterView->hasChanged())
+    if(keyboardInput->hasEntered() || filterView->hasChanged())
         filterPackages(keyboardInput->readText().c_str());
 
     std::string printStr;
@@ -259,15 +259,12 @@ void repoPackageList::updateView() {
             }
         }
         keyboardInput->updateView();
-        if (!keyboardInput->active())
-            filterView->updateView();
+        filterView->updateView();
     }
 }
 
 void repoPackageList::pressX(){
-    if(keyboardInput->active())
-        keyboardInput->pressX();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->pressX();
     else {
         std::shared_ptr<package> currpkg = currPackages[selected];
@@ -289,10 +286,7 @@ subView* repoPackageList::getChild(){
     return child;
 }
 void repoPackageList::pressCircle(){
-
-    if(keyboardInput->active())
-        keyboardInput->unSelectKeyboard();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->disableFilterView();
     else
         active = false;
@@ -304,23 +298,16 @@ void repoPackageList::setActive() {
     active = true;
 }
 void repoPackageList::pressTriangle(){
-    if(keyboardInput->active())
-        keyboardInput->unSelectKeyboard();
-    else
-        keyboardInput->selectKeyboard();
+    keyboardInput->enableKeyboard();
 }
 void repoPackageList::pressSquare(){
-    if(keyboardInput->active())
-        keyboardInput->deleteChar();
-    else if(!filterView->active())
+    if(!filterView->active())
         filterView->enableFilterView();
     else
         filterView->disableFilterView();
 }
 void repoPackageList::arrowUp(){
-    if(keyboardInput->active())
-        keyboardInput->setUpperRow();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->arrowUP();
     else {
         std::unique_lock<std::mutex> lock(updateMtx);
@@ -335,9 +322,7 @@ void repoPackageList::arrowUp(){
     }
 }
 void repoPackageList::arrowDown(){
-    if(keyboardInput->active())
-        keyboardInput->setLowerRow();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->arrowDown();
     else {
         std::unique_lock<std::mutex> lock(updateMtx);
@@ -355,16 +340,12 @@ void repoPackageList::arrowDown(){
     }
 }
 void repoPackageList::arrowRight() {
-    if(keyboardInput->active())
-        keyboardInput->nextKey();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->nextOption();
 
 }
 void repoPackageList::arrowLeft() {
-    if(keyboardInput->active())
-        keyboardInput->previousKey();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->prevOption();
 }
 repoPackageList::~repoPackageList() {
@@ -384,7 +365,7 @@ bool repoPackageList::isActive() {
 
 void repoPackageList::langChanged() {
         delete keyboardInput;
-        keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->SEARCH.c_str(),"", false);
+        keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2, LANG::mainLang->SEARCH.c_str(),"");
         delete filterView;
         filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 

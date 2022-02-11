@@ -46,6 +46,7 @@ private:
     Color textColor{};
     Color checkboxColor{};
     Color checkboxEnabledColor{};
+    Color backgroundColor{};
 
     int x, y, width, height;
 

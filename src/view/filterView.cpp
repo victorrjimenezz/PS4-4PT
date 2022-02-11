@@ -21,12 +21,13 @@ filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width
     this->selected = 0;
 
     this->titleX = x +FILTER_TITLE_OFFSET;
-    this->sortByY = y - height / 5 +FILTER_CHECKBOX_HEIGHT;
-    this->filterY = y + height / 6 +FILTER_CHECKBOX_HEIGHT;
+    this->sortByY = y - height / 3 +FILTER_CHECKBOX_HEIGHT;
+    this->filterY = y + height / 8 +FILTER_CHECKBOX_HEIGHT;
 
     this->textColor = {0,0,0};
     this->checkboxColor = {255,255,255};
     this->checkboxEnabledColor = {255,0,0};
+    this->backgroundColor = {180,180,180};
 
     //SET SORT TYPES STRING
     SortStr[0] = LANG::mainLang->ALPHABETICALLY;
@@ -42,27 +43,27 @@ filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width
 
     for(int i =0; i<PKG_FILTER_AMOUNT-1; i++) {
         positionsLOWER[i].xBox = x + (i+1) * (width) / (PKG_FILTER_AMOUNT + 2);;
-        positionsLOWER[i].yBox = y + height / 6;
+        positionsLOWER[i].yBox = y + height / 8;
 
         positionsLOWER[i].xText = positionsLOWER[i].xBox + FILTER_CHECKBOX_WIDTH + FILTER_CHAR_OFFSET;
-        positionsLOWER[i].yText = y + height / 6 + FILTER_CHECKBOX_HEIGHT;
+        positionsLOWER[i].yText = y + height / 8 + FILTER_CHECKBOX_HEIGHT;
     }
     {
         positionsLOWER[PKG_FILTER_AMOUNT - 1].xBox = FILTER_CHAR_OFFSET+x + (PKG_FILTER_AMOUNT) * (width) / (PKG_FILTER_AMOUNT + 2);
-        positionsLOWER[PKG_FILTER_AMOUNT - 1].yBox = y + height / 6;
+        positionsLOWER[PKG_FILTER_AMOUNT - 1].yBox = y + height / 8;
 
         positionsLOWER[PKG_FILTER_AMOUNT - 1].xText = positionsLOWER[PKG_FILTER_AMOUNT - 1].xBox + FILTER_CHECKBOX_WIDTH + FILTER_CHAR_OFFSET;
-        positionsLOWER[PKG_FILTER_AMOUNT - 1].yText = y + height / 6 + FILTER_CHECKBOX_HEIGHT;
+        positionsLOWER[PKG_FILTER_AMOUNT - 1].yText = y + height / 8 + FILTER_CHECKBOX_HEIGHT;
 
         enabled[PKG_FILTER_AMOUNT-1] = false;
     }
 
     for(int i =0; i<PKG_SORT_AMOUNT; i++) {
         positionsUPPER[i].xBox = x + (i+1) * (width) / (PKG_SORT_AMOUNT + 2);
-        positionsUPPER[i].yBox = y - height / 5;
+        positionsUPPER[i].yBox = y - height / 3;
 
         positionsUPPER[i].xText = positionsUPPER[i].xBox + FILTER_CHECKBOX_WIDTH + FILTER_CHAR_OFFSET;
-        positionsUPPER[i].yText = y - height / 5 + FILTER_CHECKBOX_HEIGHT;
+        positionsUPPER[i].yText = y - height / 3 + FILTER_CHECKBOX_HEIGHT;
     }
     {
         int i = PKG_SORT_AMOUNT - 1;
@@ -70,7 +71,7 @@ filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width
         OrderPosition.yBox = 0;
 
         OrderPosition.xText = positionsUPPER[i].xBox + (width) / (PKG_SORT_AMOUNT + 2);
-        OrderPosition.yText = y - height / 5 + FILTER_CHECKBOX_HEIGHT;
+        OrderPosition.yText = y - height / 3 + FILTER_CHECKBOX_HEIGHT;
     }
     checkboxBorder = new PNG(DATA_PATH "assets/images/filters/boxSelected.png", FILTER_CHECKBOX_WIDTH, FILTER_CHECKBOX_HEIGHT);
     checkboxCross = new PNG(DATA_PATH "assets/images/filters/cross.png",FILTER_CHECKBOX_WIDTH,FILTER_CHECKBOX_HEIGHT);
@@ -85,6 +86,7 @@ bool filterView::hasChanged() {
 }
 
 void filterView::updateView() {
+    mainScene->DrawRectangle(x,y-height/2,width,height,backgroundColor);
     mainScene->DrawText((char * ) LANG::mainLang->ORDER.c_str(), font, titleX, sortByY, textColor, textColor);
     mainScene->DrawText((char * ) LANG::mainLang->FILTER.c_str(),font,titleX,filterY,textColor,textColor);
 

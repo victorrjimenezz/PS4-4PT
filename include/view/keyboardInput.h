@@ -13,65 +13,46 @@
 #include "../base.h"
 
 #include <string>
+#include <orbis/ImeDialog.h>
 
 class keyboardInput {
 private:
     Color borderColor{};
     Color bgColor{};
     Color textColor{};
-    Color selectedTextColor{};
-    bool keyBoardIsSelected;
-    bool isOnUpperRow;
+
+    OrbisDialogStatus status;
+    OrbisDialogResult result;
+    OrbisImeDialogSetting param;
+    uint16_t buffer[KEYBOARD_MAX_INPUT_LENGTH];
+
     bool entered;
-    bool changed;
 
-    bool hasEnter;
-
-    const char * specialKey;
-    const char * del = "DEL";
-    const char * enter;
-    int delPos;
-    int specialPos;
     Scene2D * mainScene;
     int containerX;
     int containerY;
     int containerWidth;
     int yInputBox;
-    int yInputText;
-    int xText;
 
     int boxX;
     int boxHeight;
     int boxWidth;
 
+    int xText;
+    int yInputText;
+
     int containerHeight;
-    int yKeyboardBox;
-    int yKeyboardTextUpper;
-    int yKeyboardTextLower;
 
     FT_Face font{};
 
-    char * upperDict[DICT_SIZE];
-    char * lowerDict[SPEC_DICT_SIZE];
-    int dictPosition[DICT_SIZE];
-    int specDictPosition[DICT_SIZE];
-    int currChar;
     std::string text;
-    char getCurrentKey();
-
+    std::u16string title_u16;
+    void disableKeyboard();
 public:
-    keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * enterText = "ENTER", const char * placeHolderText = "Input Text...", bool hasEnter = true);
+    keyboardInput(Scene2D * mainScene, FT_Face font, int x, int y, int width, int height, const char * keyboardTitle = "Title", const char * placeHolderText = "Input Text...", OrbisImeType keyboardType = ORBIS_TYPE_BASIC_LATIN, OrbisButtonLabel buttonLabel = ORBIS_BUTTON_LABEL_SEARCH);
     void updateView();
-    void nextKey();
-    void previousKey();
-    void pressX();
-    void setUpperRow();
-    void setLowerRow();
-    void deleteChar();
-    void selectKeyboard();
-    void unSelectKeyboard();
+    void enableKeyboard();
     bool hasEntered() const;
-    bool hasChanged();
     std::string readText();
     bool active();
     ~keyboardInput();

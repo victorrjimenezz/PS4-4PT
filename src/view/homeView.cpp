@@ -14,7 +14,9 @@
 #include "../../include/utils/LANG.h"
 
 #include <iterator>
+#include <codecvt>
 #include <orbis/UserService.h>
+#include <orbis/ImeDialog.h>
 
 homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : frameWidth(frameWidth),frameHeight(frameHeight){
     this->mainScene = mainScene;
@@ -28,8 +30,7 @@ homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, F
 
     keyboardX = HOMEVIEW_KEYBOARD_X*frameWidth;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,LANG::mainLang->DOWNLOAD.c_str(), "https://",true);
-    keyboardInput->selectKeyboard();
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight, LANG::mainLang->PKG_DIRECT_DOWNLOAD.c_str(), "https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 
     logoWidth = HOMEVIEW_LOGO_WIDTH*frameWidth;
     logoX = HOMEVIEW_LOGO_X*frameWidth-logoWidth/2;
@@ -56,8 +57,7 @@ void homeView::loadWelcomeText(){
 void homeView::langChanged() {
     loadWelcomeText();
     delete keyboardInput;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,LANG::mainLang->DOWNLOAD.c_str(), "https://",true);
-    keyboardInput->selectKeyboard();
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,LANG::mainLang->PKG_DIRECT_DOWNLOAD.c_str(), "https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 }
 void homeView::updateView() {
     logo->Draw(mainScene,logoX,logoY);
@@ -87,31 +87,30 @@ void homeView::hasEntered() {
     downloadView::downloadManager->addDownload( download);
 }
 void homeView::pressX(){
-    keyboardInput->pressX();
+
 }
 
 void homeView::pressCircle(){
 
 }
-void homeView::pressTriangle(){
 
+void homeView::pressTriangle(){
+    keyboardInput->enableKeyboard();
 }
 void homeView::pressSquare(){
-    keyboardInput->deleteChar();
+
 }
 void homeView::arrowUp(){
-    keyboardInput->setUpperRow();
+
 }
 void homeView::arrowDown(){
-    keyboardInput->setLowerRow();
+
 }
 void homeView::arrowRight() {
-    keyboardInput->nextKey();
+
 
 }
 void homeView::arrowLeft() {
-    keyboardInput->previousKey();
-
 }
 bool homeView::isActive() {
     return true;

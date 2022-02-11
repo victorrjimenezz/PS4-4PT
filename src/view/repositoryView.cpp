@@ -40,7 +40,7 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",true);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 
     this->dialog = new terminalDialogView(this, mainScene, frameWidth, frameHeight*(1-TABVIEWSIZE),fontSmall);
     child = nullptr;
@@ -230,9 +230,6 @@ void repositoryView::hasEntered(){
 }
 
 void repositoryView::pressX(){
-    if(isOnKeyboard)
-        keyboardInput->pressX();
-    else {
         int selectedTEMP = selected;
         repository *currRepo = currRepos[selectedTEMP];
         if(currRepo == nullptr)
@@ -258,7 +255,6 @@ void repositoryView::pressX(){
                 deleteRepo(currRepo->getID(), selectedTEMP);
                 break;
         }
-    }
 }
 
 int repositoryView::deleteRepo(const char * id, int selectedTEMP){
@@ -279,24 +275,16 @@ int repositoryView::deleteRepo(const char * id, int selectedTEMP){
     return 0;
 }
 void repositoryView::pressCircle(){
-    if(isOnKeyboard) {
-        isOnKeyboard = false;
-        keyboardInput->unSelectKeyboard();
-    }
+
 }
 void repositoryView::pressTriangle(){
-    isOnKeyboard = !isOnKeyboard;
-    if(isOnKeyboard)
-        keyboardInput->selectKeyboard();
-    else
-        keyboardInput->unSelectKeyboard();
+    keyboardInput->enableKeyboard();
 }
 void repositoryView::pressSquare(){
-    if(isOnKeyboard)
-        keyboardInput->deleteChar();
+
 }
 void repositoryView::arrowUp(){
-    if(!isOnKeyboard) {
+    if(!keyboardInput->active()) {
         selected--;
         if (selected + reposPerPage * currPage < 0) {
             selected = 0;
@@ -305,11 +293,10 @@ void repositoryView::arrowUp(){
             currPage--;
             fillPage();
         }
-    } else
-        keyboardInput->setUpperRow();
+    }
 }
 void repositoryView::arrowDown(){
-    if(!isOnKeyboard) {
+    if(!keyboardInput->active()) {
         selected++;
         int repoSize = (int) repositoryList->size();
         if (selected + reposPerPage * currPage < repoSize) {
@@ -321,11 +308,10 @@ void repositoryView::arrowDown(){
         } else {
             selected--;
         }
-    } else
-        keyboardInput->setLowerRow();
+    }
 }
 void repositoryView::arrowRight() {
-    if(!isOnKeyboard) {
+    if(!keyboardInput->active()) {
         repository *currRepo = currRepos[selected];
         if(currRepo == nullptr)
             return;
@@ -340,12 +326,11 @@ void repositoryView::arrowRight() {
             default:
                 break;
         }
-    } else
-        keyboardInput->nextKey();
+    }
 
 }
 void repositoryView::arrowLeft() {
-    if(!isOnKeyboard) {
+    if(!keyboardInput->active()) {
         repository *currRepo = currRepos[selected];
         if(currRepo == nullptr)
             return;
@@ -360,8 +345,7 @@ void repositoryView::arrowLeft() {
             default:
                 break;
         }
-    } else
-        keyboardInput->previousKey();
+    }
 
 }
 bool repositoryView::isActive() {
@@ -513,7 +497,7 @@ int repositoryView::loadSavedRepos() {
 }
 void repositoryView::langChanged() {
     delete keyboardInput;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",true);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 4*viewHeight/6, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/3, LANG::mainLang->ADD_REPO.c_str(),"https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 }
 
 repository * repositoryView::getCurrentRepository() {

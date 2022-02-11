@@ -220,6 +220,8 @@ int loadModules() {
         return -1;
     if(sceSysmoduleLoadModule(ORBIS_SYSMODULE_MESSAGE_DIALOG) < 0)
         return -1;
+    if(sceSysmoduleLoadModule(ORBIS_SYSMODULE_IME_DIALOG) < 0)
+        return -1;
     if(sceSysmoduleLoadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SSL))
         return -1;
     return 0;
@@ -403,6 +405,7 @@ void networkShutDown() {
 }
 void unloadModules() {
     sceSysmoduleUnloadModule(ORBIS_SYSMODULE_MESSAGE_DIALOG);
+    sceSysmoduleUnloadModule(ORBIS_SYSMODULE_IME_DIALOG);
     sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_SYSTEM_SERVICE);
     sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_APP_INST_UTIL);
     sceSysmoduleUnloadModuleInternal(ORBIS_SYSMODULE_INTERNAL_BGFT);

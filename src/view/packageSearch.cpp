@@ -35,7 +35,7 @@ packageSearch::packageSearch(Scene2D * mainScene, FT_Face fontLarge, FT_Face fon
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "", false);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2,LANG::mainLang->SEARCH.c_str(), "");
     filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
 
@@ -111,7 +111,7 @@ void packageSearch::filterPackages(const char * name) {
 
 void packageSearch::updateView() {
     int selectedTemp;
-    if(keyboardInput->hasChanged() || filterView->hasChanged())
+    if(keyboardInput->hasEntered() || filterView->hasChanged())
         filterPackages(keyboardInput->readText().c_str());
     std::string printStr;
     int totalPages = ceil((double)displayPackageList.size()/packagesPerPage);
@@ -230,14 +230,11 @@ void packageSearch::updateView() {
         }
     }
     keyboardInput->updateView();
-    if(!keyboardInput->active())
-        filterView->updateView();
+    filterView->updateView();
 }
 
 void packageSearch::pressX(){
-    if(keyboardInput->active())
-        keyboardInput->pressX();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->pressX();
     else {
         std::shared_ptr<package> currpkg = currPackages[selected];
@@ -258,28 +255,19 @@ subView* packageSearch::getChild(){
     return nullptr;
 }
 void packageSearch::pressCircle(){
-    if(keyboardInput->active())
-        keyboardInput->unSelectKeyboard();
 
 }
 void packageSearch::pressTriangle(){
-    if(keyboardInput->active())
-        keyboardInput->unSelectKeyboard();
-    else
-        keyboardInput->selectKeyboard();
+    keyboardInput->enableKeyboard();
 }
 void packageSearch::pressSquare(){
-    if(keyboardInput->active())
-        keyboardInput->deleteChar();
-    else if(!filterView->active())
+    if(!filterView->active())
         filterView->enableFilterView();
     else
         filterView->disableFilterView();
 }
 void packageSearch::arrowUp(){
-    if(keyboardInput->active())
-        keyboardInput->setUpperRow();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->arrowUP();
     else {
         selected--;
@@ -293,9 +281,7 @@ void packageSearch::arrowUp(){
     }
 }
 void packageSearch::arrowDown(){
-    if(keyboardInput->active())
-        keyboardInput->setLowerRow();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->arrowDown();
     else  {
         selected++;
@@ -312,16 +298,12 @@ void packageSearch::arrowDown(){
     }
 }
 void packageSearch::arrowRight() {
-    if(keyboardInput->active())
-        keyboardInput->nextKey();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->nextOption();
 
 }
 void packageSearch::arrowLeft() {
-    if(keyboardInput->active())
-        keyboardInput->previousKey();
-    else if(filterView->active())
+    if(filterView->active())
         filterView->prevOption();
 
 }
@@ -339,7 +321,7 @@ bool packageSearch::isActive() {
 
 void packageSearch::langChanged() {
         delete keyboardInput;
-        keyboardInput =  new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight,LANG::mainLang->SEARCH.c_str(), "", false);
+        keyboardInput =  new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2,LANG::mainLang->SEARCH.c_str(), "");
         delete filterView;
         filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
