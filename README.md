@@ -129,10 +129,14 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 <div id="st"></div>
 
-### Version 3.00 (~2 Month)
+### Version 2.75 (~2 Month)
 
+- [ ] Text issue
+- [ ] Translate Uninstall button, delete keys and pkgtypes, Unknown
 - [ ] Add Http Authentication Support
-- [ ] Change Keyboard to UI IME
+- [ ] Download pkgs in the background
+- [X] Change Keyboard to UI IME
+- [X] When removing a download, the option selected is switched to the download button
 
 <div id="lt"></div>
 
@@ -144,7 +148,6 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Save on external HDD
 - [ ] get Abstract Class from packageSearch and repoPackageList
 - [ ] Add a new PKG List view where only covers are displayed
-- [ ] Download pkgs in the background with DAEMONS
 - [ ] Support for more languages
 
 See the [open issues](https://github.com/victorrjimenezz/PS4-4PT/issues) for a full list of proposed features (and known issues).
@@ -201,6 +204,9 @@ I would like to thank the following developers for the developing following proj
 * [PS4 Skeleton](https://github.com/Al-Azif/ps4-skeleton) by [Al Azif](https://twitter.com/_AlAzif) </br>
 &ensp;  &ensp;  &ensp; Used his jailbreaking tools to gain root privileges </br>
   &ensp;  &ensp;  &ensp; Used his notifi class to send notifications
+* [Vita Album](https://github.com/joel16/VITAlbum) by [joel16](https://github.com/joel16) </br>
+&ensp;  &ensp;  &ensp; Used his keyboard namespace to understand how IMEDialogs work  </br>
+&ensp;  &ensp;  &ensp; Used his keyboard namespace to understand how to transform UTF8 <=> UTF16 strings
 * [PS4 Homebrew Store](https://github.com/LightningMods/PS4-Store) by [LightningMods_](https://twitter.com/lightningmods_) </br>
 &ensp;  &ensp;  &ensp; Used his dialog method to pop dialogs </br>
 &ensp;  &ensp;  &ensp; Learned how to access PS4's native HTTP </br>
