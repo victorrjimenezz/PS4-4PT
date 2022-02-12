@@ -134,9 +134,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Text issue
 - [ ] Translate Uninstall button, delete keys and pkgtypes, Unknown
 - [ ] Add Http Authentication Support
-- [ ] Download pkgs in the background
-- [X] Change Keyboard to UI IME
-- [X] When removing a download, the option selected is switched to the download button
+- [ ] Download pkgs while playing games
 
 <div id="lt"></div>
 
