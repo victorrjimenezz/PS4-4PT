@@ -1,9 +1,9 @@
 # Package metadata.
 TITLE       := 4PT
-VERSION     := 2.5
-TITLE_ID    := PAPT00250
+VERSION     := 2.75
+TITLE_ID    := PAPT00275
 
-CONTENT_ID  := IV0000-PAPT00250_00-PSAAPTPKG0000000
+CONTENT_ID  := IV0000-PAPT00275_00-PSAAPTPKG0000000
 PROJNAME    := 4PT
 
 # Libraries linked into the ELF.
@@ -94,11 +94,11 @@ pkg.gp4: eboot.bin sce_sys/about/right.sprx sce_sys/param.sfo sce_sys/icon0.png 
 	$(TOOLCHAIN)/bin/$(CDIR)/create-gp4 -o $@ -c $(CONTENT_ID) $^
 sce_sys/param.sfo: Makefile
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_new $@
-	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ APP_TYPE --type Integer --maxsize 4 --value 1 
+	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ APP_TYPE --type Integer --maxsize 4 --value 0
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ APP_VER --type Utf8 --maxsize 8 --value '$(VERSION)'
-	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ ATTRIBUTE --type Integer --maxsize 4 --value 2
+	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ ATTRIBUTE --type Integer --maxsize 4 --value 18
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ ATTRIBUTE2 --type Integer --maxsize 4 --value 2
-	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ CATEGORY --type Utf8 --maxsize 4 --value 'gd'  
+	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ CATEGORY --type Utf8 --maxsize 4 --value 'gde'
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ CONTENT_ID --type Utf8 --maxsize 48 --value '$(CONTENT_ID)'
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ DOWNLOAD_DATA_SIZE --type Integer --maxsize 4 --value 0 
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core sfo_setentry $@ SYSTEM_VER --type Integer --maxsize 4 --value 0  
