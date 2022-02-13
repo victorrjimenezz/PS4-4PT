@@ -44,6 +44,8 @@ void SignalInit();
 
 std::stringstream debugLogStream;
 mainView * mainView = nullptr;
+bool running = false;
+std::mutex stopMutex;
 
 int libSslId = -1;
 int libNetMemId = -1;
@@ -82,6 +84,7 @@ int main() {
 
 
     mainView = new class mainView(isFirstRun);
+    running = true;
 
     LOG << "Initialized Main view" << "\n";
 
@@ -102,12 +105,12 @@ int main() {
 
     try {
         // Draw loop
-        while (mainView->updateView() >= 0) continue;
+        while (running) if(mainView->updateView()<0) running = false;
+
     } catch (const std::exception &exception) {
         LOG << "FATAL ERROR:\n" << exception.what();
     }
 
-    delete mainView;
     exitApp();
     return 0;
 }
@@ -370,6 +373,17 @@ int mkDirs(){
 }
 
 void exitApp(){
+    class mainView * oldMainView;
+    {
+        std::unique_lock<std::mutex> stopLock;
+        if(mainView == nullptr)
+            return;
+        oldMainView = mainView;
+        mainView = nullptr;
+    }
+    delete oldMainView;
+    LOG << "Deleted mainView";
+
     settings::termSettings();
     LOG << "Terminated settings";
 
@@ -386,6 +400,7 @@ void exitApp(){
     closeLogger();
     unjailbreak();
     sceSystemServiceLoadExec("exit",NULL);
+    exit(0);
 }
 void stopProcesses() {
     sceAppInstUtilTerminate();
@@ -424,9 +439,8 @@ void SignalHandler(int signal) {
         LOG << "Resuming APP";
         return;
     }
-    delete mainView;
-    mainView = nullptr;
-    exit(0);
+    running = false;
+    exitApp();
 }
 void SignalInit(){
 
