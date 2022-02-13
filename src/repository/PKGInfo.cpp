@@ -14,6 +14,7 @@ PKGInfo::PKGInfo(const char * fromURL, bool isLocal) {
     url = fromURL;
     this->isLocal = isLocal;
     TITLE_ID = "";
+    CONTENT_ID = "";
     TITLE = "";
     PKG_APP_VERSION = -1;
     icon = nullptr;
@@ -107,6 +108,10 @@ void PKGInfo::loadData(uint8_t * data, uint64_t data_size){
             char * sfoParam = (char*)sfoFile->getEntry("TITLE_ID");
             if(sfoParam != nullptr)
                 TITLE_ID = std::string(sfoParam);
+
+            sfoParam = (char*)sfoFile->getEntry("CONTENT_ID");
+            if(sfoParam != nullptr)
+                CONTENT_ID = std::string(sfoParam);
 
             sfoParam = (char*)sfoFile->getEntry("TITLE");
             if(sfoParam != nullptr)
@@ -249,4 +254,8 @@ uint8_t *PKGInfo::loadSFO(uint64_t param_sfo_offset, uint64_t param_sfo_size) {
 
 uint64_t PKGInfo::getPkgSize() {
     return pkgSize;
+}
+
+const char * PKGInfo::getContentID() {
+    return CONTENT_ID.c_str();
 }

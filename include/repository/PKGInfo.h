@@ -20,6 +20,7 @@ private:
     PNG * icon;
     SFO * sfoFile;
     std::string TITLE_ID;
+    std::string CONTENT_ID;
     std::string TITLE;
     std::string url;
     std::string PKG_SFO_TYPE;
@@ -33,6 +34,7 @@ public:
     explicit PKGInfo(const char * url, bool isLocal = false);
     explicit PKGInfo(uint8_t * data, uint64_t data_size);
     const char * getTitleID();
+    const char * getContentID();
     const char * getTitle();
     const char * getType();
     uint64_t getPkgSize();
@@ -40,5 +42,6 @@ public:
     double getVersion() const;
     double getSystemVersion() const;
     ~PKGInfo();
+
 };
 #endif //APT_PKGINFO_H
