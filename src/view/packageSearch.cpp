@@ -12,6 +12,7 @@
 #include "../../include/view/downloadView.h"
 #include "../../include/view/repositoryView.h"
 #include "../../include/view/filterView.h"
+#include "../../include/utils/settings.h"
 
 #include <vector>
 #include <iterator>
@@ -240,7 +241,10 @@ void packageSearch::pressX(){
         std::shared_ptr<package> currpkg = currPackages[selected];
         if(currPackages[selected] == nullptr)
             return;
-        downloadView::downloadManager->addDownload(new download(currpkg));
+        if(settings::getMainSettings()->shouldInstallDirectlyPS4())
+            currpkg->install();
+        else
+            downloadView::downloadManager->addDownload(new download(currpkg));
     }
 }
 void packageSearch::deleteChild(){
