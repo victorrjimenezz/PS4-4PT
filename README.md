@@ -135,6 +135,9 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Translate Uninstall button, delete keys and pkgtypes, Unknown
 - [ ] Add Http Authentication Support
 - [ ] Download pkgs while playing games
+- [ ] If installed but not updated show update available in downloads tab
+- [ ] Save on external HDD
+- [ ] Show speed and time remaining (and progress bar)
 
 <div id="lt"></div>
 
@@ -143,7 +146,6 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Fix Hungarian automatic detection
 - [ ] Implement proper App deallocation when pressing the Close Application button on the PS Menu
 - [ ] Add functionality to download binaries
-- [ ] Save on external HDD
 - [ ] get Abstract Class from packageSearch and repoPackageList
 - [ ] Add a new PKG List view where only covers are displayed
 - [ ] Support for more languages
