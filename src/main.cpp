@@ -420,6 +420,10 @@ void closeLogger() {
 }
 void SignalHandler(int signal) {
     LOG << "Received Signal: " << signal;
+    if(signal == SIGSTOP){
+        LOG << "Resuming APP";
+        return;
+    }
     delete mainView;
     mainView = nullptr;
     exit(0);
