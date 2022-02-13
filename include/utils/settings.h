@@ -13,12 +13,12 @@
 class settings {
 private:
     static settings * mainSettings;
-    //finished installing, finished downloading, added to downloads
     std::string currLANG;
 
     bool addedToDownloadsNotification;
     bool finishedDownloadingNotification;
     bool failedDownloadingNotification;
+    bool installDirectlyPS4;
     const int notificationsOptions = 3;
 
     void saveSettings();
@@ -42,6 +42,9 @@ public:
 
     bool isFailedDownloadingNotification() const;
     void setFailedDownloadingNotification(bool failedDownloadingNotification);
+
+    bool shouldInstallDirectlyPS4() const;
+    void setInstallDirectlyPS4(bool installDirectlyPS4);
 
     int getNotificationsOptions();
 };

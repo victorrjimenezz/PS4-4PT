@@ -53,6 +53,8 @@ void settings::saveSettings() {
     settingsFileYML["FAILED_DOWNLOADING_NOTIFICATION"] = failedDownloadingNotification;
     settingsFileYML["ADD_DOWNLOAD_NOTIFICATION"] = addedToDownloadsNotification;
     settingsFileYML["DOWNLOAD_NOTIFICATION"] = finishedDownloadingNotification;
+    settingsFileYML["INSTALL_DIRECTLY_PS4"] = installDirectlyPS4;
+
     std::ofstream downloadsFile(SETTINGS_FILE, std::ofstream::out | std::ofstream::trunc);
     downloadsFile << settingsFileYML;
     downloadsFile.flush();
@@ -75,6 +77,9 @@ void settings::loadSettings() {
             if(settingsFileYML["DOWNLOAD_NOTIFICATION"])
                 finishedDownloadingNotification = settingsFileYML["DOWNLOAD_NOTIFICATION"].as<bool>(finishedDownloadingNotification);
 
+            if(settingsFileYML["INSTALL_DIRECTLY_PS4"])
+                installDirectlyPS4 = settingsFileYML["INSTALL_DIRECTLY_PS4"].as<bool>(installDirectlyPS4);
+
         } catch(YAML::Exception & exception) {
             LOG << "ERROR WHEN LOADING SETTINGS" << exception.what();
         }
@@ -93,6 +98,7 @@ settings::settings() {
     addedToDownloadsNotification = true;
     failedDownloadingNotification = true;
     finishedDownloadingNotification = true;
+    installDirectlyPS4 = false;
 }
 
 settings *settings::getMainSettings() {
@@ -109,6 +115,15 @@ bool settings::isFailedDownloadingNotification() const {
 
 void settings::setFailedDownloadingNotification(bool failedDownloadingNotification) {
     settings::failedDownloadingNotification = failedDownloadingNotification;
+    saveSettings();
+}
+
+bool settings::shouldInstallDirectlyPS4() const {
+    return installDirectlyPS4;
+}
+
+void settings::setInstallDirectlyPS4(bool installDirectlyPS4) {
+    this->installDirectlyPS4 = installDirectlyPS4;
     saveSettings();
 }
 
