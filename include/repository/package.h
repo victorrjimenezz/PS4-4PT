@@ -28,6 +28,7 @@ private:
     PNG * icon;
     enum PKGTypeENUM packageType;
     std::string TITLE_ID;
+    std::string CONTENT_ID;
     uint64_t packageSizeBytes;
     std::string packageSizeMB;
     double version;
@@ -41,7 +42,7 @@ private:
 
 public:
     static PKGTypeENUM getPackageType(const char * packageType);
-    package(package * oldPackage);
+    explicit package(package * oldPackage);
     package(const char*url, bool local, bool * failed, const char * type = "", const char * repositoryName = "Direct Download");
     const char * getName();
     const char * getVersionStr();
@@ -59,7 +60,8 @@ public:
     ~package();
     double getCurrVer();
     int unInstall();
-    int install(const char * path = "");
+    int install(const char * path);
+    int install();
     bool updateAvailable();
     bool isInstalled() const;
 };

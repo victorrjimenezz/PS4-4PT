@@ -13,6 +13,7 @@
 #include <sstream>
 #include <orbis/AppInstUtil.h>
 #include <orbis/bgft.h>
+#include <orbis/UserService.h>
 
 package::package(const char*url, bool local, bool * failed, const char * type, const char * repositoryName){
     std::ostringstream stringStream;
@@ -31,6 +32,7 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
         goto err;
     }
     this->TITLE_ID = pkgInfo.getTitleID();
+    this->CONTENT_ID = pkgInfo.getContentID();
     this->name = pkgInfo.getTitle();
     this->packageType = getPackageType(type);
     if(this->icon == nullptr)
@@ -100,21 +102,28 @@ int package::unInstall() {
 }
 
 int package::install(const char * path) {
-    int  ret;
+    int  ret, userID;
     int  task_id = -1;
     char buffer[255];
     const char * titleID = TITLE_ID.c_str();
     const char * installPath;
     if(strcasecmp(path,"") == 0)
-        installPath = url.c_str();
+        return install();
     else
         installPath = path;
+
+    ret = sceUserServiceGetForegroundUser(&userID);
+    if (ret) {
+        LOG << "sceUserServiceGetForegroundUser failed: " << ret;
+        goto err;
+    }
 
     snprintf(buffer, 254, "%s via 4PT", titleID);
     OrbisBgftDownloadParamEx download_params;
     memset(&download_params, 0, sizeof(download_params));
     download_params.params.entitlementType = 5;
     download_params.params.id = titleID;
+    download_params.params.userId = userID;
     download_params.params.contentUrl = installPath;
     download_params.params.contentName = buffer;
     download_params.params.playgoScenarioId = "0";
@@ -135,6 +144,68 @@ int package::install(const char * path) {
         goto retry;
     } else if(ret){
         LOG << "Error on sceBgftServiceIntDownloadRegisterTaskByStorageEx";
+        goto err;
+    }
+
+    ret = sceBgftServiceDownloadStartTask(task_id);
+    if(ret){
+        LOG << "Error on sceBgftDownloadStartTask";
+        goto err;
+    }
+
+    return 0;
+
+    err:
+    std::string message = LANG::mainLang->ERROR_WHEN_INSTALLING_APP;
+    message+=name;
+    notifi(NULL,message.c_str());
+    return -1;
+
+}
+
+int package::install() {
+    int  ret, userID;
+    int  task_id = -1;
+    char buffer[255];
+
+    LOG << "Installing app from url" << url;
+
+    ret = sceUserServiceGetForegroundUser(&userID);
+    if (ret) {
+        LOG << "sceUserServiceGetForegroundUser failed: " << ret;
+        goto err;
+    }
+
+    snprintf(buffer, 254, "%s via 4PT", TITLE_ID.c_str());
+    OrbisBgftDownloadParam download_params;
+    memset(&download_params, 0, sizeof(download_params));
+    {
+
+        download_params.userId = userID;
+        download_params.id = CONTENT_ID.c_str();
+        download_params.contentUrl = url.c_str();
+        download_params.contentName = TITLE_ID.c_str();
+        download_params.iconPath = "";
+        download_params.playgoScenarioId = "0";
+        download_params.option = ORBIS_BGFT_TASK_OPT_DISABLE_CDN_QUERY_PARAM;
+        download_params.packageType = pkgSFOType.c_str();
+        download_params.packageSubType = "";
+        download_params.packageSize = packageSizeBytes;
+    }
+
+    retry:
+    ret = sceBgftServiceIntDownloadRegisterTask(&download_params, &task_id);
+
+    if(ret == ORBIS_APPINSTUTIL_APP_ALREADY_INSTALLED) {
+        ret = unInstall();
+        if(ret != 0){
+            LOG << "Error on sceAppInstUtilAppUnInstall";
+            goto err;
+        }
+
+        goto retry;
+    } else if(ret){
+        LOG << "Error on sceBgftServiceIntDownloadRegisterTask";
         goto err;
     }
 
