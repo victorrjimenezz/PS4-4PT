@@ -55,11 +55,17 @@ settingsView::settingsView(Scene2D *mainScene, FT_Face fontLarge, FT_Face fontMe
     checkboxCross = new PNG(DATA_PATH "assets/images/filters/cross.png",SETTINGS_CHECKBOX_WIDTH,SETTINGS_CHECKBOX_HEIGHT);
     checkboxSelectedCross = new PNG(DATA_PATH "assets/images/filters/crossSelected.png",SETTINGS_CHECKBOX_WIDTH,SETTINGS_CHECKBOX_HEIGHT);
 
+
+    settingsSecondRowX = flagTextPosX;
+    settingsSecondRowY = frameHeight * SETTINGS_VIEW_NOTIFICATIONS_Y_PAD*1.25;
+
+
     currentRow = LANGROW;
 
 }
 void settingsView::updateView(){
     int selectedTemp = selected, currFlag = 0;
+    std::string messageString;
     rows currRowTemp = currentRow;
     mainScene->DrawText((char *) langText.c_str(), fontMedium, flagTextPosX, textPosY, textColor, textColor);
 
@@ -126,6 +132,25 @@ void settingsView::updateView(){
         checkboxBorder->Draw(mainScene, notifications3X, notificationsY);
     }
 
+    tempBool = settings::getMainSettings()->shouldInstallDirectlyPS4();
+    {
+        messageString = LANG::mainLang->INSTALL_DIRECTLY_PS4 + ":\n\n";
+        messageString += LANG::mainLang->INSTALL_DIRECTLY_PS4_DESC;
+        mainScene->DrawText((char *) messageString.c_str(), fontSmall, settingsSecondRowX+SETTINGS_CHECKBOX_WIDTH+5, settingsSecondRowY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
+                            textColor);
+        mainScene->DrawRectangle(settingsSecondRowX, settingsSecondRowY, SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT,
+                                 checkboxColor);
+        if (currRowTemp == SECONDSETTINGSROW) {
+            if (tempBool)
+                mainScene->DrawRectangle(settingsSecondRowX, settingsSecondRowY, SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT,
+                                         checkboxEnabledColor);
+            else
+                checkboxSelectedCross->Draw(mainScene, settingsSecondRowX, settingsSecondRowY);
+        } else if (tempBool)
+            checkboxCross->Draw(mainScene, settingsSecondRowX, settingsSecondRowY);
+        checkboxBorder->Draw(mainScene, settingsSecondRowX, settingsSecondRowY);
+    }
+
 }
 void settingsView::pressX(){
     settings * mainSettings = settings::getMainSettings();
@@ -135,6 +160,9 @@ void settingsView::pressX(){
     switch(currentRow){
         case LANGROW:
             mainSettings->setCurrLang(flags.at(selectedTEMP).lang);
+            break;
+        case SECONDSETTINGSROW:
+            mainSettings->setInstallDirectlyPS4(!mainSettings->shouldInstallDirectlyPS4());
             break;
         case NOTIFICATIONROW:
             if(selected==0)
@@ -150,12 +178,34 @@ void settingsView::pressCircle(){ }
 void settingsView::pressTriangle(){ }
 void settingsView::pressSquare(){ }
 void settingsView::arrowUp(){
-    currentRow = LANGROW;
-    selected = selected>=flags.size()? flags.size()-1 : selected;
+    switch(currentRow){
+        case SECONDSETTINGSROW:
+            currentRow = LANGROW;
+            selected = selected>=flags.size()? flags.size()-1 : selected;
+            break;
+        case NOTIFICATIONROW:
+            currentRow = SECONDSETTINGSROW;
+            break;
+        case LANGROW:
+        default:
+            break;
+    }
+
 }
 void settingsView::arrowDown(){
-    currentRow = NOTIFICATIONROW;
-    selected = selected>=settings::getMainSettings()->getNotificationsOptions() ? settings::getMainSettings()->getNotificationsOptions()-1 : selected;
+
+    switch(currentRow){
+        case LANGROW:
+            currentRow = SECONDSETTINGSROW;
+            break;
+        case SECONDSETTINGSROW:
+            currentRow = NOTIFICATIONROW;
+            selected = selected>=settings::getMainSettings()->getNotificationsOptions() ? settings::getMainSettings()->getNotificationsOptions()-1 : selected;
+            break;
+        case NOTIFICATIONROW:
+        default:
+            break;
+    }
 }
 
 void settingsView::arrowRight(){
@@ -166,6 +216,9 @@ void settingsView::arrowRight(){
         case NOTIFICATIONROW:
             selected = (selected+1)%settings::getMainSettings()->getNotificationsOptions();
             break;
+        case SECONDSETTINGSROW:
+        default:
+            break;
     }
 }
 void settingsView::arrowLeft(){
@@ -175,6 +228,9 @@ void settingsView::arrowLeft(){
             break;
         case NOTIFICATIONROW:
             selected = selected ==0 ? settings::getMainSettings()->getNotificationsOptions()-1: selected-1;
+            break;
+        case SECONDSETTINGSROW:
+        default:
             break;
     }
 }

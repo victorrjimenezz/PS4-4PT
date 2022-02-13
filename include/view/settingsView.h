@@ -17,7 +17,7 @@
 class PNG;
 class settingsView : public subView {
 private:
-    enum rows {LANGROW, NOTIFICATIONROW};
+    enum rows {LANGROW, SECONDSETTINGSROW, NOTIFICATIONROW};
     rows currentRow;
     struct flag {
         PNG * flagIcon;
@@ -44,6 +44,9 @@ private:
     int notifications1X;
     int notifications2X;
     int notifications3X;
+
+    int settingsSecondRowX;
+    int settingsSecondRowY;
 
     FT_Face fontLarge;
     FT_Face fontMedium;
