@@ -33,6 +33,7 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     bgColor = {255,255,255};
     selectedColor = {0,0,0};
     textColor = {180, 180, 180};
+    updateTextColor = {255, 0, 0};
 
     this->fontLarge = fontLarge;
     this->fontMedium = fontMedium;
@@ -240,6 +241,11 @@ void downloadView::updateView() {
                 printStr+=TypeStr[currDownload->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
                                     textColor, textColor);
+                if (currDownload->updateAvailable()) {
+                    printStr = LANG::mainLang->UPDATE_AVAILABLE;
+                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y+ 1 * repoRectangle.height / 8,
+                                        updateTextColor, updateTextColor);
+                }
                 printStr = LANG::mainLang->SOURCE;
                 printStr+=currDownload->getRepoName();
                 mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, repoRectangle.y+ 3 * repoRectangle.height / 8,
@@ -272,6 +278,11 @@ void downloadView::updateView() {
         printStr+=TypeStr[currDownload->getPackageType()];
         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
                             selectedColor, selectedColor);
+        if (currDownload->updateAvailable()) {
+            printStr = LANG::mainLang->UPDATE_AVAILABLE;
+            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y+ 1 * repoRectangle.height / 8,
+                                updateTextColor, updateTextColor);
+        }
         printStr = LANG::mainLang->SOURCE;
         printStr+=currDownload->getRepoName();
         mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, repoRectangle.y+ 3 * repoRectangle.height / 8,

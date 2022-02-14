@@ -69,6 +69,7 @@ private:
     Color bgColor{};
     Color textColor{};
     Color selectedColor{};
+    Color updateTextColor{};
     FT_Face fontLarge{};
     FT_Face fontMedium{};
     FT_Face fontSmall{};
