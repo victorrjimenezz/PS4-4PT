@@ -137,7 +137,10 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Download pkgs while playing games
 - [ ] If installed but not updated show update available in downloads tab
 - [ ] Save on external HDD
+- [ ] Fix bug that where update available would be shown after installing app
 - [ ] Show speed and time remaining (and progress bar)
+- [X] Fix downloads tab flicker on rapidly changing selected download
+- [X] Use full downloads tab
 
 <div id="lt"></div>
 
