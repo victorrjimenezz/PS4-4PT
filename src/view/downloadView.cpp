@@ -233,10 +233,19 @@ void downloadView::updateView() {
                 currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
                 mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
                                     textColor, textColor);
-                mainScene->DrawText((char *) currDownload->getTitleID(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
-                                    textColor, textColor);
+
                 mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 3 * repoRectangle.height / 8,
                                     textColor, textColor);
+
+                printStringStream.str(std::string());
+                printStringStream << currDownload->getTitleID();
+                if(downloadRequest->isDownloading()){
+                    printStringStream << " | " << currDownload->getCurrentSpeedInMB() << "MB/s";
+                    printStringStream << " | ETA: " << currDownload->getTimeLeftInMinutes() << "min";
+                }
+                mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
+                        textColor, textColor);
+
                 printStr = LANG::mainLang->TYPE;
                 printStr+=TypeStr[currDownload->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
@@ -272,8 +281,16 @@ void downloadView::updateView() {
                                  repoRectangle.width, rectangleDivisorHeight, selectedColor);
         mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
                             selectedColor, selectedColor);
-        mainScene->DrawText((char *) currDownload->getTitleID(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
+
+        printStringStream << currDownload->getTitleID();
+        if(currDownload->getRequest()->isDownloading()){
+            printStringStream << " | " << currDownload->getCurrentSpeedInMB() << "MB/s";
+            printStringStream << " | ETA: " << currDownload->getTimeLeftInMinutes() << "min";
+        }
+        mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
                             selectedColor, selectedColor);
+        printStringStream.str(std::string());
+
         printStr = LANG::mainLang->TYPE;
         printStr+=TypeStr[currDownload->getPackageType()];
         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
@@ -283,6 +300,7 @@ void downloadView::updateView() {
             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y+ 1 * repoRectangle.height / 8,
                                 updateTextColor, updateTextColor);
         }
+
         printStr = LANG::mainLang->SOURCE;
         printStr+=currDownload->getRepoName();
         mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, repoRectangle.y+ 3 * repoRectangle.height / 8,
