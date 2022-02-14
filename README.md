@@ -135,9 +135,9 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Translate Uninstall button, delete keys and pkgtypes, Unknown
 - [ ] Add Http Authentication Support
 - [ ] Download pkgs while playing games
-- [ ] Show update available in downloads tab
 - [ ] Save on external HDD
 - [ ] Show speed and time remaining (and progress bar)
+- [X] Show update available in downloads tab
 - [X] Fix bug that where update available would be shown after installing app's latest version
 - [X] Improved date string generation by adding a 0 in front of single digit time units
 - [X] Fix downloads tab flicker on rapidly changing selected download
