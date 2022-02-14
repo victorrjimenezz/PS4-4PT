@@ -102,11 +102,32 @@ std::string genDate(){
     tm currentLocalTime = *localtime(&currentTime);
 
     std::ostringstream buffer;
+    int add;
     buffer << currentLocalTime.tm_year+1900;
-    buffer << "/" <<currentLocalTime.tm_mon+1;
-    buffer << "/" << currentLocalTime.tm_mday;
-    buffer << " " << currentLocalTime.tm_hour;
-    buffer << ":" << currentLocalTime.tm_min;
+
+    add = currentLocalTime.tm_mon+1;
+    if(add < 10)
+        buffer << "/0" << add;
+    else
+        buffer << "/" << add;
+
+    add = currentLocalTime.tm_mday;
+    if(add < 10)
+        buffer << "/0" << add;
+    else
+        buffer << "/" << add;
+
+    add = currentLocalTime.tm_hour;
+    if(add < 10)
+        buffer << " 0" << add;
+    else
+        buffer << " " << add;
+
+    add = currentLocalTime.tm_min;
+    if(add < 10)
+        buffer << ":0" << add;
+    else
+        buffer << ":" << add;
 
     return buffer.str();
 }
