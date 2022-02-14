@@ -23,11 +23,11 @@
 #include <iterator>
 //TODO Investigate Crash when removing download
 downloadView* downloadView::downloadManager;
-downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : downloadList(),currDownloads(), frameWidth(frameWidth), frameHeight(frameHeight), viewWidth(frameWidth), viewHeight(frameHeight * TOPVIEWSIZE) {
+downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : downloadList(),currDownloads(), frameWidth(frameWidth), frameHeight(frameHeight), viewWidth(frameWidth), viewHeight(frameHeight) {
     this->mainScene = mainScene;
     downloadManager = this;
 
-    rectangleBaseHeight = ((frameHeight-frameHeight*TABVIEWSIZE-viewHeight) / downloadsPerPage);
+    rectangleBaseHeight = (frameHeight*(1-TABVIEWSIZE) / downloadsPerPage);
     rectangleDivisorHeight = (rectangleBaseHeight*RECTANGLEDIVISORHEIGHT);
 
     bgColor = {255,255,255};
@@ -48,7 +48,7 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
     this->repoIconX = static_cast<int>(REPO_ICON_POS*repoX);
     for(int i =0; i < downloadsPerPage; i++)
-        downloadRectangles[i] = {repoX, viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight,viewHeight + i * rectangleBaseHeight + rectangleBaseHeight / 2 -1 * rectangleBaseHeight / 16} ;
+        downloadRectangles[i] = {repoX, i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight, i * rectangleBaseHeight + rectangleBaseHeight / 2 -1 * rectangleBaseHeight / 16} ;
 
     this->downloadDateX=repoX+ (downloadRectangles[0].width - repoX) * DOWNLOAD_DATE_POS;
     this->packageTypeX=repoX+ (downloadRectangles[0].width - repoX) * PACKAGE_TYPE_POS;
@@ -199,14 +199,16 @@ void downloadView::addDownload(download * newDownload) {
 }
 void downloadView::updateView() {
     this->isUpdating = true;
+    bool selectedTEMP;
     std::string printStr;
     std::stringstream printStringStream;
     printStringStream.precision(2);
     printStringStream << std::fixed;
+    selectedTEMP = selected;
     for(int i =0; i < downloadsPerPage; i++){
         download * currDownload = currDownloads[i];
         downloadRectangle repoRectangle = downloadRectangles[i];
-        if(selected != i || downloadList.empty()){
+        if(selectedTEMP != i || downloadList.empty()){
             mainScene->DrawRectangle(0, repoRectangle.y-repoRectangle.height/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             mainScene->DrawRectangle(0, repoRectangle.y+repoRectangle.height/2-rectangleDivisorHeight/2, repoRectangle.width, rectangleDivisorHeight, textColor);
             if(currDownload != nullptr){
@@ -256,8 +258,8 @@ void downloadView::updateView() {
     }
     if(!downloadList.empty()) {
         printStringStream.str(std::string());
-        download *currDownload = currDownloads[selected];
-        downloadRectangle repoRectangle = downloadRectangles[selected];
+        download *currDownload = currDownloads[selectedTEMP];
+        downloadRectangle repoRectangle = downloadRectangles[selectedTEMP];
         mainScene->DrawRectangle(0, repoRectangle.y - repoRectangle.height / 2, repoRectangle.width,
                                  rectangleDivisorHeight, selectedColor);
         mainScene->DrawRectangle(0, repoRectangle.y + repoRectangle.height / 2 - rectangleDivisorHeight / 2,
