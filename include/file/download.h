@@ -39,6 +39,7 @@ public:
     const char * getRepoName();
     const char * getTitleID();
     double getVersion();
+    bool updateAvailable();
     void initDownload();
     void deleteDownload();
     bool stored();

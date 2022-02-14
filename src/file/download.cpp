@@ -153,6 +153,10 @@ const char * download::getVersionStr() {
     return pkg->getVersionStr();
 }
 
+bool download::updateAvailable() {
+    return pkg->updateAvailable();
+}
+
 const char *download::getRepoName() {
     return pkg->getRepoName();
 }
