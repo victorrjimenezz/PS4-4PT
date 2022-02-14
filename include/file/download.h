@@ -44,6 +44,8 @@ public:
     void deleteDownload();
     bool stored();
     std::shared_ptr<fileDownloadRequest> getRequest();
+    double getCurrentSpeedInMB();
+    double getTimeLeftInMinutes();
     bool hasFinished();
     bool hasFailed();
     void setFinished();

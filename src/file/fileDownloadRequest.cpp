@@ -31,6 +31,9 @@ int fileDownloadRequest::getLibhttpCtxId() {
 fileDownloadRequest::fileDownloadRequest(const char * sourceURL, const char * destinationPath, uint64_t startByte, uint64_t fileSize) {
     this->sourceURL = encodeURL(std::string(sourceURL));
     this->destinationPath = destinationPath;
+    this->lastCheckpointTime = std::chrono::high_resolution_clock::now();
+    this->lastCheckPointBytes = startByte;
+    this->averageSpeed = 0;
 
     requestID = 0;
     connectionID = 0;
@@ -322,6 +325,8 @@ int fileDownloadRequest::downloadLoop() {
     if(out.fail())
         return downloadError("File could not be opened");
 
+    this->lastCheckpointTime = std::chrono::high_resolution_clock::now();
+    lastCheckPointBytes = downloadedBytes;
     char buffer[255];
     uint64_t read = sceHttpReadData(requestID, buffer, sizeof(buffer)), data_offset = 0;
     auto it = std::search(buffer, buffer + read, eoh, eoh + 4);
@@ -329,6 +334,7 @@ int fileDownloadRequest::downloadLoop() {
         data_offset = it - buffer + 4;      // skip it
         downloadedBytes -= data_offset;
     }
+
     while (downloadedBytes < fileSizeBytes && read > 0 && !paused) {
         uint64_t left = fileSizeBytes - downloadedBytes;
         if (downloadedBytes + read > fileSizeBytes) {
@@ -403,6 +409,26 @@ std::string fileDownloadRequest::encodeURL(const std::string & url) {
             escaped << std::nouppercase;
         }
         return escaped.str();
+}
+
+double fileDownloadRequest::getDownloadSpeedInMB() {
+    auto now = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - lastCheckpointTime);
+    if(duration.count() == 0)
+        return averageSpeed;
+    uint64_t currBytes = downloadedBytes;
+    uint64_t dwnld = currBytes - lastCheckPointBytes;
+    auto downloadSpeed = (double)((long double) dwnld / (long double) duration.count());
+    lastCheckpointTime = now;
+    lastCheckPointBytes = currBytes;
+    averageSpeed = averageSpeed == 0? downloadSpeed : DOWNLOAD_SPEED_SMOOTHING_FACTOR * downloadSpeed + (1-DOWNLOAD_SPEED_SMOOTHING_FACTOR) * averageSpeed;
+    return averageSpeed;
+}
+
+double fileDownloadRequest::getTimeLeftInMinutes() {
+    double speed = getDownloadSpeedInMB();
+    auto MBLeft = (double)((double)(fileSizeBytes-downloadedBytes)/(uint64_t) (ONE_MB));
+    return MBLeft/(speed*60);
 }
 
 

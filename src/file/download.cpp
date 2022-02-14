@@ -188,3 +188,11 @@ void download::setFailed(bool failed) {
 const char *download::getTitleID() {
     return pkg->getTitleID();
 }
+
+double download::getCurrentSpeedInMB() {
+    return downloadRequest->getDownloadSpeedInMB();
+}
+
+double download::getTimeLeftInMinutes() {
+    return downloadRequest->getTimeLeftInMinutes();
+}

@@ -6,6 +6,7 @@
 #define CYDI4_FILEDOWNLOADREQUEST_H
 #include <atomic>
 #include <string>
+#include <chrono>
 #include <regex>
 
 class download;
@@ -22,6 +23,10 @@ private:
     int requestID = -69;
     int connectionID = -69;
     int templateID = -69;
+
+    std::chrono::high_resolution_clock::time_point lastCheckpointTime;
+    uint64_t    lastCheckPointBytes;
+    double averageSpeed;
 
     uint64_t    downloadedBytes;
     uint64_t    fileSizeBytes;
@@ -55,6 +60,9 @@ public:
     void pauseDownload();
     bool isDownloading() const;
     bool hasFinished() const;
+
+    double getDownloadSpeedInMB();
+    double getTimeLeftInMinutes();
 
 };
 #endif //CYDI4_FILEDOWNLOADREQUEST_H

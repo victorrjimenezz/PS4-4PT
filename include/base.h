@@ -48,6 +48,7 @@
 #define FILTER_CHECKBOX_HEIGHT 25
 
 //Networking
+#define DOWNLOAD_SPEED_SMOOTHING_FACTOR 0.005
 #define ONE_MB 10e5
 #define USER_AGENT "PS4-4PT/2.75" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
 #define HTTP_SUCCESS 1
