@@ -26,6 +26,7 @@ private:
     std::string repoName;
     std::string url;
     PNG * icon;
+    int oldInstalled;
     enum PKGTypeENUM packageType;
     std::string TITLE_ID;
     std::string CONTENT_ID;
@@ -37,9 +38,10 @@ private:
     std::string systemVersionString;
     double systemVersion;
     double currentInstalledVersion;
-    double getCurrentInstalledVersion() const;
+    double getCurrentInstalledVersion();
+    bool isInstalledPrivate();
     void setDefaultIcon();
-
+    void updateCurrVersion();
 public:
     static PKGTypeENUM getPackageType(const char * packageType);
     explicit package(package * oldPackage);
@@ -63,7 +65,7 @@ public:
     int install(const char * path);
     int install();
     bool updateAvailable();
-    bool isInstalled() const;
+    bool isInstalled();
 };
 
 #endif //CYDI4_PACKAGE_H

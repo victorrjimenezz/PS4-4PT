@@ -45,12 +45,9 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
     stringStream << std::fixed << packageSizeBytes/ONE_MB;
     this->packageSizeMB = stringStream.str();
     stringStream.str(std::string());
-    this->currentInstalledVersion = -1;
+    this->oldInstalled = isInstalledPrivate();
 
-    if(isInstalled()){
-        PKGInfo pkgInfoInstalled((INSTALL_PATH+std::string(TITLE_ID)+"/app.pkg").c_str(),true);
-        this->currentInstalledVersion = pkgInfoInstalled.getVersion();
-    }
+    updateCurrVersion();
 
     stringStream << std::fixed << version;
     this->versionString = stringStream.str();
@@ -73,9 +70,7 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
     *failed = true;
 }
 
-double package::getCurrentInstalledVersion() const{
-    if(!isInstalled())
-        return version;
+double package::getCurrentInstalledVersion(){
     return currentInstalledVersion;
 }
 
@@ -91,8 +86,17 @@ package::PKGTypeENUM package::getPackageType(const char *packageType) {
     return pkgType;
 }
 
-bool package::isInstalled() const{
+bool package::isInstalledPrivate() {
     return fileExists((INSTALL_PATH+std::string(TITLE_ID)).c_str());
+}
+
+bool package::isInstalled() {
+    bool installed = isInstalledPrivate();
+    if(installed != oldInstalled) {
+        oldInstalled = installed;
+        updateCurrVersion();
+    }
+    return installed;
 }
 
 int package::unInstall() {
@@ -258,9 +262,6 @@ const char * package::getSystemVersionStr(){
     return systemVersionString.c_str();
 }
 
-double package::getCurrVer() {
-    return currentInstalledVersion;
-}
 uint64_t package::getPkgSize() {
     return packageSizeBytes;
 }
@@ -326,5 +327,13 @@ void package::setDefaultIcon() {
 }
 
 bool package::updateAvailable() {
-    return this->getVersion()>this->getCurrVer();
+    return this->getVersion()>this->getCurrentInstalledVersion();
+}
+
+void package::updateCurrVersion() {
+    if(isInstalledPrivate()){
+        PKGInfo pkgInfoInstalled((INSTALL_PATH+std::string(TITLE_ID)+"/app.pkg").c_str(),true);
+        this->currentInstalledVersion = pkgInfoInstalled.getVersion();
+    } else
+        this->currentInstalledVersion = version;
 }
