@@ -139,6 +139,7 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Save on external HDD
 - [ ] Fix bug that where update available would be shown after installing app's latest version
 - [ ] Show speed and time remaining (and progress bar)
+- [X] Improved date string generation by adding a 0 in front of single digit time units
 - [X] Fix downloads tab flicker on rapidly changing selected download
 - [X] Use full downloads tab
 
