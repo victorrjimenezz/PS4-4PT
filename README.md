@@ -135,7 +135,10 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Translate Uninstall button, delete keys and pkgtypes, Unknown
 - [ ] Add Http Authentication Support
 - [ ] Save on external HDD
-- [ ] Show speed and time remaining (and progress bar)
+- [ ] Fix crash when loading repo
+- [ ] Fix crash when deleting
+- [ ] Fix crash when deleting ongoing download
+- [X] Show speed and time remaining
 - [X] Download pkgs while playing games (Optional in settings)
 - [X] Show update available in downloads tab
 - [X] Fix bug that where update available would be shown after installing app's latest version
