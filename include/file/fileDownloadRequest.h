@@ -62,7 +62,7 @@ public:
     bool hasFinished() const;
 
     double getDownloadSpeedInMB();
-    double getTimeLeftInMinutes();
+    double getTimeLeftInMinutes() const;
 
 };
 #endif //CYDI4_FILEDOWNLOADREQUEST_H
