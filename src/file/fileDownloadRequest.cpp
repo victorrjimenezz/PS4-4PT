@@ -425,10 +425,9 @@ double fileDownloadRequest::getDownloadSpeedInMB() {
     return averageSpeed;
 }
 
-double fileDownloadRequest::getTimeLeftInMinutes() {
-    double speed = getDownloadSpeedInMB();
+double fileDownloadRequest::getTimeLeftInMinutes() const {
     auto MBLeft = (double)((double)(fileSizeBytes-downloadedBytes)/(uint64_t) (ONE_MB));
-    return MBLeft/(speed*60);
+    return MBLeft/(averageSpeed*60);
 }
 
 
