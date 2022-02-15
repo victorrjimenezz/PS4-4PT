@@ -126,6 +126,8 @@ int LANG::loadDefLang(){
     ADDED_TO_DOWNLOADS = ("Added to downloads");
     INSTALL_DIRECTLY_PS4 = ("Install Directly to PS4");
     INSTALL_DIRECTLY_PS4_DESC = ("Allows playing games while downloading and only stores one copy of the app\nDisables ability to pause/resume download");
+    DOWNLOAD_ETA = ("ETA");
+    MIN = ("Min");
     return 0;
 }
 
@@ -336,6 +338,16 @@ int LANG::loadLangFrom(const std::string& langFile) {
         INSTALL_DIRECTLY_PS4_DESC = langFileYAML["INSTALL_DIRECTLY_PS4_DESC"].as<std::string>("");
     } else {
         return -39;
+    }
+    if(langFileYAML["DOWNLOAD_ETA"]){
+        DOWNLOAD_ETA = langFileYAML["DOWNLOAD_ETA"].as<std::string>("");
+    } else {
+        return -40;
+    }
+    if(langFileYAML["MIN"]){
+        MIN = langFileYAML["MIN"].as<std::string>("");
+    } else {
+        return -41;
     }
 
     return 0;

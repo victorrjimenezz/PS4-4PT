@@ -56,6 +56,8 @@ public:
     std::string ADDED_TO_DOWNLOADS;
     std::string INSTALL_DIRECTLY_PS4;
     std::string INSTALL_DIRECTLY_PS4_DESC;
+    std::string DOWNLOAD_ETA;
+    std::string MIN;
     static LANG * mainLang;
     explicit LANG();
     static int initLang();

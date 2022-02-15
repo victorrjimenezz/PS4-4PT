@@ -217,7 +217,7 @@ void downloadView::updateView() {
                 std::shared_ptr<fileDownloadRequest> downloadRequest = currDownload->getRequest();
                 if(currDownload->hasFailed()) {
                     printStringStream << LANG::mainLang->HAS_FAILED;
-                    printStringStream << LANG::mainLang->DOWNLOADED << downloadRequest->getDownloadedInMb();
+                    printStringStream << LANG::mainLang->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
                     printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
                 } else if(!currDownload->stored())
                     printStringStream <<  LANG::mainLang->PENDING_DOWNLOAD;
@@ -227,7 +227,7 @@ void downloadView::updateView() {
                 } else if(currDownload->hasFinished() && currDownload->isInstalled())
                     printStringStream << LANG::mainLang->INSTALLED;
                 else {
-                    printStringStream << LANG::mainLang->DOWNLOADED << downloadRequest->getDownloadedInMb();
+                    printStringStream << LANG::mainLang->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
                     printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
                 }
                 currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
@@ -241,7 +241,7 @@ void downloadView::updateView() {
                 printStringStream << currDownload->getTitleID();
                 if(downloadRequest->isDownloading()){
                     printStringStream << " | " << currDownload->getCurrentSpeedInMB() << "MB/s";
-                    printStringStream << " | ETA: " << currDownload->getTimeLeftInMinutes() << "min";
+                    printStringStream << " | " << LANG::mainLang->DOWNLOAD_ETA << currDownload->getTimeLeftInMinutes() << LANG::mainLang->MIN;
                 }
                 mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
                         textColor, textColor);
@@ -285,7 +285,7 @@ void downloadView::updateView() {
         printStringStream << currDownload->getTitleID();
         if(currDownload->getRequest()->isDownloading()){
             printStringStream << " | " << currDownload->getCurrentSpeedInMB() << "MB/s";
-            printStringStream << " | ETA: " << currDownload->getTimeLeftInMinutes() << "min";
+            printStringStream << " | " << LANG::mainLang->DOWNLOAD_ETA << ": " << currDownload->getTimeLeftInMinutes() << LANG::mainLang->MIN;
         }
         mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
                             selectedColor, selectedColor);
@@ -322,7 +322,7 @@ void downloadView::updateView() {
         bool downloading = downloadRequest->isDownloading();
         if(currDownload->hasFailed()) {
             printStringStream << LANG::mainLang->HAS_FAILED;
-            printStringStream << LANG::mainLang->DOWNLOADED << downloadRequest->getDownloadedInMb();
+            printStringStream << LANG::mainLang->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
             printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
         }else if(!stored)
             printStringStream <<  LANG::mainLang->PENDING_DOWNLOAD;
@@ -332,7 +332,7 @@ void downloadView::updateView() {
         } else if(finished && installed)
             printStringStream << LANG::mainLang->INSTALLED;
         else {
-            printStringStream << LANG::mainLang->DOWNLOADED << downloadRequest->getDownloadedInMb();
+            printStringStream << LANG::mainLang->DOWNLOADED << ": " <<  downloadRequest->getDownloadedInMb();
             printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
         }
         mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x,

@@ -172,7 +172,6 @@ void download::setFinished() {
         notifi(NULL, downloadMessage.c_str());
     }
     finished = true;
-    //pkg->updateInstalled();
 
 }
 
