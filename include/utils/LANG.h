@@ -58,10 +58,7 @@ public:
     std::string INSTALL_DIRECTLY_PS4_DESC;
     std::string DOWNLOAD_ETA;
     std::string MIN;
-    static LANG * mainLang;
     explicit LANG();
-    static int initLang();
     int loadLang();
-    static int termLang();
 };
 #endif //INC_4PT_LANG_H

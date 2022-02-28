@@ -7,14 +7,13 @@
 #include "../../include/view/subView.h"
 #include "../../include/utils/logger.h"
 #include "../../include/ControllerManager.h"
+#include "../../include/utils/settings.h"
 
 #include <orbis/SystemService.h>
 #include <string>
-#include "../../include/utils/settings.h"
 #include <yaml-cpp/yaml.h>
 
 int32_t LANG::systemLanguage = 0;
-LANG * LANG::mainLang = nullptr;
 
 int LANG::changeLangTo(const std::string& lang){
     int loadLangRet;
@@ -37,8 +36,8 @@ int LANG::changeLangTo(const std::string& lang){
 int LANG::loadLang(){
     int ret = 1;
     sceSystemServiceParamGetInt(ORBIS_SYSTEM_SERVICE_PARAM_ID_LANG, &systemLanguage);
-    if(settings::getMainSettings() != nullptr) {
-        ret = changeLangTo(settings::getMainSettings()->getCurrLang());
+    if(getMainSettings() != nullptr) {
+        ret = changeLangTo(getMainSettings()->getCurrLang());
         if (ret == 0) {
             langChanged();
             return 0;
@@ -52,6 +51,11 @@ int LANG::loadLang(){
         case ORBIS_SYSTEM_PARAM_LANG_GERMAN:
             LOG << "DETECTED GERMAN";
             ret= changeLangTo("DE");
+            break;
+        case ORBIS_SYSTEM_PARAM_LANG_PORTUGUESE_BR:
+        case ORBIS_SYSTEM_PARAM_LANG_PORTUGUESE_PT:
+            LOG << "DETECTED Portuguese";
+            ret= changeLangTo("PT");
             break;
         case ORBIS_SYSTEM_PARAM_LANG_SPANISH_LA:
         case ORBIS_SYSTEM_PARAM_LANG_SPANISH:
@@ -76,10 +80,9 @@ int LANG::loadLang(){
 }
 
 void LANG::langChanged(){
-    int subViewSize = ControllerManager::getControllerManager()->getSubViews();
     subView * subView;
-    for(int i = 0; i<subViewSize; i++) {
-        subView = ControllerManager::getControllerManager()->getSubViewAt(i);
+    for(int i = 0; i<VIEWS; i++) {
+        subView = getSubViewAt(i);
         if(subView== nullptr)
             continue;
         subView->langChanged();
@@ -128,13 +131,6 @@ int LANG::loadDefLang(){
     INSTALL_DIRECTLY_PS4_DESC = ("Allows playing games while downloading and only stores one copy of the app\nDisables ability to pause/resume download");
     DOWNLOAD_ETA = ("ETA");
     MIN = ("Min");
-    return 0;
-}
-
-int LANG::initLang() {
-    if(LANG::mainLang!= nullptr)
-        return 1;
-    LANG::mainLang = new LANG();
     return 0;
 }
 
@@ -355,11 +351,5 @@ int LANG::loadLangFrom(const std::string& langFile) {
 
 LANG::LANG() {
     loadDefLang();
-}
-
-int LANG::termLang() {
-    delete LANG::mainLang;
-    mainLang= nullptr;
-    return 0;
 }
 
