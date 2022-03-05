@@ -11,6 +11,7 @@
 #include "../../include/utils/logger.h"
 #include "../../include/utils/LANG.h"
 #include "../../include/utils/settings.h"
+#include "../../include/main.h"
 
 
 download::download(const std::shared_ptr<package>& pkg){
@@ -54,8 +55,8 @@ download::download(const char * id, const char * date, const char * localPath, b
 download::download(const char *url, bool * failedInit) {
 
     this->pkg = std::shared_ptr<package>(new package(url,false,failedInit));
-    if(*failedInit && settings::getMainSettings()->isFailedDownloadingNotification()) {
-        std::string msg(LANG::mainLang->FAILED_TO_DOWNLOAD_PKG_FROM + ":\n");
+    if(*failedInit && getMainSettings()->isFailedDownloadingNotification()) {
+        std::string msg(getMainLang()->FAILED_TO_DOWNLOAD_PKG_FROM + ":\n");
         msg += url;
         notifi(NULL,msg.c_str());
         return;
@@ -88,7 +89,7 @@ std::shared_ptr<fileDownloadRequest> download::getRequest() {
 
 void download::deleteDownload() {
     downloadRequest->pauseDownload();
-    while(downloadRequest->isDownloading());
+    while(downloadRequest->isDownloading() || downloadRequest->requestRunning()) continue;
 
     if(stored())
         removeFile(path.c_str());
@@ -166,8 +167,8 @@ download::~download() {
 }
 
 void download::setFinished() {
-    if(settings::getMainSettings()->isFinishedDownloadingNotification()){
-        std::string downloadMessage = LANG::mainLang->FINISHED_DOWNLOADING + ":\n";
+    if(getMainSettings()->isFinishedDownloadingNotification()){
+        std::string downloadMessage = getMainLang()->FINISHED_DOWNLOADING + ":\n";
         downloadMessage += pkg->getName();
         notifi(NULL, downloadMessage.c_str());
     }
@@ -176,8 +177,8 @@ void download::setFinished() {
 }
 
 void download::setFailed(bool failed) {
-    if(failed && settings::getMainSettings()->isFailedDownloadingNotification()) {
-        std::string downloadMessage = LANG::mainLang->ERROR_WHEN_DOWNLOADING + ":\n";;
+    if(failed && getMainSettings()->isFailedDownloadingNotification()) {
+        std::string downloadMessage = getMainLang()->ERROR_WHEN_DOWNLOADING + ":\n";;
         downloadMessage += pkg->getURL();
         notifi(NULL, downloadMessage.c_str());
     }

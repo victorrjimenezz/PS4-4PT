@@ -35,8 +35,9 @@ fileDownloadRequest::fileDownloadRequest(const char * sourceURL, const char * de
     this->lastCheckPointBytes = startByte;
     this->averageSpeed = 0;
 
-    requestID = 0;
-    connectionID = 0;
+    requestID = -69;
+    connectionID = -69;
+    templateID =-69;
 
     downloadedBytes = startByte;
     fileSizeBytes = fileSize;
@@ -97,7 +98,7 @@ int fileDownloadRequest::downloadError(const char *message, int statusCode) {
 }
 
 int fileDownloadRequest::initDownload(download * download) {
-    int ret = 0;
+    int ret;
     if(!verifyURL(sourceURL.c_str(),true)){
         std::string message = "INVALID URL AT ";
         message+=sourceURL;
@@ -128,6 +129,7 @@ int fileDownloadRequest::initDownload(download * download) {
             goto err;
         }
     }
+
     ret = downloadLoop();
     if(ret < 0) {
         if(download != nullptr)
@@ -143,7 +145,6 @@ int fileDownloadRequest::initDownload(download * download) {
 }
 void fileDownloadRequest::pauseDownload() {
     paused = true;
-    downloading =false;
 }
 
 //TODO IF SSL OUT OF MEMORY 0x809517d5 retry ?
@@ -190,6 +191,7 @@ int fileDownloadRequest::initRequest() {
     }
     return 0;
 }
+
 
 int fileDownloadRequest::termRequest() {
     if(requestID!=-69) {
@@ -428,6 +430,10 @@ double fileDownloadRequest::getDownloadSpeedInMB() {
 double fileDownloadRequest::getTimeLeftInMinutes() const {
     auto MBLeft = (double)((double)(fileSizeBytes-downloadedBytes)/(uint64_t) (ONE_MB));
     return MBLeft/(averageSpeed*60);
+}
+
+bool fileDownloadRequest::requestRunning() {
+    return requestID!=-69 || connectionID!=-69 || templateID!=-69;
 }
 
 
