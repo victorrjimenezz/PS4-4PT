@@ -12,6 +12,7 @@
 #include "../../include/file/download.h"
 #include "../../include/utils/logger.h"
 #include "../../include/utils/settings.h"
+#include "../../include/main.h"
 
 #include <vector>
 #include <iterator>
@@ -37,7 +38,7 @@ repoPackageList::repoPackageList(Scene2D * mainScene, FT_Face fontLarge, FT_Face
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2, LANG::mainLang->SEARCH.c_str(),"");
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2, getMainLang()->SEARCH.c_str(),"");
     filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
     currPage = 0;
@@ -139,19 +140,19 @@ void repoPackageList::updateView() {
                             (char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
                             fontMedium, packageRectangle.x, packageRectangle.y,
                             textColor, textColor);
-                    printStr = LANG::mainLang->TYPE;
+                    printStr = getMainLang()->TYPE;
                     printStr += TypeStr[currPackage->getPackageType()];
                     mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                         packageRectangle.y - 1 * packageRectangle.height / 8,
                                         textColor, textColor);
-                    printStr = LANG::mainLang->VERSION;
+                    printStr = getMainLang()->VERSION;
                     printStr += ": ";
                     printStr += currPackage->getVersionStr();
                     printStr += " | ";
                     printStr += currPackage->getTitleID();
 
                     if (currPackage->getSystemVersion() > 0) {
-                        printStr += " | " + LANG::mainLang->FOR_FW;
+                        printStr += " | " + getMainLang()->FOR_FW;
                         printStr += currPackage->getSystemVersionStr();
                         printStr += "+";
                     }
@@ -160,13 +161,13 @@ void repoPackageList::updateView() {
                                         textColor, textColor);
                     if (currPackage->isInstalled()) {
                         if (currPackage->updateAvailable()) {
-                            printStr = LANG::mainLang->UPDATE_AVAILABLE;
+                            printStr = getMainLang()->UPDATE_AVAILABLE;
                             printStr += currPackage->getSFOType();
                             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                                 packageRectangle.y + 1 * packageRectangle.height / 8,
                                                 updateTextColor, updateTextColor);
                         } else {
-                            printStr = LANG::mainLang->INSTALLED;
+                            printStr = getMainLang()->INSTALLED;
                             printStr += currPackage->getSFOType();
                             mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                                 packageRectangle.y + 1 * packageRectangle.height / 8,
@@ -180,7 +181,7 @@ void repoPackageList::updateView() {
                     }
                     currPackage->getIcon()->Draw(mainScene, repoIconX,
                                                  packageRectangle.y - 3 * packageRectangle.height / 8);
-                    printStr = LANG::mainLang->SIZE;
+                    printStr = getMainLang()->SIZE;
                     printStr += ": ";
                     printStr += currPackage->getPkgSizeMB();
                     printStr += "MB";
@@ -203,19 +204,19 @@ void repoPackageList::updateView() {
                         (char *) std::string(currPackage->getName()).substr(0, PKGLIST_CHARACTER_LIMIT).c_str(),
                         fontMedium, packageRectangle.x, packageRectangle.y,
                         selectedColor, selectedColor);
-                printStr = LANG::mainLang->TYPE;
+                printStr = getMainLang()->TYPE;
                 printStr += TypeStr[currPackage->getPackageType()];
                 mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                     packageRectangle.y - 1 * packageRectangle.height / 8,
                                     selectedColor, selectedColor);
-                printStr = LANG::mainLang->VERSION;
+                printStr = getMainLang()->VERSION;
                 printStr += ": ";
                 printStr += currPackage->getVersionStr();
                 printStr += " | ";
                 printStr += currPackage->getTitleID();
 
                 if (currPackage->getSystemVersion() > 0) {
-                    printStr += " | " + LANG::mainLang->FOR_FW;;
+                    printStr += " | " + getMainLang()->FOR_FW;;
                     printStr += currPackage->getSystemVersionStr();
                     printStr += "+";
                 }
@@ -226,13 +227,13 @@ void repoPackageList::updateView() {
                                              packageRectangle.y - 3 * packageRectangle.height / 8);
                 if (currPackage->isInstalled()) {
                     if (currPackage->updateAvailable()) {
-                        printStr = LANG::mainLang->UPDATE_AVAILABLE;
+                        printStr = getMainLang()->UPDATE_AVAILABLE;
                         printStr += currPackage->getSFOType();
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                             packageRectangle.y + 1 * packageRectangle.height / 8,
                                             updateTextColor, updateTextColor);
                     } else {
-                        printStr = LANG::mainLang->INSTALLED;
+                        printStr = getMainLang()->INSTALLED;
                         printStr += currPackage->getSFOType();
                         mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX,
                                             packageRectangle.y + 1 * packageRectangle.height / 8,
@@ -244,7 +245,7 @@ void repoPackageList::updateView() {
                                         packageRectangle.y + 1 * packageRectangle.height / 8,
                                         selectedColor, selectedColor);
                 }
-                printStr = LANG::mainLang->SIZE;
+                printStr = getMainLang()->SIZE;
                 printStr += ": ";
                 printStr += currPackage->getPkgSizeMB();
                 printStr += "MB";
@@ -271,10 +272,10 @@ void repoPackageList::pressX(){
         std::shared_ptr<package> currpkg = currPackages[selected];
         if(currPackages[selected] == nullptr)
             return;
-        if(settings::getMainSettings()->shouldInstallDirectlyPS4())
+        if(getMainSettings()->shouldInstallDirectlyPS4())
             currpkg->install();
         else
-            downloadView::downloadManager->addDownload(new download(currpkg));
+            getDownloadManager()->addDownload(new download(currpkg));
 
     }
 }
@@ -370,7 +371,7 @@ bool repoPackageList::isActive() {
 
 void repoPackageList::langChanged() {
         delete keyboardInput;
-        keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2, LANG::mainLang->SEARCH.c_str(),"");
+        keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight / 2, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2, getMainLang()->SEARCH.c_str(),"");
         delete filterView;
         filterView = new class filterView(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 3*viewHeight / 4, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/2);
 
