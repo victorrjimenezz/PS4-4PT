@@ -18,15 +18,13 @@ private:
     bool addedToDownloadsNotification;
     bool finishedDownloadingNotification;
     bool failedDownloadingNotification;
-    bool installDirectlyPS4;
     const int notificationsOptions = 3;
+
+    bool installDirectlyPS4;
 
     void saveSettings();
 public:
-    static settings * getMainSettings();
     explicit settings();
-    static int initSettings();
-    static int termSettings();
 
     void loadSettings();
 

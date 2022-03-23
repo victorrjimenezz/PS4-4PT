@@ -6,16 +6,8 @@
 #include "../../include/utils/logger.h"
 #include "../../include/utils/LANG.h"
 #include "../../include/file/fileManager.h"
+#include "../../include/main.h"
 #include <fstream>
-
-settings * settings::mainSettings = nullptr;
-
-int settings::initSettings() {
-    if(mainSettings!= nullptr)
-        return 1;
-    mainSettings = new settings();
-    return 0;
-}
 
 std::string settings::getCurrLang() {
     return currLANG;
@@ -23,7 +15,8 @@ std::string settings::getCurrLang() {
 
 void settings::setCurrLang(const std::string &currLang) {
     currLANG = currLang;
-    LANG::mainLang->loadLang();
+    if(getMainLang()!= nullptr)
+        getMainLang()->loadLang();
     saveSettings();
 }
 
@@ -46,7 +39,7 @@ void settings::setAddedToDownloadsNotification(bool addedToDownloadsNotification
 }
 
 void settings::saveSettings() {
-    if(mainSettings == nullptr)
+    if(getMainSettings() == nullptr)
         return;
     YAML::Node settingsFileYML;
     settingsFileYML["LANG"] = currLANG;
@@ -85,24 +78,12 @@ void settings::loadSettings() {
         }
 }
 
-int settings::termSettings() {
-    if(mainSettings!= nullptr){
-        delete mainSettings;
-        mainSettings = nullptr;
-    }
-    return 0;
-}
-
 settings::settings() {
     currLANG = "NONE";
     addedToDownloadsNotification = true;
     failedDownloadingNotification = true;
     finishedDownloadingNotification = true;
     installDirectlyPS4 = false;
-}
-
-settings *settings::getMainSettings() {
-    return mainSettings;
 }
 
 int settings::getNotificationsOptions() {
@@ -126,4 +107,5 @@ void settings::setInstallDirectlyPS4(bool installDirectlyPS4) {
     this->installDirectlyPS4 = installDirectlyPS4;
     saveSettings();
 }
+
 
