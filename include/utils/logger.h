@@ -15,6 +15,7 @@ public:
     static int init(const char *PATH);
     explicit logger(const std::string &funcName);
     logger& operator<<(const char * message);
+    logger& operator<<(char * message);
     logger& operator<<(const std::string& message);
     template<typename T>
     logger& operator<<(T value) {return logger::operator<<(std::to_string(value));};

@@ -29,6 +29,11 @@ logger& logger::operator<<(const char *message) {
     logStream.flush();
     return *this;
 }
+logger& logger::operator<<(char *message) {
+    logStream << message;
+    logStream.flush();
+    return *this;
+}
 logger& logger::operator<<(const std::string& message){
     logStream << message;
     logStream.flush();
