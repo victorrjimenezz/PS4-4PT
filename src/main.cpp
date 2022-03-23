@@ -1,7 +1,5 @@
 //C++ Libs
 #include <sstream>
-#include <iostream>
-#include <thread>
 
 //Orbis Library Definitions
 #ifndef GRAPHICS_USES_FONT
@@ -21,6 +19,7 @@
 #include "../include/utils/settings.h"
 #include "../include/utils/AudioManager.h"
 #include "../include/utils/threadPool.h"
+#include "../include/main.h"
 
 //Load Orbis dependencies
 #include <orbis/Sysmodule.h>
@@ -38,12 +37,17 @@
 #include <csignal>
 
 
+//Main Defines
+settings * mainSettings = nullptr;
+LANG * mainLANG = nullptr;
+AudioManager * mainAudioManager = nullptr;
+mainView * mainView = nullptr;
+
+
 void SignalHandler(int signal);
 
 void SignalInit();
 
-std::stringstream debugLogStream;
-mainView * mainView = nullptr;
 bool running = false;
 std::mutex stopMutex;
 
@@ -71,6 +75,7 @@ int main() {
     SignalInit();
     atexit(&exitApp);
     at_quick_exit(&exitApp);
+    mainView = new class mainView();
 
     bool isFirstRun = false;
     int ret = initializeApp();
@@ -83,25 +88,25 @@ int main() {
         isFirstRun = true;
 
 
-    mainView = new class mainView(isFirstRun);
+    mainView->initMainView(isFirstRun);
     running = true;
 
     LOG << "Initialized Main view" << "\n";
 
     sceSystemServiceHideSplashScreen();
 
-    LOG << "Checking for Update";
-
-    checkForUpdate();
-    LOG << "Initialized APP!";
-
     LOG << "Loading SETTINGS";
-    settings::getMainSettings()->loadSettings();
+    mainSettings->loadSettings();
     LOG << "Loaded SETTINGS";
 
-    LOG << "LOADING LANG";
-    LANG::mainLang->loadLang();
-    LOG << "LOADED LANG";
+    LOG << "Loading LANG";
+    mainLANG->loadLang();
+    LOG << "Loaded LANG";
+
+    LOG << "Checking for Update";
+    checkForUpdate();
+
+    LOG << "Initialized APP!";
 
     try {
         // Draw loop
@@ -163,6 +168,10 @@ int initializeApp() {
     }
     LOG << "Loaded Modules" << "\n";
 
+    LOG << "Starting ThreadPool";
+    threadPool::init();
+    LOG << "Started ThreadPool";
+
     if(startProcesses()< 0) {
         LOG << "ERROR: COULD NOT START PROCESSES";
         return -1;
@@ -172,23 +181,20 @@ int initializeApp() {
     srand (time(NULL));
     LOG << "Set srand" << "\n";
 
-    if(AudioManager::initAudioManager() <0)
-        LOG << "Could not initialize Audio Manager";
-
+    LOG << "Starting Audio Manager";
+    mainAudioManager = new class AudioManager();
+    LOG << "Started Audio Manager";
 
     LOG << "Starting SETTINGS";
-    settings::initSettings();
+    mainSettings = new settings();
     LOG << "Started SETTINGS";
 
     LOG << "Starting Lang";
-    LANG::initLang();
+    mainLANG = new LANG();
     LOG <<"Started Lang";
 
     if(migrate() < 0)
         LOG << "Could not migrate files";
-
-    if(threadPool::init() < 0)
-        LOG << "Could not init Thread Pool";
 
     return ret;
 }
@@ -201,7 +207,7 @@ int checkForUpdate(){
         popDialog("Failed to install update");
     else if(ret == -4) {
         popDialog("Failed to uninstall old app version.\nPlease uninstall it manually");
-        sceSystemServiceLoadExec("exit",NULL);
+        exitApp();
     }
     return 0;
 }
@@ -373,6 +379,8 @@ int mkDirs(){
 }
 
 void exitApp(){
+    LOG << "Exiting APP";
+    running = false;
     class mainView * oldMainView;
     {
         std::unique_lock<std::mutex> stopLock;
@@ -381,11 +389,21 @@ void exitApp(){
         oldMainView = mainView;
         mainView = nullptr;
     }
+
+    if(oldMainView == nullptr)
+        return;
+    LOG << "Deleting mainView";
     delete oldMainView;
     LOG << "Deleted mainView";
 
-    settings::termSettings();
+    delete mainLANG;
+    LOG << "Terminated LANG";
+
+    delete mainSettings;
     LOG << "Terminated settings";
+
+    delete mainAudioManager;
+    LOG << "Terminated Audio Manager";
 
     threadPool::term();
     LOG << "Terminated threadPool";
@@ -407,8 +425,6 @@ void stopProcesses() {
     sceBgftServiceIntTerm();
     sceUserServiceTerminate();
     networkShutDown();
-    AudioManager::mainAudioManager->termAudioManager();
-    LANG::termLang();
 }
 void networkShutDown() {
     sceHttpTerm(fileDownloadRequest::getLibhttpCtxId());
@@ -452,4 +468,28 @@ void SignalInit(){
     for(int i = 1; i<=_NSIG; i++)
         sigaction(i,&sigIntHandler,NULL);
 
+}
+settings * getMainSettings() {
+    return mainSettings;
+}
+LANG * getMainLang() {
+    return mainLANG;
+}
+subView * getSubViewAt(int index) {
+    if(mainView == nullptr)
+        return nullptr;
+    return mainView->getSubViewAt(index);
+}
+downloadView * getDownloadManager() {
+    return reinterpret_cast<downloadView *>(getSubViewAt(DOWNLOADVIEW));
+}
+
+AudioManager * getMainAudioManager() {
+    return mainAudioManager;
+}
+repositoryView * getMainRepositoryView(){
+    return reinterpret_cast<repositoryView *>(getSubViewAt(REPOSITORYVIEW));
+}
+packageSearch * getMainPackageSearch() {
+    return reinterpret_cast<packageSearch *>(getSubViewAt(PACKAGESEARCHVIEW));
 }
