@@ -106,6 +106,10 @@ void repoPackageList::filterPackages(const char * name) {
 }
 
 void repoPackageList::updateView() {
+    if(repo->isUpdating()) {
+        active = false;
+        return;
+    }
     int selectedTemp;
     bool empty;
     if(keyboardInput->hasEntered() || filterView->hasChanged())
