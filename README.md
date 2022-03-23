@@ -135,13 +135,15 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 - [ ] Translate Uninstall button, delete keys and pkgtypes, Unknown
 - [ ] Add Http Authentication Support
 - [ ] Save on external HDD
-- [ ] Fix crash when loading repo
-- [ ] Fix crash when deleting
-- [ ] Fix crash when deleting ongoing download
+- [X] Fix crash when deleting ongoing download
+- [X] Compare repo url regardless HTTP
+- [ ] Filter by region (https://www.psdevwiki.com/ps4/Productcode)
+- [x] Add portuguese
+- [ ] Fix bug that causes the app to crash, after having changed the language and moving to the last page of the search list
 - [X] Show speed and time remaining
 - [X] Download pkgs while playing games (Optional in settings)
 - [X] Show update available in downloads tab
-- [X] Fix bug that where update available would be shown after installing app's latest version
+- [X] Fix bug that caused update available to be shown after installing app's latest version
 - [X] Improved date string generation by adding a 0 in front of single digit time units
 - [X] Fix downloads tab flicker on rapidly changing selected download
 - [X] Use full downloads tab
@@ -150,6 +152,8 @@ _For information on creating a repo, please refer to  [4PT-Repository](https://g
 
 ### Future versions (~1/2 Year)
 
+- [ ] Fix crash when loading slow and long repo
+- [ ] Fix bug that causes the app to freeze
 - [ ] Fix Hungarian automatic detection
 - [ ] Implement proper App deallocation when pressing the Close Application button on the PS Menu
 - [ ] Add functionality to download binaries
