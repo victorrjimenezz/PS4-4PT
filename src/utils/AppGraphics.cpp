@@ -202,6 +202,8 @@ void Scene2D::FrameBufferSwap()
 
 void Scene2D::FrameBufferClear()
 {
+    if(this->frameBuffers == nullptr || this->frameBuffers[this->activeFrameBufferIdx] == nullptr)
+        return;
     memset(this->frameBuffers[this->activeFrameBufferIdx],0xFF,frameBufferSize);
 }
 
