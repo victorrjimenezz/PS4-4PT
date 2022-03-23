@@ -13,11 +13,13 @@
 #include "../../include/view/terminalDialogView.h"
 #include "../../include/view/packageSearch.h"
 #include "../../include/repository/PKGInfo.h"
+#include "../../include/main.h"
 
 #include <utility>
 #include <mutex>
+#include <string>
 #include <yaml-cpp/yaml.h>
-#include <thread>
+
 
 repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), addPKGMtx(), updateMtx() {
     this->name = std::string(name);
@@ -27,10 +29,14 @@ repository::repository(const char * id, const char *name, const char *repoURL, c
     this->updated = true;
     this->updated = false;
     this->willDelete =false;
-    this->updatedCount = 0;
     packageList = new std::vector<std::shared_ptr<package>>;
 
-    std::thread(&repository::updatePKGS, std::ref(*this)).detach();
+    threadPool::addJob([&] {
+        std::unique_lock<std::mutex> lock(updateMtx);
+        updating = true;
+        this->updatePKGS();
+        updating = false;
+    });
 }
 
 const char * repository::getID() {
@@ -39,15 +45,13 @@ const char * repository::getID() {
 
 int repository::updatePKGS() {
     std::string stateString;
-    int ret = 0, tempCNT = 0;
+    int ret = 0;
     int cnt = 0;
-    updatedCount = 0;
     std::string downloadURL;
 
     YAML::Node repoYAML;
 
     std::string repoYMLPath = repoLocalPath + "repo.yml";
-
 
     std::vector<std::shared_ptr<package>> oldPackageList(*packageList);
     packageList->clear();
@@ -57,7 +61,7 @@ int repository::updatePKGS() {
         ret = -1;
         goto err;
     }
-
+    updatedCount = 0;
     try {
         repoYAML = YAML::LoadFile(repoYMLPath);
     } catch(const YAML::ParserException& ex) {
@@ -87,25 +91,27 @@ int repository::updatePKGS() {
 
                 stateString = "Fetching: " + pkgPath;
                 LOG << stateString;
-                threadPool::addJob([this, capture0 = pkgPath, capture1 = type] { addPKG(capture0, capture1); });
+
+                //this->addPKG(pkgPath.c_str(),type.c_str());
+                threadPool::addJobSecondary([this, capture0 = pkgPath, capture1=type] {
+                    this->addPKG(capture0,capture1);
+                });
+
                 cnt++;
             }
         }
     }
-
-    while(tempCNT < cnt) {
-        std::unique_lock<std::mutex> lock(addPKGMtx);
-        tempCNT = updatedCount;
+    if(cnt>0) {
+        while (cnt > updatedCount) continue;
+        if (packageList->empty())
+            for (const auto &pkg: oldPackageList)
+                packageList->emplace_back(pkg);
     }
-
-    if(packageList->empty() && cnt > 0)
-        for(const auto& pkg : oldPackageList)
-            packageList->emplace_back(pkg);
 
     oldPackageList.clear();
     err:
-    while(packageSearch::mainPackageSearch == nullptr) continue;
-    packageSearch::mainPackageSearch->updatePackages();
+    while(getMainPackageSearch() == nullptr) continue;
+    getMainPackageSearch()->updatePackages();
     sendTerminalMessage("Finished Updating PKGs");
     updated = true;
     return ret;
@@ -255,8 +261,8 @@ int repository::updateIcon() {
 }
 
 int repository::updateRepository() {
-    updating = true;
     std::unique_lock<std::mutex> lock(updateMtx);
+    updating = true;
     int packages = 0;
 
     if(willDelete)
@@ -411,10 +417,13 @@ void repository::sendTerminalMessage(const char *message, const char * repoURLNe
 
 void repository::addPKG(std::string pkgURL, std::string pkgType) {
 
+    if(pkgURL.empty() || pkgType.empty()) {
+        return;
+    }
+
     bool failedInit;
     std::string stateString;
-    std::shared_ptr<package> pkg(
-            new package(pkgURL.c_str(), false, &failedInit, pkgType.c_str(), name.c_str()));
+    std::shared_ptr<package> pkg(new package(pkgURL.c_str(), false, &failedInit, pkgType.c_str(), name.c_str()));
 
     if (failedInit) {
         stateString = "FAILED TO FETCH: ";
@@ -423,12 +432,9 @@ void repository::addPKG(std::string pkgURL, std::string pkgType) {
         sendTerminalMessage(stateString.c_str());
         pkg.reset();
         LOG << "DELETED " << pkgURL;
-
-        std::unique_lock<std::mutex> lock(addPKGMtx);
         updatedCount++;
         return;
     }
-
 
     stateString = "Fetched: " + std::string(pkg->getName());
     LOG << stateString;

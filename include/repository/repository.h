@@ -5,6 +5,7 @@
 #ifndef CYDI4_REPOSITORY_H
 #define CYDI4_REPOSITORY_H
 #include <string>
+
 #include <vector>
 #include "../../include/utils/threadPool.h"
 
@@ -14,11 +15,13 @@ class repository {
 private:
     std::mutex updateMtx;
     std::mutex addPKGMtx;
-    int updatedCount;
+
     const std::string id;
     std::string name;
-    const std::string repoURL;
+    std::string repoURL;
     const std::string repoLocalPath;
+    std::atomic_int32_t updatedCount;
+
     PNG * icon;
     std::vector<std::shared_ptr<package>> *packageList;
     void addPKG(std::string pkgURL, std::string pkgType);
