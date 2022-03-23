@@ -16,17 +16,16 @@
 #include "../../include/utils/logger.h"
 #include "../../include/file/fileManager.h"
 #include "../../include/utils/LANG.h"
+#include "../../include/main.h"
 
 #include <string>
 #include <vector>
 #include <iterator>
-#include <thread>
+
 #include <yaml-cpp/yaml.h>
 
-repositoryView * repositoryView::mainRepositoryView;
 repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight, bool isFirstRun) : currRepos(),frameWidth(frameWidth),frameHeight(frameHeight), viewWidth(frameWidth), viewHeight(frameHeight*TOPVIEWSIZE) {
     this->mainScene = mainScene;
-    mainRepositoryView = this;
 
     rectangleBaseHeight = ((frameHeight-frameHeight*TABVIEWSIZE-viewHeight)/reposPerPage);
     rectangleDivisorHeight = (rectangleBaseHeight*RECTANGLEDIVISORHEIGHT);
@@ -40,7 +39,7 @@ repositoryView::repositoryView(Scene2D * mainScene, FT_Face fontLarge, FT_Face f
     this->fontMedium = fontMedium;
     this->fontSmall = fontSmall;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, LANG::mainLang->ADD_REPO.c_str(),"https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, viewHeight, frameWidth * (1 - KEYBOARD_X_POS * 2), viewHeight, getMainLang()->ADD_REPO.c_str(),"https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 
     this->dialog = new terminalDialogView(this, mainScene, frameWidth, frameHeight*(1-TABVIEWSIZE),fontSmall);
     child = nullptr;
@@ -201,32 +200,41 @@ void repositoryView::updateView() {
 
 void repositoryView::hasEntered(){
     std::string repoURLTEMP = keyboardInput->readText();
+
     if(repoURLTEMP.back() != '/')
         repoURLTEMP+='/';
+    transform(repoURLTEMP.begin(), repoURLTEMP.end(), repoURLTEMP.begin(), ::tolower);
+    std::string repoURLSearch = repoURLTEMP.substr(6);
     const char * repoURL = repoURLTEMP.c_str();
+
     if(!fileDownloadRequest::verifyURL(repoURL)) {
-        popDialog((LANG::mainLang->INVALID_URL+repoURLTEMP).c_str());
-        return;
+        popDialog((getMainLang()->INVALID_URL + ": "+ repoURLTEMP).c_str());
+        goto err;
     }
 
     for(repository *repository : *repositoryList){
-        if(strcasecmp(repository->getRepoURL(),repoURL) == 0) {
-            popDialog(LANG::mainLang->REPO_ALREADY_LOADED.c_str());
-            return;
+        if(strstr(repository->getRepoURL(),repoURLSearch.c_str()) != nullptr) {
+            popDialog(getMainLang()->REPO_ALREADY_LOADED.c_str());
+            goto err;
         }
     }
 
     dialog->openTerminalDialogView(repoURL);
-    this->child = dialog;
-    repository *repo = repository::fetchRepo(repoURL);
-    if(repo != nullptr) {
-        addRepository(repo);
-        fillPage();
-    } else {
-        std::string errmessage = LANG::mainLang->NO_REPO_FOUND_AT;
-        errmessage+=repoURL;
-        popDialog(errmessage.c_str());
-    }
+    threadPool::addJob([this, capture0 = repoURLTEMP] {
+        this->child = dialog;
+        LOG << "NOW IS " << capture0;
+        repository * repo = repository::fetchRepo(capture0.c_str());
+        if (repo != nullptr) {
+            addRepository(repo);
+            fillPage();
+        } else {
+            std::string errmessage = getMainLang()->NO_REPO_FOUND_AT;
+            errmessage += capture0;
+            popDialog(errmessage.c_str());
+        }
+    });
+    err:
+    return;
 }
 
 void repositoryView::pressX(){
@@ -246,8 +254,7 @@ void repositoryView::pressX(){
                 break;
             case UPDATE:
                 if(!currRepo->isUpdating()) {
-                    std::thread([&capture0 = *currRepo, updateIcon = std::ref(
-                            updateIcon)] { capture0.updateRepository(); }).detach();
+                    threadPool::addJob([&capture0 = *currRepo, updateIcon = std::ref(updateIcon)] { capture0.updateRepository(); });
                     selectedOption = OPEN;
                 }
                 break;
@@ -270,15 +277,15 @@ int repositoryView::deleteRepo(const char * id, int selectedTEMP){
         }
     }
     fillPage();
-    packageSearch::mainPackageSearch->updatePackages();
-    AudioManager::mainAudioManager->playAudio(deleteWav,deleteWavCount);
+    getMainPackageSearch()->updatePackages();
+    getMainAudioManager()->playAudio(deleteWav,deleteWavCount);
     return 0;
 }
 void repositoryView::pressCircle(){
 
 }
 void repositoryView::pressTriangle(){
-    keyboardInput->enableKeyboard();
+    threadPool::addJob([&]{keyboardInput->enableKeyboard();});
 }
 void repositoryView::pressSquare(){
 
@@ -497,7 +504,7 @@ int repositoryView::loadSavedRepos() {
 }
 void repositoryView::langChanged() {
     delete keyboardInput;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 4*viewHeight/6, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/3, LANG::mainLang->ADD_REPO.c_str(),"https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, viewWidth * KEYBOARD_X_POS, 4*viewHeight/6, viewWidth * (1 - KEYBOARD_X_POS * 2), viewHeight/3, getMainLang()->ADD_REPO.c_str(),"https://192.168.1.11/victorrrepo",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 }
 
 repository * repositoryView::getCurrentRepository() {
