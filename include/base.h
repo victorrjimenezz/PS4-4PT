@@ -50,13 +50,14 @@
 //Networking
 #define DOWNLOAD_SPEED_SMOOTHING_FACTOR 0.005
 #define ONE_MB 10e5
-#define USER_AGENT "PS4-4PT/2.75" //"Mozilla/5.0 (PLAYSTATION 4; 1.00)"
+#define USER_AGENT "PS4-4PT/2.75"
 #define HTTP_SUCCESS 1
 #define BGFT_HEAP_SIZE (1 * 1024 * 1024)
 #define HTTP_HEAP_SIZE (1024 * 1024)
 #define SSL_HEAP_SIZE (15*128 * 1024)
-#define NET_HEAP_SIZE   (1 * 1024 * 1024)
-#define THREADPOOL_AMOUNT 20
+#define NET_HEAP_SIZE   (1024 * 1024)
+#define THREADPOOL_MAIN_POOL_AMOUNT 4
+#define THREADPOOL_SECONDARY_POOL_AMOUNT 7
 
 // Font information
 #define FONT_SIZE_LARGE  128
@@ -66,6 +67,11 @@
 
 //Amount of Views Information
 #define VIEWS 5
+#define HOMEVIEW 0
+#define REPOSITORYVIEW 1
+#define DOWNLOADVIEW 2
+#define PACKAGESEARCHVIEW 3
+#define SETTINGSVIEW 4
 
 // Screen Dimensions
 #define FRAME_WIDTH     1920
