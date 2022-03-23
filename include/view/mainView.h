@@ -12,20 +12,17 @@
 #include "../utils/AppGraphics.h"
 #include "../base.h"
 
-#include <thread>
 class tabView;
 class ControllerManager;
 class subView;
 class mainView {
 private:
-    Scene2D * mainScene;
-    tabView * tabView;
-    ControllerManager * controllerManager;
+    Scene2D * mainScene = nullptr;
+    tabView * tabView = nullptr;
+    ControllerManager * controllerManager= nullptr;
     const static int views = VIEWS;
     subView* subViews[views];
     Color bgColor{};
-
-
 
     int frameID;
 
@@ -39,8 +36,10 @@ public:
     const static int frameWidth = FRAME_WIDTH;
     const static int frameHeight = FRAME_HEIGHT;
     const static int frameDepth = FRAME_DEPTH;
+    subView * getSubViewAt(int index);
 
-    mainView(bool isFirstRun);
+    explicit mainView();
+    void initMainView(bool isFirstRun);
     int updateView();
     ~mainView();
 };
