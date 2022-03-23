@@ -7,14 +7,11 @@
 #include "../include/view/subView.h"
 #include "../include/utils/AudioManager.h"
 
-#include <thread>
+
 
 bool ControllerManager::controllerActive;
 
-ControllerManager * ControllerManager::controllerManager = nullptr;
-
-ControllerManager::ControllerManager(class tabView *tabView, subView* subViews[VIEWS]) : subViews() {
-    controllerManager=this;
+ControllerManager::ControllerManager(class tabView *tabView) {
     this->exit = 0;
     this->tabView = tabView;
     controller = new Controller();
@@ -32,32 +29,6 @@ ControllerManager::ControllerManager(class tabView *tabView, subView* subViews[V
     squareWasPressed = false;
     controllerActive = false;
 
-    for(int i =0; i<VIEWS; i ++)
-        this->subViews[i] = subViews[i];
-
-    switchCurrentView(tabView->getCurrentView());
-}
-void ControllerManager::switchCurrentView(tabSelected tabSelected){
-    switch (tabSelected) {
-        case HOME:
-            currentSubView = subViews[0];
-            break;
-        case SOURCES:
-            currentSubView = subViews[1];
-            break;
-        case INSTALLED:
-            currentSubView = subViews[2];
-            break;
-        case SEARCH:
-            currentSubView = subViews[3];
-            break;
-        case SETTINGS:
-            currentSubView = subViews[4];
-            break;
-    }
-}
-subView * ControllerManager::getCurrentView(){
-    return currentSubView;
 }
 
 void ControllerManager::initController() {
@@ -83,7 +54,7 @@ void ControllerManager::initController() {
     audioPath+="assets/audio/arrow.wav";
     arrowWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &arrowWavCount);
 
-
+    currentSubView = getSubViewAt(tabView->getCurrentView());
     controllerActive = true;
 
     while(controllerActive)
@@ -95,11 +66,11 @@ void ControllerManager::updateRearUpperButtons() {
     bool L1Pressed = controller->L1Pressed();
     bool R1Pressed = controller->R1Pressed();
     if(L1Pressed && !R1Pressed && !L1Waspressed){
-        AudioManager::mainAudioManager->playAudio(tabChangeWav,tabChangeWavCount);
-        switchCurrentView(tabView->tabLeft());
+        getMainAudioManager()->playAudio(tabChangeWav,tabChangeWavCount);
+        currentSubView = getSubViewAt(tabView->tabLeft());
     } else if(!L1Pressed && R1Pressed && !R1Waspressed){
-        AudioManager::mainAudioManager->playAudio(tabChangeWav,tabChangeWavCount);
-        switchCurrentView(tabView->tabRight());
+        getMainAudioManager()->playAudio(tabChangeWav,tabChangeWavCount);
+        currentSubView = getSubViewAt(tabView->tabRight());
     }
     L1Waspressed = L1Pressed;
     R1Waspressed = R1Pressed;
@@ -110,10 +81,10 @@ void ControllerManager::updateArrowVertical() {
     bool ArrowUpPressed = controller->DpadUpPressed();
     bool ArrowDownPressed = controller->DpadDownPressed();
     if(ArrowUpPressed && !ArrowDownPressed && !ArrowUpWasPressed){
-        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
+        getMainAudioManager()->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowUp();
     } else if(!ArrowUpPressed && ArrowDownPressed && !ArrowDownWasPressed){
-        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
+        getMainAudioManager()->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowDown();
     }
     ArrowUpWasPressed = ArrowUpPressed;
@@ -124,10 +95,10 @@ void ControllerManager::updateArrowHorizontal() {
     bool ArrowRightPressed = controller->DpadRightPressed();
     bool ArrowLeftPressed = controller->DpadLeftPressed();
     if(ArrowRightPressed && !ArrowLeftPressed && !ArrowRightWasPressed){
-        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
+        getMainAudioManager()->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowRight();
     } else if(!ArrowRightPressed && ArrowLeftPressed && !ArrowLeftWasPressed){
-        AudioManager::mainAudioManager->playAudio(arrowWav,arrowWavCount);
+        getMainAudioManager()->playAudio(arrowWav,arrowWavCount);
         currentSubView->arrowLeft();
     }
     ArrowRightWasPressed = ArrowRightPressed;
@@ -139,10 +110,10 @@ void ControllerManager::updateXCircle() {
     bool XPressed = controller->XPressed();
     bool CirclePressed = controller->CirclePressed();
     if(XPressed && !CirclePressed && !XWasPressed){
-        AudioManager::mainAudioManager->playAudio(pressXWav,pressXWavCount);
+        getMainAudioManager()->playAudio(pressXWav,pressXWavCount);
         currentSubView->pressX();
     } else if(!XPressed && CirclePressed && !CircleWasPressed){
-        AudioManager::mainAudioManager->playAudio(escapeWav,escapeWavCount);
+        getMainAudioManager()->playAudio(escapeWav,escapeWavCount);
         currentSubView->pressCircle();
     }
     XWasPressed = XPressed;
@@ -209,20 +180,9 @@ ControllerManager::~ControllerManager() {
     stopController();
     delete controller;
 }
-
-int ControllerManager::getSubViews() {
-    return VIEWS;
+subView * ControllerManager::getCurrentSubView(){
+    return currentSubView;
 }
-subView* ControllerManager::getSubViewAt(int subView) {
-    if(VIEWS <= subView)
-        return nullptr;
-    return subViews[subView];
-}
-
-ControllerManager *ControllerManager::getControllerManager() {
-    return controllerManager;
-}
-
 int ControllerManager::getExit() {
     return exit;
 }

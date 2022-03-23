@@ -7,6 +7,7 @@
 
 #include "view/tabView.h"
 #include "base.h"
+#include "main.h"
 #include <mutex>
 
 class drwav_int16;
@@ -48,11 +49,8 @@ private:
     static bool controllerActive;
 
     Controller *controller = nullptr;
-    static ControllerManager * controllerManager;
     subView * currentSubView = nullptr;
     tabView * tabView = nullptr;
-    subView* subViews[VIEWS];
-    void switchCurrentView(tabSelected tabSelected);
     void updateRearUpperButtons();
     void updateArrowVertical();
     void updateArrowHorizontal();
@@ -61,15 +59,13 @@ private:
     void updateSquare();
     void updateController();
 public:
-    ControllerManager(class tabView * tabView, subView* subViews[VIEWS]);
+    ControllerManager(class tabView * tabView);
     void initController();
     void stopController();
-    int getSubViews();
-    subView* getSubViewAt(int subView);
-    static ControllerManager* getControllerManager();
     ~ControllerManager();
-    subView *getCurrentView();
 
     int getExit();
+
+    subView *getCurrentSubView();
 };
 #endif //CYDI4_CONTROLLERMANAGER_H
