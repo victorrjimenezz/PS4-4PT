@@ -9,6 +9,7 @@
 #include "../../include/utils/PNG.h"
 #include "../../include/utils/notifi.h"
 #include "../../include/utils/LANG.h"
+#include "../../include/main.h"
 
 #include <sstream>
 #include <orbis/AppInstUtil.h>
@@ -58,9 +59,9 @@ package::package(const char*url, bool local, bool * failed, const char * type, c
 
     pkgSFOType = "";
     if(strcasecmp(pkgInfo.getType(),"gc") == 0)
-        pkgSFOType = LANG::mainLang->GAME_CONTENT;
+        pkgSFOType = getMainLang()->GAME_CONTENT;
     else if(strcasecmp(pkgInfo.getType(),"gpc") == 0 || strcasecmp(pkgInfo.getType(),"gpd") == 0)
-        pkgSFOType = LANG::mainLang->PATCH;
+        pkgSFOType = getMainLang()->PATCH;
 
     *failed = false;
     return;
@@ -160,7 +161,7 @@ int package::install(const char * path) {
     return 0;
 
     err:
-    std::string message = LANG::mainLang->ERROR_WHEN_INSTALLING_APP;
+    std::string message = getMainLang()->ERROR_WHEN_INSTALLING_APP;
     message+=name;
     notifi(NULL,message.c_str());
     return -1;
@@ -222,7 +223,7 @@ int package::install() {
     return 0;
 
     err:
-    std::string message = LANG::mainLang->ERROR_WHEN_INSTALLING_APP;
+    std::string message = getMainLang()->ERROR_WHEN_INSTALLING_APP;
     message+=name;
     notifi(NULL,message.c_str());
     return -1;
