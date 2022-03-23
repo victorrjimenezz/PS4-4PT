@@ -348,6 +348,7 @@ int fileDownloadRequest::downloadLoop() {
         }
         read = sceHttpReadData(requestID, buffer, sizeof(buffer));
     }
+
     out.close();
     if(paused) {
         downloading=false;
