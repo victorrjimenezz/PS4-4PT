@@ -12,6 +12,7 @@
 #include "../../include/file/download.h"
 #include "../../include/utils/PNG.h"
 #include "../../include/utils/LANG.h"
+#include "../../include/main.h"
 
 #include <iterator>
 #include <codecvt>
@@ -30,7 +31,7 @@ homeView::homeView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, F
 
     keyboardX = HOMEVIEW_KEYBOARD_X*frameWidth;
 
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight, LANG::mainLang->PKG_DIRECT_DOWNLOAD.c_str(), "https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight, getMainLang()->PKG_DIRECT_DOWNLOAD.c_str(), "https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 
     logoWidth = HOMEVIEW_LOGO_WIDTH*frameWidth;
     logoX = HOMEVIEW_LOGO_X*frameWidth-logoWidth/2;
@@ -48,16 +49,16 @@ void homeView::loadWelcomeText(){
     std::ostringstream out;
     out.precision(2);
     out << std::fixed << APP_VERSION;
-    std::string welcomeString(LANG::mainLang->WELCOME_MESSAGE);
+    std::string welcomeString(getMainLang()->WELCOME_MESSAGE);
     welcomeString.replace(welcomeString.find(".user."),6,username);
     welcomeText = welcomeString + ": " + out.str();
-    welcomeSubText = std::string(LANG::mainLang->DEVELOPED_BY) + "@victorrjimenezz";
-    pkgLink = LANG::mainLang->PKG_DIRECT_DOWNLOAD;
+    welcomeSubText = std::string(getMainLang()->DEVELOPED_BY) + "@victorrjimenezz";
+    pkgLink = getMainLang()->PKG_DIRECT_DOWNLOAD;
 }
 void homeView::langChanged() {
     loadWelcomeText();
     delete keyboardInput;
-    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,LANG::mainLang->PKG_DIRECT_DOWNLOAD.c_str(), "https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
+    keyboardInput = new class keyboardInput(mainScene, fontSmall, keyboardX, HOMEVIEW_KEYBOARD_Y*frameHeight, frameWidth * (1 - HOMEVIEW_KEYBOARD_X * 2), HOMEVIEW_KEYBOARD_HEIGHT*frameHeight,getMainLang()->PKG_DIRECT_DOWNLOAD.c_str(), "https://",ORBIS_TYPE_TYPE_URL,ORBIS_BUTTON_LABEL_GO);
 }
 void homeView::updateView() {
     logo->Draw(mainScene,logoX,logoY);
@@ -72,7 +73,7 @@ void homeView::hasEntered() {
     std::string inputText = keyboardInput->readText();
 
     if(!fileDownloadRequest::verifyURL(inputText.c_str())) {
-        popDialog((LANG::mainLang->INVALID_URL + inputText).c_str());
+        popDialog((getMainLang()->INVALID_URL + inputText).c_str());
         return;
     }
 
@@ -81,10 +82,10 @@ void homeView::hasEntered() {
 
     auto * download = new class download(inputText.c_str(),&initFailed);
     if(initFailed) {
-        notifi(NULL,(LANG::mainLang->FAILED_TO_DOWNLOAD_PKG_FROM+inputText).c_str());
+        notifi(NULL,(getMainLang()->FAILED_TO_DOWNLOAD_PKG_FROM+inputText).c_str());
         return;
     }
-    downloadView::downloadManager->addDownload( download);
+    getDownloadManager()->addDownload( download);
 }
 void homeView::pressX(){
 

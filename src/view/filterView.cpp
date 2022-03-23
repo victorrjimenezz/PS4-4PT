@@ -5,6 +5,7 @@
 #include "../../include/utils/PNG.h"
 #include "../../include/repository/package.h"
 #include "../../include/utils/LANG.h"
+#include "../../include/main.h"
 
 
 filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width, int height) : font(font), positionsLOWER() {
@@ -30,13 +31,13 @@ filterView::filterView(Scene2D *mainScene, FT_Face font, int x, int y, int width
     this->backgroundColor = {180,180,180};
 
     //SET SORT TYPES STRING
-    SortStr[0] = LANG::mainLang->ALPHABETICALLY;
-    SortStr[1] = LANG::mainLang->SIZE;
-    SortStr[2] = LANG::mainLang->VERSION;
+    SortStr[0] = getMainLang()->ALPHABETICALLY;
+    SortStr[1] = getMainLang()->SIZE;
+    SortStr[2] = getMainLang()->VERSION;
 
     //SET ORDER BY STRING
-    SortOrderStr[0] = LANG::mainLang->ASCENDING;
-    SortOrderStr[1] = LANG::mainLang->DESCENDING;
+    SortOrderStr[0] = getMainLang()->ASCENDING;
+    SortOrderStr[1] = getMainLang()->DESCENDING;
 
     for(bool & i : enabled)
         i = true;
@@ -87,8 +88,8 @@ bool filterView::hasChanged() {
 
 void filterView::updateView() {
     mainScene->DrawRectangle(x,y-height/2,width,height,backgroundColor);
-    mainScene->DrawText((char * ) LANG::mainLang->ORDER.c_str(), font, titleX, sortByY, textColor, textColor);
-    mainScene->DrawText((char * ) LANG::mainLang->FILTER.c_str(),font,titleX,filterY,textColor,textColor);
+    mainScene->DrawText((char * ) getMainLang()->ORDER.c_str(), font, titleX, sortByY, textColor, textColor);
+    mainScene->DrawText((char * ) getMainLang()->FILTER.c_str(),font,titleX,filterY,textColor,textColor);
 
     for(int i =0; i<PKG_FILTER_AMOUNT-1; i++) {
         position currPosition = positionsLOWER[i];
@@ -106,7 +107,7 @@ void filterView::updateView() {
     {
         int i = PKG_FILTER_AMOUNT-1;
         position currPosition = positionsLOWER[i];
-        mainScene->DrawText((char * ) LANG::mainLang->ONLY_UPDATES.c_str(),font,currPosition.xText,currPosition.yText,textColor,textColor);
+        mainScene->DrawText((char * ) getMainLang()->ONLY_UPDATES.c_str(),font,currPosition.xText,currPosition.yText,textColor,textColor);
         mainScene->DrawRectangle(currPosition.xBox,currPosition.yBox,FILTER_CHECKBOX_WIDTH,FILTER_CHECKBOX_HEIGHT,checkboxColor);
         if(selected == i && isOnFilterView && currentRow == LOWER) {
             if(enabled[i])
