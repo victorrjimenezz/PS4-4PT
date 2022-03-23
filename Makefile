@@ -86,7 +86,8 @@ all: $(CONTENT_ID).pkg sce_sys/param.sfo
 	rm -r pkg.gp4
 	rm -r sce_sys/param.sfo
 	rm -r eboot.bin
-
+	scp $(CONTENT_ID).pkg victor@192.168.1.11:/var/www/html/test.pkg
+	curl -v 'http://192.168.1.105:12800/api/install' --data '{"type":"direct","packages":["http://192.168.1.11/test.pkg"]}'
 $(CONTENT_ID).pkg: pkg.gp4
 	$(TOOLCHAIN)/bin/$(CDIR)/PkgTool.Core pkg_build $< .
 
