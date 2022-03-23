@@ -10,16 +10,16 @@
 #include "../../include/utils/logger.h"
 #include "../../include/ControllerManager.h"
 #include "../../include/view/packageSearch.h"
+#include "../../include/utils/threadPool.h"
 #include <proto-include.h>
-#include <thread>
+
 
 bool mainView::updatingView;
 int mainView::updateView() {
-
     mainScene->FrameBufferClear();
 
     updatingView = true;
-    controllerManager->getCurrentView()->updateView();
+    controllerManager->getCurrentSubView()->updateView();
     updatingView = false;
 
     tabView->updateTab();
@@ -34,9 +34,13 @@ int mainView::updateView() {
     return controllerManager->getExit();
 }
 
-mainView::mainView(bool isFirstRun) : subViews()  {
-
+mainView::mainView() : subViews() {
     updatingView = false;
+    for(auto & subView : subViews)
+        subView = nullptr;
+}
+void mainView::initMainView(bool isFirstRun)  {
+
     bgColor = {255,255,255};
     // No buffering
     setvbuf(stdout, NULL, _IONBF, 0);
@@ -100,21 +104,22 @@ mainView::mainView(bool isFirstRun) : subViews()  {
     tabView = new class tabView(mainScene,frameWidth,frameHeight);
 
     LOG << "Settings subViews" << "\n";
-    subViews[0] = new homeView(mainScene,fontMediumLarge,fontMedium,fontSmall,frameWidth,frameHeight);
+    subViews[HOMEVIEW] = new homeView(mainScene,fontMediumLarge,fontMedium,fontSmall,frameWidth,frameHeight);
     LOG << "Initialized homeView" << "\n";
-    subViews[1] = new repositoryView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight,isFirstRun);
+    subViews[REPOSITORYVIEW] = new repositoryView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight,isFirstRun);
     LOG << "Initialized repositoryView" << "\n";
-    subViews[2] = new downloadView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
+    subViews[DOWNLOADVIEW] = new downloadView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
     LOG << "Initialized downloadView" << "\n";
-    subViews[3] = new packageSearch(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
+    subViews[PACKAGESEARCHVIEW] = new packageSearch(mainScene, fontLarge, fontMedium, fontSmall, frameWidth, frameHeight);
     LOG << "Initialized packageSearch" << "\n";
-    subViews[4] = new settingsView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
+    subViews[SETTINGSVIEW] = new settingsView(mainScene,fontLarge,fontMedium,fontSmall, frameWidth, frameHeight);
     LOG << "Initialized settingsView" << "\n";
 
     LOG << "Initializing ControllerManager" << "\n";
-    controllerManager = new ControllerManager(tabView,subViews);
+    controllerManager = new ControllerManager(tabView);
     LOG << "Initializing Thread" << "\n";
-    std::thread(&ControllerManager::initController, std::ref(*controllerManager)).detach();
+
+    threadPool::addJob([&] {controllerManager->initController();},true);
 
 }
 
@@ -130,4 +135,8 @@ mainView::~mainView() {
 
     LOG << "Deleted subViews";
 
+}
+
+subView *mainView::getSubViewAt(int index) {
+    return index>=VIEWS || index < 0? nullptr : subViews[index];
 }
