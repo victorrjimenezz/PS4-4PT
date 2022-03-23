@@ -8,6 +8,7 @@
 #include "../../include/utils/logger.h"
 #include "../../include/utils/LANG.h"
 #include "../../include/utils/settings.h"
+#include "../../include/main.h"
 
 
 settingsView::settingsView(Scene2D *mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : fontLarge(fontLarge), fontMedium(fontMedium), fontSmall(fontSmall){
@@ -34,7 +35,7 @@ settingsView::settingsView(Scene2D *mainScene, FT_Face fontLarge, FT_Face fontMe
     selectedBorder = new PNG(LANG_FLAG_PATH "boxSelectedThin.png",flagWidth,flagHeight);
     selected = 0;
 
-    langText = LANG::mainLang->LANGUAGE;
+    langText = getMainLang()->LANGUAGE;
 
     flagBaseX = flagTextPosX + (int)(double)((double)langText.size() * (double)SETTINGS_VIEW_FLAG_CHAR_TEXT_OFFSET);
     flagSpacingX = (frameWidth-flagBaseX) / (flags.size()+1);
@@ -47,7 +48,7 @@ settingsView::settingsView(Scene2D *mainScene, FT_Face fontLarge, FT_Face fontMe
     notificationsXText = flagTextPosX;
     notificationsYText = frameHeight * SETTINGS_VIEW_NOTIFICATIONS_Y_PAD*2;
     notificationsY = notificationsYText + SETTINGS_VIEW_FLAG_Y_PAD_IMAGE;
-    int notificationsOptionsDivider = settings::getMainSettings()->getNotificationsOptions();
+    int notificationsOptionsDivider = getMainSettings()->getNotificationsOptions();
     notifications1X = notificationsXText + frameWidth/notificationsOptionsDivider * 0.1;
     notifications2X = notificationsXText + 1*frameWidth/notificationsOptionsDivider;
     notifications3X = notificationsXText + 2*frameWidth/notificationsOptionsDivider;
@@ -79,11 +80,11 @@ void settingsView::updateView(){
     }
 
 
-    mainScene->DrawText((char * ) LANG::mainLang->NOTIFICATIONS.c_str(),fontMedium,notificationsXText,notificationsYText,textColor,textColor);
+    mainScene->DrawText((char * ) getMainLang()->NOTIFICATIONS.c_str(),fontMedium,notificationsXText,notificationsYText,textColor,textColor);
 
-    bool tempBool = settings::getMainSettings()->isAddedToDownloadsNotification();
+    bool tempBool = getMainSettings()->isAddedToDownloadsNotification();
     {
-        mainScene->DrawText((char *) LANG::mainLang->ADDED_TO_DOWNLOADS.c_str(), fontSmall, notifications1X+SETTINGS_CHECKBOX_WIDTH+5, notificationsY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
+        mainScene->DrawText((char *) getMainLang()->ADDED_TO_DOWNLOADS.c_str(), fontSmall, notifications1X+SETTINGS_CHECKBOX_WIDTH+5, notificationsY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
                             textColor);
         mainScene->DrawRectangle(notifications1X, notificationsY, SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT,
                                  checkboxColor);
@@ -98,9 +99,9 @@ void settingsView::updateView(){
         checkboxBorder->Draw(mainScene, notifications1X, notificationsY);
     }
 
-    tempBool = settings::getMainSettings()->isFinishedDownloadingNotification();
+    tempBool = getMainSettings()->isFinishedDownloadingNotification();
     {
-        mainScene->DrawText((char *) LANG::mainLang->FINISHED_DOWNLOADING.c_str(), fontSmall, notifications2X+SETTINGS_CHECKBOX_WIDTH+5, notificationsY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
+        mainScene->DrawText((char *) getMainLang()->FINISHED_DOWNLOADING.c_str(), fontSmall, notifications2X+SETTINGS_CHECKBOX_WIDTH+5, notificationsY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
                             textColor);
         mainScene->DrawRectangle(notifications2X, notificationsY, SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT,
                                  checkboxColor);
@@ -115,9 +116,9 @@ void settingsView::updateView(){
         checkboxBorder->Draw(mainScene, notifications2X, notificationsY);
     }
 
-    tempBool = settings::getMainSettings()->isFailedDownloadingNotification();
+    tempBool = getMainSettings()->isFailedDownloadingNotification();
     {
-        mainScene->DrawText((char *) LANG::mainLang->ERROR_WHEN_DOWNLOADING.c_str(), fontSmall, notifications3X+SETTINGS_CHECKBOX_WIDTH+5, notificationsY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
+        mainScene->DrawText((char *) getMainLang()->ERROR_WHEN_DOWNLOADING.c_str(), fontSmall, notifications3X+SETTINGS_CHECKBOX_WIDTH+5, notificationsY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
                             textColor);
         mainScene->DrawRectangle(notifications3X, notificationsY, SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT,
                                  checkboxColor);
@@ -132,10 +133,10 @@ void settingsView::updateView(){
         checkboxBorder->Draw(mainScene, notifications3X, notificationsY);
     }
 
-    tempBool = settings::getMainSettings()->shouldInstallDirectlyPS4();
+    tempBool = getMainSettings()->shouldInstallDirectlyPS4();
     {
-        messageString = LANG::mainLang->INSTALL_DIRECTLY_PS4 + ":\n\n";
-        messageString += LANG::mainLang->INSTALL_DIRECTLY_PS4_DESC;
+        messageString = getMainLang()->INSTALL_DIRECTLY_PS4 + ":\n\n";
+        messageString += getMainLang()->INSTALL_DIRECTLY_PS4_DESC;
         mainScene->DrawText((char *) messageString.c_str(), fontSmall, settingsSecondRowX+SETTINGS_CHECKBOX_WIDTH+5, settingsSecondRowY+SETTINGS_CHECKBOX_HEIGHT*0.9, textColor,
                             textColor);
         mainScene->DrawRectangle(settingsSecondRowX, settingsSecondRowY, SETTINGS_CHECKBOX_WIDTH, SETTINGS_CHECKBOX_HEIGHT,
@@ -153,24 +154,23 @@ void settingsView::updateView(){
 
 }
 void settingsView::pressX(){
-    settings * mainSettings = settings::getMainSettings();
-    if(mainSettings== nullptr)
+    if(getMainSettings()== nullptr)
         return;
     int selectedTEMP = selected;
     switch(currentRow){
         case LANGROW:
-            mainSettings->setCurrLang(flags.at(selectedTEMP).lang);
+            getMainSettings()->setCurrLang(flags.at(selectedTEMP).lang);
             break;
         case SECONDSETTINGSROW:
-            mainSettings->setInstallDirectlyPS4(!mainSettings->shouldInstallDirectlyPS4());
+            getMainSettings()->setInstallDirectlyPS4(!getMainSettings()->shouldInstallDirectlyPS4());
             break;
         case NOTIFICATIONROW:
             if(selected==0)
-                mainSettings->setAddedToDownloadsNotification(!mainSettings->isAddedToDownloadsNotification());
+                getMainSettings()->setAddedToDownloadsNotification(!getMainSettings()->isAddedToDownloadsNotification());
             else if(selected == 1)
-                mainSettings->setFinishedDownloadingNotification(!mainSettings->isFinishedDownloadingNotification());
+                getMainSettings()->setFinishedDownloadingNotification(!getMainSettings()->isFinishedDownloadingNotification());
             else if(selected == 2)
-                mainSettings->setFailedDownloadingNotification(!mainSettings->isFailedDownloadingNotification());
+                getMainSettings()->setFailedDownloadingNotification(!getMainSettings()->isFailedDownloadingNotification());
             break;
     }
 }
@@ -200,7 +200,7 @@ void settingsView::arrowDown(){
             break;
         case SECONDSETTINGSROW:
             currentRow = NOTIFICATIONROW;
-            selected = selected>=settings::getMainSettings()->getNotificationsOptions() ? settings::getMainSettings()->getNotificationsOptions()-1 : selected;
+            selected = selected>=getMainSettings()->getNotificationsOptions() ? getMainSettings()->getNotificationsOptions()-1 : selected;
             break;
         case NOTIFICATIONROW:
         default:
@@ -214,7 +214,7 @@ void settingsView::arrowRight(){
             selected = (selected+1)%flags.size();
             break;
         case NOTIFICATIONROW:
-            selected = (selected+1)%settings::getMainSettings()->getNotificationsOptions();
+            selected = (selected+1)%getMainSettings()->getNotificationsOptions();
             break;
         case SECONDSETTINGSROW:
         default:
@@ -227,7 +227,7 @@ void settingsView::arrowLeft(){
             selected = selected ==0 ? flags.size()-1 : selected-1;
             break;
         case NOTIFICATIONROW:
-            selected = selected ==0 ? settings::getMainSettings()->getNotificationsOptions()-1: selected-1;
+            selected = selected ==0 ? getMainSettings()->getNotificationsOptions()-1: selected-1;
             break;
         case SECONDSETTINGSROW:
         default:
@@ -240,7 +240,7 @@ bool settingsView::isActive(){
 }
 
 void settingsView::langChanged(){
-    langText = LANG::mainLang->LANGUAGE;
+    langText = getMainLang()->LANGUAGE;
 }
 subView * settingsView::getParent(){
     return nullptr;
