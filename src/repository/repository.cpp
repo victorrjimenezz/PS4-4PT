@@ -23,6 +23,7 @@
 
 repository::repository(const char * id, const char *name, const char *repoURL, const char * repoLocalPath, const char * iconPath) : id(id), repoURL(repoURL), repoLocalPath(repoLocalPath), addPKGMtx(), updateMtx() {
     this->name = std::string(name);
+    transform(this->repoURL.begin(), this->repoURL.end(), this->repoURL.begin(), ::tolower);
     std::string iconPathStr = iconPath;
     this->icon = hasEnding(iconPath,".gif") ? new GIF(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT) : new PNG(iconPath,ICON_DEFAULT_WIDTH,ICON_DEFAULT_HEIGHT);
     this->updating = false;
