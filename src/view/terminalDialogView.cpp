@@ -115,13 +115,15 @@ subView *terminalDialogView::getChild() {
 }
 
 int terminalDialogView::openTerminalDialogView(const char * repoURLNew) {
-    if(active)
+    if (active)
         return 0;
-    memcpy(&lastInstanceFrameBuffer[0],&mainView->getCurrentFrameBuffer()[0], sizeof(uint32_t) * viewSize);
+    memcpy(&lastInstanceFrameBuffer[0], &mainView->getCurrentFrameBuffer()[0], sizeof(uint32_t) * viewSize);
     generateDarkenedImage();
-    newPage();
+    if (strcasecmp(repoURL.c_str(),repoURLNew) != 0) {
+        newPage();
+        this->repoURL = repoURLNew;
+    }
     active = true;
-    this->repoURL = repoURLNew;
     return active;
 }
 
