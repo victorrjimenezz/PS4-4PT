@@ -75,15 +75,15 @@ private:
     FT_Face fontSmall{};
     SelectedOption option;
 
-    bool isUpdating;
+    std::mutex updateMtx;
     const int frameWidth = 0;
     const int frameHeight = 0;
     const int viewWidth = 0;
     const int viewHeight = 0;
     void fillPage();
     int loadDownloadList();
+    void drawDownload(download * currDownload, downloadRectangle dldRectangle, bool isSelected);
 public:
-    static downloadView *downloadManager;
     downloadView(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight);
     void addDownload(download * newDownload);
     void updateView();

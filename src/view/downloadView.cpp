@@ -15,17 +15,18 @@
 #include "../../include/file/fileDownloadRequest.h"
 #include "../../include/utils/AudioManager.h"
 #include "../../include/utils/LANG.h"
+#include "../../include/utils/threadPool.h"
+#include "../../include/main.h"
 
 #include <string>
-#include <thread>
+
 #include <ostream>
 #include <vector>
 #include <iterator>
 //TODO Investigate Crash when removing download
-downloadView* downloadView::downloadManager;
+
 downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight) : downloadList(),currDownloads(), frameWidth(frameWidth), frameHeight(frameHeight), viewWidth(frameWidth), viewHeight(frameHeight) {
     this->mainScene = mainScene;
-    downloadManager = this;
 
     rectangleBaseHeight = (frameHeight*(1-TABVIEWSIZE) / downloadsPerPage);
     rectangleDivisorHeight = (rectangleBaseHeight*RECTANGLEDIVISORHEIGHT);
@@ -48,9 +49,7 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
 
     int repoX = static_cast<int>(frameWidth*REPO_X_POS);
     this->repoIconX = static_cast<int>(REPO_ICON_POS*repoX);
-    for(int i =0; i < downloadsPerPage; i++)
-        downloadRectangles[i] = {repoX, i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight, i * rectangleBaseHeight + rectangleBaseHeight / 2 -1 * rectangleBaseHeight / 16} ;
-
+    for(int i =0; i < downloadsPerPage; i++) downloadRectangles[i] = {repoX, i * rectangleBaseHeight + rectangleBaseHeight / 2, frameWidth, rectangleBaseHeight, i * rectangleBaseHeight + rectangleBaseHeight / 2 - 1 * rectangleBaseHeight / 16};
     this->downloadDateX=repoX+ (downloadRectangles[0].width - repoX) * DOWNLOAD_DATE_POS;
     this->packageTypeX=repoX+ (downloadRectangles[0].width - repoX) * PACKAGE_TYPE_POS;
 
@@ -84,7 +83,6 @@ downloadView::downloadView(Scene2D * mainScene, FT_Face fontLarge, FT_Face fontM
     audioPath+="assets/audio/delete.wav";
     deleteWav = (drwav_int16 *)AudioManager::loadAudioFile(audioPath.c_str(), &deleteWavCount);
 
-    this->isUpdating = false;
     this->fillPage();
 }
 
@@ -105,6 +103,7 @@ void downloadView::fillPage() {
     if((!installed && option == UNINSTALL )|| (!finished && option == INSTALL))
         option = INSTALL;
 }
+
 int downloadView::loadDownloadList(){
     std::vector<std::string> downloadsLocations;
     bool failedInit;
@@ -180,10 +179,12 @@ int downloadView::loadDownloadList(){
 
 void downloadView::addDownload(download * newDownload) {
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
-    std::thread(&download::initDownload,std::ref(*newDownload)).detach();
-    if(settings::getMainSettings()->isAddedToDownloadsNotification()) {
+
+    threadPool::addJobSecondary([&] {newDownload->initDownload();},true);
+
+    if(getMainSettings()->isAddedToDownloadsNotification()) {
         std::string notification = newDownload->getName();
-        notification += "\n" + LANG::mainLang->ADDED_TO_DOWNLOADS;
+        notification += "\n" + getMainLang()->ADDED_TO_DOWNLOADS;
         notifi(NULL, notification.c_str());
     }
     downloadList.emplace_back(newDownload);
@@ -198,187 +199,128 @@ void downloadView::addDownload(download * newDownload) {
     downloadsFile.close();
     fillPage();
 }
-void downloadView::updateView() {
-    this->isUpdating = true;
-    bool selectedTEMP;
-    std::string printStr;
-    std::stringstream printStringStream;
-    printStringStream.precision(2);
-    printStringStream << std::fixed;
-    selectedTEMP = selected;
-    for(int i =0; i < downloadsPerPage; i++){
-        download * currDownload = currDownloads[i];
-        downloadRectangle repoRectangle = downloadRectangles[i];
-        if(selectedTEMP != i || downloadList.empty()){
-            mainScene->DrawRectangle(0, repoRectangle.y-repoRectangle.height/2, repoRectangle.width, rectangleDivisorHeight, textColor);
-            mainScene->DrawRectangle(0, repoRectangle.y+repoRectangle.height/2-rectangleDivisorHeight/2, repoRectangle.width, rectangleDivisorHeight, textColor);
-            if(currDownload != nullptr){
-                printStringStream.str(std::string());
-                std::shared_ptr<fileDownloadRequest> downloadRequest = currDownload->getRequest();
-                if(currDownload->hasFailed()) {
-                    printStringStream << LANG::mainLang->HAS_FAILED;
-                    printStringStream << LANG::mainLang->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
-                    printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
-                } else if(!currDownload->stored())
-                    printStringStream <<  LANG::mainLang->PENDING_DOWNLOAD;
-                else if(currDownload->hasFinished() && !currDownload->isInstalled()) {
-                    printStringStream << LANG::mainLang->HAS_FINISHED;
-                    printStringStream << " | " << LANG::mainLang->SIZE << ": " << downloadRequest->getTotalSizeInMb() << "MBs";
-                } else if(currDownload->hasFinished() && currDownload->isInstalled())
-                    printStringStream << LANG::mainLang->INSTALLED;
-                else {
-                    printStringStream << LANG::mainLang->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
-                    printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
-                }
-                currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-                mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
-                                    textColor, textColor);
 
-                mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 3 * repoRectangle.height / 8,
-                                    textColor, textColor);
+void downloadView::drawDownload(download * currDownload, downloadRectangle dldRectangle, bool isSelected){
+    if(currDownload != nullptr){
+        Color currColor = isSelected ? selectedColor : textColor;
+        mainScene->DrawRectangle(0, dldRectangle.y-dldRectangle.height/2, dldRectangle.width, rectangleDivisorHeight, currColor);
+        mainScene->DrawRectangle(0, dldRectangle.y+dldRectangle.height/2-rectangleDivisorHeight/2, dldRectangle.width, rectangleDivisorHeight, currColor);
 
-                printStringStream.str(std::string());
-                printStringStream << currDownload->getTitleID();
-                if(downloadRequest->isDownloading()){
-                    printStringStream << " | " << currDownload->getCurrentSpeedInMB() << "MB/s";
-                    printStringStream << " | " << LANG::mainLang->DOWNLOAD_ETA << currDownload->getTimeLeftInMinutes() << LANG::mainLang->MIN;
-                }
-                mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
-                        textColor, textColor);
+        std::string printStr;
+        std::stringstream printStringStream;
+        printStringStream.precision(2);
+        printStringStream << std::fixed;
 
-                printStr = LANG::mainLang->TYPE;
-                printStr+=TypeStr[currDownload->getPackageType()];
-                mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
-                                    textColor, textColor);
-                if (currDownload->updateAvailable()) {
-                    printStr = LANG::mainLang->UPDATE_AVAILABLE;
-                    mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y+ 1 * repoRectangle.height / 8,
-                                        updateTextColor, updateTextColor);
-                }
-                printStr = LANG::mainLang->SOURCE;
-                printStr+=currDownload->getRepoName();
-                mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, repoRectangle.y+ 3 * repoRectangle.height / 8,
-                                    textColor, textColor);
-                printStr = LANG::mainLang->DOWNLOAD_DATE;
-                printStr+=currDownload->getDate();
-                mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
-                                    textColor, textColor);
-                printStr = LANG::mainLang->VERSION;
-                printStr += ": ";
-                printStr+=currDownload->getVersionStr();
-                mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
-                                    textColor, textColor);
-            }
-        }
-    }
-    if(!downloadList.empty()) {
         printStringStream.str(std::string());
-        download *currDownload = currDownloads[selectedTEMP];
-        downloadRectangle repoRectangle = downloadRectangles[selectedTEMP];
-        mainScene->DrawRectangle(0, repoRectangle.y - repoRectangle.height / 2, repoRectangle.width,
-                                 rectangleDivisorHeight, selectedColor);
-        mainScene->DrawRectangle(0, repoRectangle.y + repoRectangle.height / 2 - rectangleDivisorHeight / 2,
-                                 repoRectangle.width, rectangleDivisorHeight, selectedColor);
-        mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, repoRectangle.x, repoRectangle.y - 1 * repoRectangle.height/8,
-                            selectedColor, selectedColor);
+        std::shared_ptr<fileDownloadRequest> downloadRequest = currDownload->getRequest();
+        if(currDownload->hasFailed()) {
+            printStringStream << getMainLang()->HAS_FAILED;
+            printStringStream << getMainLang()->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
+            printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
+        } else if(!currDownload->stored())
+            printStringStream <<  getMainLang()->PENDING_DOWNLOAD;
+        else if(currDownload->hasFinished() && !currDownload->isInstalled()) {
+            printStringStream << getMainLang()->HAS_FINISHED;
+            printStringStream << " | " << getMainLang()->SIZE << ": " << downloadRequest->getTotalSizeInMb() << "MBs";
+        } else if(currDownload->hasFinished() && currDownload->isInstalled())
+            printStringStream << getMainLang()->INSTALLED;
+        else {
+            printStringStream << getMainLang()->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
+            printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
+        }
+        currDownload->getIcon()->Draw(mainScene, repoIconX, dldRectangle.y - 3 * dldRectangle.height / 8);
+        mainScene->DrawText((char *) std::string(currDownload->getName()).substr(0,DOWNLOAD_NAME_CHARACTER_LIMIT).c_str(), fontMedium, dldRectangle.x, dldRectangle.y - 1 * dldRectangle.height/8,
+                            currColor, currColor);
 
+        mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, dldRectangle.x, dldRectangle.y + 3 * dldRectangle.height / 8,
+                            currColor, currColor);
+
+        printStringStream.str(std::string());
         printStringStream << currDownload->getTitleID();
-        if(currDownload->getRequest()->isDownloading()){
+        if(downloadRequest->isDownloading()){
             printStringStream << " | " << currDownload->getCurrentSpeedInMB() << "MB/s";
-            printStringStream << " | " << LANG::mainLang->DOWNLOAD_ETA << ": " << currDownload->getTimeLeftInMinutes() << LANG::mainLang->MIN;
+            printStringStream << " | " << getMainLang()->DOWNLOAD_ETA << ": " << currDownload->getTimeLeftInMinutes() << getMainLang()->MIN;
         }
-        mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x, repoRectangle.y + 1 * repoRectangle.height/8,
-                            selectedColor, selectedColor);
-        printStringStream.str(std::string());
+        mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, dldRectangle.x, dldRectangle.y + 1 * dldRectangle.height/8,
+                            currColor, currColor);
 
-        printStr = LANG::mainLang->TYPE;
+        printStr = getMainLang()->TYPE;
         printStr+=TypeStr[currDownload->getPackageType()];
-        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y- 1 * repoRectangle.height / 8,
-                            selectedColor, selectedColor);
+        mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, dldRectangle.y- 1 * dldRectangle.height / 8,
+                            currColor, currColor);
         if (currDownload->updateAvailable()) {
-            printStr = LANG::mainLang->UPDATE_AVAILABLE;
-            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, repoRectangle.y+ 1 * repoRectangle.height / 8,
+            printStr = getMainLang()->UPDATE_AVAILABLE;
+            mainScene->DrawText((char *) printStr.c_str(), fontSmall, packageTypeX, dldRectangle.y+ 1 * dldRectangle.height / 8,
                                 updateTextColor, updateTextColor);
         }
-
-        printStr = LANG::mainLang->SOURCE;
+        printStr = getMainLang()->SOURCE;
         printStr+=currDownload->getRepoName();
-        mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, repoRectangle.y+ 3 * repoRectangle.height / 8,
-                            selectedColor, selectedColor);
-        printStr = LANG::mainLang->DOWNLOAD_DATE;
+        mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, packageTypeX, dldRectangle.y+ 3 * dldRectangle.height / 8,
+                            currColor, currColor);
+        printStr = getMainLang()->DOWNLOAD_DATE;
         printStr+=currDownload->getDate();
-        mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, repoRectangle.y- 1 * repoRectangle.height / 8,
-                            selectedColor, selectedColor);
-        printStr = LANG::mainLang->VERSION;
+        mainScene->DrawText((char *) printStr.c_str(), fontSmall, downloadDateX, dldRectangle.y- 1 * dldRectangle.height / 8,
+                            currColor, currColor);
+        printStr = getMainLang()->VERSION;
         printStr += ": ";
         printStr+=currDownload->getVersionStr();
-        mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, repoRectangle.y+ 3 * repoRectangle.height / 8,
-                            selectedColor, selectedColor);
-
-        std::shared_ptr<fileDownloadRequest> downloadRequest = currDownload->getRequest();
-        bool installed = currDownload->isInstalled();
-        bool stored = currDownload->stored();
-        bool finished = currDownload->hasFinished();
-        bool downloading = downloadRequest->isDownloading();
-        if(currDownload->hasFailed()) {
-            printStringStream << LANG::mainLang->HAS_FAILED;
-            printStringStream << LANG::mainLang->DOWNLOADED << ": " << downloadRequest->getDownloadedInMb();
-            printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
-        }else if(!stored)
-            printStringStream <<  LANG::mainLang->PENDING_DOWNLOAD;
-        else if(finished && !installed) {
-            printStringStream << LANG::mainLang->HAS_FINISHED;
-            printStringStream << " | " << LANG::mainLang->SIZE << ": " << downloadRequest->getTotalSizeInMb() << "MBs";
-        } else if(finished && installed)
-            printStringStream << LANG::mainLang->INSTALLED;
-        else {
-            printStringStream << LANG::mainLang->DOWNLOADED << ": " <<  downloadRequest->getDownloadedInMb();
-            printStringStream << "MBs / " << downloadRequest->getTotalSizeInMb() << "MBs";
+        mainScene->DrawText((char *) printStr.substr(0,DOWNLOAD_CHARACTER_LIMIT).c_str(), fontSmall, downloadDateX, dldRectangle.y+ 3 * dldRectangle.height / 8,
+                            currColor, currColor);
+        if(isSelected){
+            bool installed = currDownload->isInstalled();
+            bool finished = currDownload->hasFinished();
+            bool downloading = downloadRequest->isDownloading();
+            switch(option){
+                case INSTALL:
+                    if(finished)
+                        installIconSelected->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    else if(downloading)
+                        pauseIconSelected->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    else
+                        downloadIconSelected->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    if(installed)
+                        uninstallIcon->Draw(mainScene, uninstallIconX, dldRectangle.iconPosY);
+                    deleteIcon->Draw(mainScene, deleteIconX, dldRectangle.iconPosY);
+                    break;
+                case UNINSTALL:
+                    if(finished)
+                        installIcon->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    else if(downloading)
+                        pauseIcon->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    else
+                        downloadIcon->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    uninstallIconSelected->Draw(mainScene, uninstallIconX, dldRectangle.iconPosY);
+                    deleteIcon->Draw(mainScene, deleteIconX, dldRectangle.iconPosY);
+                    break;
+                case REMOVE:
+                default:
+                    if(finished)
+                        installIcon->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    else if(downloading)
+                        pauseIcon->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    else
+                        downloadIcon->Draw(mainScene, installIconX, dldRectangle.iconPosY);
+                    if(installed)
+                        uninstallIcon->Draw(mainScene, uninstallIconX, dldRectangle.iconPosY);
+                    deleteIconSelected->Draw(mainScene, deleteIconX, dldRectangle.iconPosY);
+                    break;
+            }
         }
-        mainScene->DrawText((char *) printStringStream.str().c_str(), fontSmall, repoRectangle.x,
-                            repoRectangle.y + 3 * repoRectangle.height / 8,
-                            selectedColor, selectedColor);
-        currDownload->getIcon()->Draw(mainScene, repoIconX, repoRectangle.y - 3 * repoRectangle.height / 8);
-
-
-        switch(option){
-            case INSTALL:
-                if(finished)
-                    installIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else if(downloading)
-                    pauseIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else
-                    downloadIconSelected->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                if(installed)
-                    uninstallIcon->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
-                deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
-                break;
-            case UNINSTALL:
-                if(finished)
-                    installIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else if(downloading)
-                    pauseIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else
-                    downloadIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                uninstallIconSelected->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
-                deleteIcon->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
-                break;
-            case REMOVE:
-            default:
-                if(finished)
-                    installIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else if(downloading)
-                    pauseIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                else
-                    downloadIcon->Draw(mainScene, installIconX, repoRectangle.iconPosY);
-                if(installed)
-                    uninstallIcon->Draw(mainScene, uninstallIconX, repoRectangle.iconPosY);
-                deleteIconSelected->Draw(mainScene, deleteIconX, repoRectangle.iconPosY);
-                break;
-        }
-
+    } else {
+        mainScene->DrawRectangle(0, dldRectangle.y-dldRectangle.height/2, dldRectangle.width, rectangleDivisorHeight, textColor);
+        mainScene->DrawRectangle(0, dldRectangle.y+dldRectangle.height/2-rectangleDivisorHeight/2, dldRectangle.width, rectangleDivisorHeight, textColor);
     }
-    this->isUpdating = false;
+}
+void downloadView::updateView() {
+    std::unique_lock<std::mutex> lock(updateMtx);
+    int selectedTEMP = selected;
+    for(int i =0; i < downloadsPerPage; i++){
+        download * currDownload = currDownloads[i];
+        downloadRectangle dldRectangle = downloadRectangles[i];
+        if(selectedTEMP != i)
+            drawDownload(currDownload, dldRectangle, false);
+    }
+    drawDownload(currDownloads[selectedTEMP], downloadRectangles[selectedTEMP], true);
 }
 
 void downloadView::pressX(){
@@ -393,7 +335,8 @@ void downloadView::pressX(){
             else if(currDownload->hasFinished())
                 currDownload->install();
             else
-                std::thread(&download::initDownload,std::ref(*currDownload)).detach();
+                threadPool::addJob([&] { currDownload->initDownload(); });
+
             break;
         case UNINSTALL:
             option = INSTALL;
@@ -401,17 +344,19 @@ void downloadView::pressX(){
             break;
         case REMOVE:
         default:
-            while(isUpdating)
-                continue;
+            {
+            std::unique_lock<std::mutex> lock(updateMtx);
             deleteDownload(currDownload);
+            }
             break;
     }
 }
 
 int downloadView::deleteDownload(download * dld){
+
     std::string id = dld->getID();
-    downloadList.erase(std::remove_if(downloadList.begin(), downloadList.end(), [&id](download* download){bool found = strcasecmp(download->getID(), id.c_str()) == 0; if(found) download->deleteDownload(); return found;}), downloadList.end());
-    
+    downloadList.erase(std::remove_if(downloadList.begin(), downloadList.end(), [&id](download* download){bool found = strcasecmp(download->getID(), id.c_str()) == 0; if(found) {download->deleteDownload();} return found;}), downloadList.end());
+
     downloadsYAML.remove(id);
 
     std::ofstream downloadsFile(DOWNLOADS_PATH, std::ofstream::out | std::ofstream::trunc);
@@ -428,7 +373,7 @@ int downloadView::deleteDownload(download * dld){
         }
     }
     fillPage();
-    AudioManager::mainAudioManager->playAudio(deleteWav,deleteWavCount);
+    getMainAudioManager()->playAudio(deleteWav,deleteWavCount);
     return 0;
 }
 void downloadView::pressCircle(){
