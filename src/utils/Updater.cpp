@@ -13,6 +13,7 @@
 #include <orbis/AppInstUtil.h>
 
 int Updater::checkForUpdate() {
+
     std::string localUpdatesDownloadFile = STORED_PATH;
     localUpdatesDownloadFile+=UPDATES_FILE;
     fileDownloadRequest downloadRequest(UPDATES_FILE_URL,localUpdatesDownloadFile.c_str());
