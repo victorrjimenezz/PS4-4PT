@@ -17,8 +17,7 @@ private:
     void runLoop();
     int playAudioPrivate();
 public:
-    static int initAudioManager();
-    static AudioManager * mainAudioManager;
+    explicit AudioManager();
     int playAudio(void * audioWav,  size_t count);
     int playAudio(const char * dir);
     static void * loadAudioFile(const char * dir, size_t * count);

@@ -9,45 +9,11 @@
 #define PARAMS16 ORBIS_AUDIO_OUT_PARAM_FORMAT_S16_STEREO
 
 #include "../../include/utils/logger.h"
+#include "../../include/utils/threadPool.h"
 
 #include <orbis/AudioOut.h>
-#include <thread>
-#include <mutex>
-std::mutex mutex;
 
 int32_t AudioManager::audio = 0;
-AudioManager * AudioManager::mainAudioManager = nullptr;
-
-int AudioManager::initAudioManager(){
-    int rc;
-    AudioManager * mainManager;
-
-    if (mainAudioManager != nullptr) {
-        LOG << ("Audio Manager already initialized!");
-        return -1;
-    }
-
-    rc = sceAudioOutInit();
-
-    if (rc != 0) {
-        LOG << ("[ERROR] Failed to initialize audio output");
-        return -1;
-    }
-
-    // Open a handle to audio output device
-    audio = sceAudioOutOpen(ORBIS_USER_SERVICE_USER_ID_SYSTEM, ORBIS_AUDIO_OUT_PORT_TYPE_MAIN, 0, 256, 48000, PARAMS16);
-
-    if (audio <= 0) {
-        LOG << "[ERROR] Failed to open audio on main port\n";
-        return -1;
-    }
-    mainManager = new AudioManager();
-    std::thread(&AudioManager::runLoop,std::ref(*mainManager)).detach();
-
-    mainAudioManager = mainManager;
-    return 0;
-
-}
 
 int AudioManager::playAudioPrivate(){
 
@@ -147,7 +113,6 @@ AudioManager::~AudioManager(){
     termAudioManager();
 }
 void AudioManager::runLoop() {
-    mutex.lock();
     currentAudioWav = nullptr;
     term = false;
     cancelled = false;
@@ -162,6 +127,25 @@ void AudioManager::runLoop() {
 
     if(!term)
         goto replay;
-    mutex.unlock();
+}
+
+AudioManager::AudioManager() {
+    int rc;
+    rc = sceAudioOutInit();
+
+    if (rc != 0) {
+        LOG << ("[ERROR] Failed to initialize audio output");
+        return;
+    }
+
+    // Open a handle to audio output device
+    audio = sceAudioOutOpen(ORBIS_USER_SERVICE_USER_ID_SYSTEM, ORBIS_AUDIO_OUT_PORT_TYPE_MAIN, 0, 256, 48000, PARAMS16);
+
+    if (audio <= 0) {
+        LOG << "[ERROR] Failed to open audio on main port\n";
+        return;
+    }
+    threadPool::addJob([&] {this->runLoop();},true);
+
 }
 
