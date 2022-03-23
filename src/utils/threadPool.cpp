@@ -7,7 +7,6 @@
 #include "../../include/base.h"
 #include "../../include/utils/logger.h"
 
-//TODO TRY GENERATING THREADS AT THAT MOMENT AND THEN IF MAX NUMBER REACHED WAIT
 bool threadPool::shutdown = true;
 
 std::mutex threadPool::queueMutex;
