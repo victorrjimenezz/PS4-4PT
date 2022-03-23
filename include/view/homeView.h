@@ -8,13 +8,11 @@
 #endif
 
 #include "subView.h"
-//#include "../repository/repository.h"
 #include "../utils/AppGraphics.h"
-//#include "../../include/view/keyboardInput.h"
-//#include "../utils/AnimatedPNG.h"
 
 #include <vector>
 #include <string>
+
 class PNG;
 class keyboardInput;
 class homeView : public subView {

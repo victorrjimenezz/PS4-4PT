@@ -64,7 +64,6 @@ private:
     void fillPage();
     void filterPackages(const char * name);
 public:
-    static packageSearch * mainPackageSearch;
     packageSearch(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight);
     void updateView();
     void pressX();

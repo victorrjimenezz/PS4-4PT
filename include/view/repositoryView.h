@@ -84,7 +84,6 @@ private:
     void hasEntered();
     int loadSavedRepos();
 public:
-    static repositoryView * mainRepositoryView;
     repositoryView(Scene2D* mainScene, FT_Face fontLarge, FT_Face fontMedium, FT_Face fontSmall, int frameWidth, int frameHeight, bool isFirstRun);
     void updateView();
     void pressX();
